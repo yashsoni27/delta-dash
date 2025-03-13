@@ -3,14 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+  --foreground-color: #f8fafc;
+  --background-color: 	#020817;
+  --border-color: #0f172a;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  color: var(--foreground-color);
+  background: var(--background-color);
+  border-color: var(--border-color);
 }
+
 
 @layer components {
   .btn {

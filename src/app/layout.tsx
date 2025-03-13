@@ -1,14 +1,20 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import Navbar from '@/components/layout/Navbar';
-// import Footer from '@/components/layout/Foote1r';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Titillium_Web } from "next/font/google";
+import localFont from "next/font/local";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
-const inter = Inter({ subsets: ['latin'] });
+const myFont = Titillium_Web({ weight: ["200", "300", "400", "600", "700", "900"], subsets: ["latin"] });
+// const myFont = localFont({
+//   src: '../../public/fonts/Formula1.otf', // Path relative to public folder
+//   weight: "200",
+//   style: "normal",
+// });
 
 export const metadata: Metadata = {
-  title: 'F1 Dashboard',
-  description: 'Formula 1 analysis dashboard',
+  title: "F1 Dashboard",
+  description: "Formula 1 analysis dashboard",
 };
 
 export default function RootLayout({
@@ -18,12 +24,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={myFont.className}>
         <Navbar />
-        <div className="min-h-screen">
-          {children}
-        </div>
-        {/* <Footer /> */}
+        <div className="min-h-screen">{children}</div>
+        <Footer />
       </body>
     </html>
   );
