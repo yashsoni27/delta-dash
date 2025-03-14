@@ -22,20 +22,20 @@ export default function Navbar() {
         
         {/* Desktop navigation */}
         <div className="hidden md:flex space-x-4">
-          <Link href="/dashboard" className="hover:text-red-400">Dashboard</Link>
-          <Link href="/drivers" className="hover:text-red-400">Drivers</Link>
-          <Link href="/constructors" className="hover:text-red-400">Constructors</Link>
-          <Link href="/races" className="hover:text-red-400">Races</Link>
+          <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
+          <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
+          <Link href="/constructors" className="hover:text-red-500">Constructors</Link>
+          <Link href="/races" className="hover:text-red-500">Races</Link>
         </div>
         
         {/* Mobile navigation */}
         {isMenuOpen && (
           <div className="absolute top-16 right-4 bg-slate-800 p-4 rounded-md shadow-lg md:hidden">
             <div className="flex flex-col space-y-2">
-              <Link href="/dashboard" className="hover:text-red-400">Dashboard</Link>
-              <Link href="/drivers" className="hover:text-red-400">Drivers</Link>
-              <Link href="/constructors" className="hover:text-red-400">Constructors</Link>
-              <Link href="/races" className="hover:text-red-400">Races</Link>
+              <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
+              <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
+              <Link href="/constructors" className="hover:text-red-500">Constructors</Link>
+              <Link href="/races" className="hover:text-red-500">Races</Link>
             </div>
           </div>
         )}

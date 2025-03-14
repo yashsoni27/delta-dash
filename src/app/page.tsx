@@ -1,4 +1,5 @@
 import CountdownCard from "@/components/ui/CountdownCard";
+import StandingsTable from "@/components/ui/StandingsTable";
 import { getNextRace } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,10 +8,9 @@ export default async function Home() {
   
 
   return (
-    <main className="p-20 gap-5">
+    <main className="p-10 md:p-20 gap-5">
       <div className="flex flex-row gap-5">
         <CountdownCard />
-        {/* <CountdownCard /> */}
         {/* <Link
           href="/dashboard"
           className="p-5 border rounded-lg hover:bg-gray-900 transition-colors"
@@ -19,9 +19,11 @@ export default async function Home() {
           <p>View current F1 season overview</p>
         </Link>*/}
       </div>
-      <div className="pt-5">
+      <div className="pt-5 flex gap-5">
         {/* <CountdownCard /> */}
-        
+        <StandingsTable name={"Drivers"}/>
+        <StandingsTable name={"Constructors"}/>
+
       </div>
     </main>
   );

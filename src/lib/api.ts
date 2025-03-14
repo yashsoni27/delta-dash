@@ -231,9 +231,10 @@ export async function getDriverStandings(
     limit,
     offset
   );
-  // console.log("Check", result);
+  
   return {
     standings: result.data?.StandingsLists[0]?.DriverStandings || [],
+    season: result.data?.StandingsLists[0]?.season || "",
     pagination: {
       total: result.total,
       limit: result.limit,
@@ -248,11 +249,20 @@ export async function getConstructorStandings(
   limit: number = 30,
   offset: number = 0
 ) {
-  const result = await fetchFromApi(
+  const result = await fetchFromApi<any>(
     `${season}/constructorStandings`,
     "Standings",
     limit,
     offset
   );
-  return result;
+
+  return {
+    standings: result.data?.StandingsLists[0]?.ConstructorStandings || [],
+    season: result.data?.StandingsLists[0]?.season || "",
+    pagination: {
+      total: result.total,
+      limit: result.limit,
+      offset: result.offset
+    }
+  };
 }
