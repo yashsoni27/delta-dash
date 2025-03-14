@@ -15,7 +15,8 @@ function DynamicSVG({ name }: {name: string}) {
     async function loadSVG() {
       try {
         const { default: LoadedSVG } = await import(
-          `../../components/circuits/${name}.svg`
+          // `../../../public/circuits/${name}.svg`
+          `../../../public/circuits/${name}.avif`
         );
         setSVGComponent(() => LoadedSVG); // Store the component function
       } catch (error) {
@@ -27,12 +28,12 @@ function DynamicSVG({ name }: {name: string}) {
   }, [name]);
 
   if (!SVGComponent) {
-    return null;
+    return <div className="mr-5 h-20 w-24"></div>;
   }
 
   return (
     <>
-      <Image className="mr-5 h-20 w-24 svg-filter" src={SVGComponent} alt={name + "circuit"} />
+      <Image className="mr-5 h-20 w-24" src={SVGComponent} alt={name + "circuit"} />
     </>
   );
   // return <SVGComponent fill="#fff" />;
