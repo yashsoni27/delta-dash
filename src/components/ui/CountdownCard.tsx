@@ -129,6 +129,7 @@ const CountdownCard = () => {
           width={96}
           height={80}
           src={`/circuits/${circuitId}.avif`}
+          onError={(e) => (e.currentTarget.src = "/vercel.svg")}
           alt={circuitId + "circuit"}
           priority={true}
         />
