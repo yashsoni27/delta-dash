@@ -1,8 +1,5 @@
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { getNextRace } from "@/lib/api";
-import Image from "next/image";
-import Link from "next/link";
 
 export default async function Home() {
   
