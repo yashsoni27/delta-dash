@@ -6,7 +6,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   return (
-    <nav className="bg-slate-800 text-white p-4">
+    <nav className="p-4 border-b border-gray-800">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold">F1 Dashboard</Link>
         

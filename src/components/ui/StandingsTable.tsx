@@ -17,7 +17,7 @@ const StandingsTable = ({ name }: { name: string }) => {
   useEffect(() => {
     const fetchData = async (name: string) => {
       if (name == "Drivers") {
-        const response = await getDriverStandings("2024");
+        const response = await getDriverStandings();
 
         const formattedDrivers = response.standings
           .slice(0, 10)
@@ -30,7 +30,7 @@ const StandingsTable = ({ name }: { name: string }) => {
 
         setStandings(formattedDrivers);
       } else if (name == "Constructors") {
-        const response = await getConstructorStandings("2024");
+        const response = await getConstructorStandings();
         console.log("Cons: ", response);
         const formattedConstructors = response.standings
           .slice(0, 10)
@@ -49,23 +49,24 @@ const StandingsTable = ({ name }: { name: string }) => {
   }, []);
 
   return (
-    <div className="p-5 rounded-lg shadow-lg w-full max-w-md border border-gray-700">
-      <h2 className="text-lg font-thin mb-3">{name} Standings</h2>
-      <table className="w-full text-left">
+    <div className="p-5 rounded-lg shadow-lg w-full max-w-md border border-gray-700 text-gray-300">
+      <h2 className="text-lg font-thin mb-5">{name} Standings</h2>
+      <table className="w-full text-left ">
         <thead>
-          <tr className="text-sm font-thin text-gray-400">
+          <tr className="text-sm font-thin text-gray-500">
             <th className="pb-3">Pos.</th>
             <th className="pb-3">{name}</th>
             <th className="pb-3">Points</th>
+            {/* <th className="pb-3">Evo.</th> */}
           </tr>
         </thead>
         <tbody>
           {standings.map((standing) => (
-            <tr key={standing.position} className="text-sm">
+            <tr key={standing.position} className="text-sm hover:bg-slate-900 delay-75">
               <td className="py-3 align-middle border-t border-gray-700">
                 {standing.position}
               </td>
-              <td className="py-3 align-middle border-t border-gray-700 ">
+              <td className="py-3 align-middle border-t border-gray-700">
                 <div className="flex items-center gap-2">
                   {standing.team && (
                     <img
@@ -78,12 +79,18 @@ const StandingsTable = ({ name }: { name: string }) => {
                   {standing.driver ? standing.driver : standing.constructor}
                 </div>
               </td>
-              <td className="py-3 align-middle border-t border-gray-700 ">
+              <td className="py-3 align-middle border-t border-gray-700">
                 {standing.points}
               </td>
+              {/* <td className="py-3 align-middle border-t border-gray-700 text-gray-700">-</td> */}
             </tr>
           ))}
         </tbody>
+        {/* <tfoot className="flex justify-center">
+          <tr className="text-sm  font-thin">
+            <td className="">Full Standings</td>
+          </tr>
+        </tfoot> */}
       </table>
     </div>
   );

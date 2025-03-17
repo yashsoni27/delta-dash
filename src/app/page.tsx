@@ -20,10 +20,8 @@ export default async function Home() {
         </Link>*/}
       </div>
       <div className="pt-5 flex gap-5">
-        {/* <CountdownCard /> */}
         <StandingsTable name={"Drivers"}/>
         <StandingsTable name={"Constructors"}/>
-
       </div>
     </main>
   );
