@@ -18,7 +18,7 @@ const StandingsTable = ({ name }: { name: string }) => {
     const fetchData = async (name: string) => {
       if (name == "Drivers") {
         const response = await getDriverStandings();
-
+        console.log(response);
         const formattedDrivers = response.standings
           .slice(0, 10)
           .map((item: any) => ({

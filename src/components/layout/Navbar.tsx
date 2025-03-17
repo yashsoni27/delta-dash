@@ -24,7 +24,7 @@ export default function Navbar() {
         <div className="hidden md:flex space-x-4">
           <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
           <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
-          <Link href="/constructors" className="hover:text-red-500">Constructors</Link>
+          <Link href="/teams" className="hover:text-red-500">Teams</Link>
           <Link href="/races" className="hover:text-red-500">Races</Link>
         </div>
         
@@ -34,7 +34,7 @@ export default function Navbar() {
             <div className="flex flex-col space-y-2">
               <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
               <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
-              <Link href="/constructors" className="hover:text-red-500">Constructors</Link>
+              <Link href="/teams" className="hover:text-red-500">Teams</Link>
               <Link href="/races" className="hover:text-red-500">Races</Link>
             </div>
           </div>

@@ -51,17 +51,46 @@ export function getTimeDifference(date1: Date, date2: Date): string {
  */
 export function getConstructorColor(constructorName: string): string {
   const colors: Record<string, string> = {
-    'Mercedes': '#00D2BE',
-    'Red Bull': '#0600EF',
-    'Ferrari': '#DC0000',
-    'McLaren': '#FF8700',
-    'Alpine': '#0090FF',
-    'AlphaTauri': '#2B4562',
-    'Aston Martin': '#006F62',
-    'Williams': '#005AFF',
-    'Alfa Romeo': '#900000',
-    'Haas': '#FFFFFF'
+    // 'mercedes': '#27F4D2',
+    // 'red_bull': '#3671C6',
+    // 'ferrari': '#E80020',
+    // 'mclaren': '#FF8000',
+    // 'alpine': '#00A1E8',
+    // 'rb': '#6692FF',
+    // 'aston_martin': '#229971',
+    // 'williams': '#1868DB',
+    // 'sauber': '#52E252',
+    // 'haas': '#B6BABD'
+    'mercedes': 'rgb(39,244,210,.25)',
+    'red_bull': 'rgb(54,113,198,.25)',
+    'ferrari': 'rgb(232,0,32,.25)',
+    'mclaren': 'rgb(255,128,0,.25)',
+    'alpine': 'rgb(0,161,232,.25)',
+    'rb': 'rgb(102,146,255,.25)',
+    'aston_martin': 'rgb(34,153,113,.25)',
+    'williams': 'rgb(24,104,219,.25)',
+    'sauber': 'rgb(82,226,82,.25)',
+    'haas': 'rgb(182,186,189,.25)'
   };
   
   return colors[constructorName] || '#333333';
+}
+
+
+export function getConstructorGradient(constructorName: string): string {
+  const baseColor = getConstructorColor(constructorName);
+  // Extract RGB values to create a darker shade for the gradient
+  const rgbMatch = baseColor.match(/rgb\((\d+),(\d+),(\d+),([.\d]+)\)/);
+  
+  if (rgbMatch) {
+    const [_, r, g, b, a] = rgbMatch;
+    // Create a darker variant for the gradient (reducing brightness by ~30%)
+    const darkerR = Math.max(0, parseInt(r) * 0.5);
+    const darkerG = Math.max(0, parseInt(g) * 0.5);
+    const darkerB = Math.max(0, parseInt(b) * 0.5);
+    
+    return `linear-gradient(180deg, ${baseColor} 0%, rgb(${darkerR},${darkerG},${darkerB},${a}) 100%)`;
+  }
+  
+  return baseColor;
 }
