@@ -48,7 +48,7 @@ export default function Home() {
       chassis: "RB21",
       carImage: "/cars/red_bull.avif",
       logoImage: "/teams/red_bull.svg",
-      drivers: ["/drivers/verstappen.avif", "/drivers/lawson.avif"],
+      drivers: ["/drivers/max_verstappen.avif", "/drivers/lawson.avif"],
       details: {
         fullName: "Oracle Red Bull Racing",
         base: "Milton Keynes, United Kingdom",
@@ -196,8 +196,8 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-black text-white">
-        <div className="container:2xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-black">
+        <div className="container mx-auto px-4 py-8">
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
             ref={teamContainerRef}
@@ -240,7 +240,7 @@ export default function Home() {
                             key={idx}
                             className="w-10 h-10 rounded-full overflow-hidden"
                             style={{
-                              backgroundColor: getConstructorColor(team.code),
+                              backgroundColor: getConstructorColor(team.code)                          
                             }}
                           >
                             <Image

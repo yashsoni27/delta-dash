@@ -46,21 +46,28 @@ export function getTimeDifference(date1: Date, date2: Date): string {
   }
 }
 
+export function getConstructorHex(constructorName: string): string {
+  const colors: Record<string, string> = {
+    'mercedes': '#27F4D2',
+    'red_bull': '#3671C6',
+    'ferrari': '#E80020',
+    'mclaren': '#FF8000',
+    'alpine': '#00A1E8',
+    'rb': '#6692FF',
+    'aston_martin': '#229971',
+    'williams': '#1868DB',
+    'sauber': '#52E252',
+    'haas': '#B6BABD'
+  }
+
+  return colors[constructorName] || '#333333';
+}
+
 /**
  * Gets a color for a constructor based on their name
  */
 export function getConstructorColor(constructorName: string): string {
   const colors: Record<string, string> = {
-    // 'mercedes': '#27F4D2',
-    // 'red_bull': '#3671C6',
-    // 'ferrari': '#E80020',
-    // 'mclaren': '#FF8000',
-    // 'alpine': '#00A1E8',
-    // 'rb': '#6692FF',
-    // 'aston_martin': '#229971',
-    // 'williams': '#1868DB',
-    // 'sauber': '#52E252',
-    // 'haas': '#B6BABD'
     'mercedes': 'rgb(39,244,210,.25)',
     'red_bull': 'rgb(54,113,198,.25)',
     'ferrari': 'rgb(232,0,32,.25)',
