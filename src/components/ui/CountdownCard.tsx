@@ -56,7 +56,7 @@ const CountdownCard = () => {
     const fetchNextRace = async () => {
       try {
         const nextRace = await getNextRace();
-        console.log(nextRace);
+        // console.log(nextRace);
         if (nextRace) {
           setSeason(nextRace.season);
           setRaceName(nextRace.raceName);
@@ -99,7 +99,7 @@ const CountdownCard = () => {
   }, [raceDate]);
 
   return (
-    <div className="bg-gradient-to-tr from-red-900 to-red-700 p-5 rounded-lg shadow-lg border border-red-600 min-w-max md:w-[400px]  text-center">
+    <div className="bg-gradient-to-tr from-red-900 to-red-700 p-5 rounded-lg shadow-lg border border-red-600 min-w-max  max-w-md  text-center">
       <h2 className="text-lg text-left">
         {season} {raceName}
       </h2>
