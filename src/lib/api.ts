@@ -225,14 +225,13 @@ export async function getDriverStandings(
   limit: number = 30,
   offset: number = 0
 ) {
-
   const nextRace = await getNextRace();
   const evoResults = await fetchFromApi<any>(
     `${season}/${nextRace?.round - 2}/driverStandings`,
     "Standings",
     limit,
     offset
-  )
+  );
   const result = await fetchFromApi<any>(
     `${season}/driverStandings`,
     "Standings",
@@ -240,30 +239,38 @@ export async function getDriverStandings(
     offset
   );
 
-  const currentStandings = result.data?.StandingsLists[0]?.DriverStandings || [];
-  const previousStandings = evoResults.data?.StandingsLists[0]?.DriverStandings || [];
+  const currentStandings =
+    result.data?.StandingsLists[0]?.DriverStandings || [];
+  const previousStandings =
+    evoResults.data?.StandingsLists[0]?.DriverStandings || [];
 
-  const standingsWithDifference = currentStandings.map((currentDriver: any, currentIndex: any) => {
-    const previousDriver = previousStandings.find(
-      (driver: any) => driver.Driver.driverId === currentDriver.Driver.driverId
-    );
+  const standingsWithDifference = currentStandings.map(
+    (currentDriver: any, currentIndex: any) => {
+      const previousDriver = previousStandings.find(
+        (driver: any) =>
+          driver.Driver.driverId === currentDriver.Driver.driverId
+      );
 
-    const pointsDifference = previousDriver
-      ? parseInt(currentDriver.points) - parseInt(previousDriver.points)
-      : parseInt(currentDriver.points); // If no previous driver, difference is current points
+      const pointsDifference = previousDriver
+        ? parseInt(currentDriver.points) - parseInt(previousDriver.points)
+        : parseInt(currentDriver.points); // If no previous driver, difference is current points
 
-    let positionDifference = 0;
-    if (previousDriver) {
-        const previousIndex = previousStandings.findIndex((driver: any) => driver.Driver.driverId === currentDriver.Driver.driverId);
+      let positionDifference = 0;
+      if (previousDriver) {
+        const previousIndex = previousStandings.findIndex(
+          (driver: any) =>
+            driver.Driver.driverId === currentDriver.Driver.driverId
+        );
         positionDifference = previousIndex - currentIndex;
-    }
+      }
 
-    return {
-      ...currentDriver,
-      pointsDifference,
-      positionDifference,
-    };
-  });
+      return {
+        ...currentDriver,
+        pointsDifference,
+        positionDifference,
+      };
+    }
+  );
 
   return {
     // standings: result.data?.StandingsLists[0]?.DriverStandings || [],
@@ -283,7 +290,6 @@ export async function getConstructorStandings(
   limit: number = 30,
   offset: number = 0
 ) {
-
   const nextRace = await getNextRace();
 
   const evoResults = await fetchFromApi<any>(
@@ -299,30 +305,41 @@ export async function getConstructorStandings(
     offset
   );
 
-  const currentStandings = result.data?.StandingsLists[0]?.ConstructorStandings || [];
-  const previousStandings = evoResults.data?.StandingsLists[0]?.ConstructorStandings || [];
+  const currentStandings =
+    result.data?.StandingsLists[0]?.ConstructorStandings || [];
+  const previousStandings =
+    evoResults.data?.StandingsLists[0]?.ConstructorStandings || [];
 
-  const standingsWithDifference = currentStandings.map((currentConstructor: any, currentIndex: any) => {
-    const previousConstructor = previousStandings.find(
-      (constructor: any) => constructor.Constructor.constructorId === currentConstructor.Constructor.constructorId
-    );
+  const standingsWithDifference = currentStandings.map(
+    (currentConstructor: any, currentIndex: any) => {
+      const previousConstructor = previousStandings.find(
+        (constructor: any) =>
+          constructor.Constructor.constructorId ===
+          currentConstructor.Constructor.constructorId
+      );
 
-    const pointsDifference = previousConstructor
-      ? parseInt(currentConstructor.points) - parseInt(previousConstructor.points)
-      : parseInt(currentConstructor.points); // If no previous constructor, difference is current points
+      const pointsDifference = previousConstructor
+        ? parseInt(currentConstructor.points) -
+          parseInt(previousConstructor.points)
+        : parseInt(currentConstructor.points); // If no previous constructor, difference is current points
 
-    let positionDifference = 0;
-    if (previousConstructor) {
-        const previousIndex = previousStandings.findIndex((constructor: any) => constructor.Constructor.constructorId === currentConstructor.Constructor.constructorId);
+      let positionDifference = 0;
+      if (previousConstructor) {
+        const previousIndex = previousStandings.findIndex(
+          (constructor: any) =>
+            constructor.Constructor.constructorId ===
+            currentConstructor.Constructor.constructorId
+        );
         positionDifference = previousIndex - currentIndex;
-    }
+      }
 
-    return {
-      ...currentConstructor,
-      pointsDifference,
-      positionDifference,
-    };
-  });
+      return {
+        ...currentConstructor,
+        pointsDifference,
+        positionDifference,
+      };
+    }
+  );
 
   return {
     standings: standingsWithDifference,
@@ -333,4 +350,145 @@ export async function getConstructorStandings(
       offset: result.offset,
     },
   };
+}
+
+// Driver evolution info
+export async function getDriverEvolution(
+  season: string = "current",
+  limit: number = 30,
+  offset: number = 0
+) {
+  try {
+    const driverMapping: any = {};
+
+    const fullSeasonResponse = await fetchFromApi<any>(
+      `${season}/driverStandings`,
+      "Standings",
+      limit,
+      offset
+    );
+    const fullSeasonData = fullSeasonResponse.data;
+    const totalRounds = parseInt(
+      fullSeasonData.StandingsLists[0].round
+    );
+
+    for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
+      const roundResponse = await fetchFromApi<any>(
+        `/${season}/${roundNum}/driverStandings`,
+        "Standings",
+        limit,
+        offset
+      );
+      const roundData = roundResponse.data;
+      const standingsList = roundData.StandingsLists[0];
+      const currentRound = standingsList.round;
+
+      for (const standing of standingsList.DriverStandings) {
+        const driver = standing.Driver;
+        const driverId = driver.driverId;
+
+        // Add driver to mapping if new
+        if (!driverMapping[driverId]) {
+          driverMapping[driverId] = {
+            driverId: driverId,
+            code: driver.code,
+            name: `${driver.givenName} ${driver.familyName}`,
+            nationality: driver.nationality,
+            constructorId: standing.Constructors[0]?.constructorId,
+            rounds: [],
+          };
+        }
+
+        // Add this round's data
+        driverMapping[driverId].rounds.push({
+          round: parseInt(currentRound),
+          position: parseInt(standing.position),
+          points: parseFloat(standing.points),
+        });
+      }
+    }
+
+    // Convert mapping to array
+    const driverEvolution = Object.values(driverMapping);
+
+    return {
+      season: fullSeasonData.season,
+      totalRounds: totalRounds,
+      driversEvolution: driverEvolution,
+    };
+  } catch (error) {
+    console.error("Error fetching driver evolution:", error);
+    return { error: "Failed to fetch driver evolution" };
+  }
+}
+
+// Constructor evolution info
+export async function getConstructorEvolution(
+  season: string = "current",
+  limit: number = 30,
+  offset: number = 0
+) {
+  try {
+    const constructorMapping: any = {};
+
+    const fullSeasonResponse = await fetchFromApi<any>(
+      `${season}/constructorStandings`,
+      "Standings",
+      limit,
+      offset
+    );
+    const fullSeasonData = fullSeasonResponse.data;
+    const totalRounds = parseInt(
+      fullSeasonData.StandingsLists[0].round
+    );
+
+    for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
+      const roundResponse = await fetchFromApi<any>(
+        `/${season}/${roundNum}/constructorStandings`,
+        "Standings",
+        limit,
+        offset
+      );
+      const roundData = roundResponse.data;
+      const standingsList = roundData.StandingsLists[0];
+      const currentRound = standingsList.round;
+      // console.log(standingsList);
+
+      for (const standing of standingsList.ConstructorStandings) {
+        const constructor = standing.Constructor;
+        const constructorId = constructor.constructorId;
+
+        // Add driver to mapping if new
+        if (!constructorMapping[constructorId]) {
+          constructorMapping[constructorId] = {
+            constructorId: constructorId,
+            // code: constructor.code,
+            name: constructor.name,
+            nationality: constructor.nationality,
+            rounds: [],
+          };
+        }
+
+        // Add this round's data
+        constructorMapping[constructorId].rounds.push({
+          round: parseInt(currentRound),
+          position: parseInt(standing.position),
+          points: parseFloat(standing.points),
+        });
+      }
+    }
+
+    // Convert mapping to array
+    const constructorEvolution = Object.values(constructorMapping);
+
+    return {
+      season: fullSeasonData.season,
+      totalRounds: totalRounds,
+      constructorsEvolution: constructorEvolution,
+    };
+
+  } catch (error) {
+    console.error("Error fetching constructor evolution:", error);
+    return { error: "Failed to fetch constructor evolution" };
+  }
 }

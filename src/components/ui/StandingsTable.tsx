@@ -33,7 +33,6 @@ const StandingsTable = ({ name }: { name: string }) => {
             team: item.Constructors[0]?.constructorId || "Unknown",
             evolution: item.positionDifference,
           }));
-        console.log(response);
 
         setStandings(formattedDrivers);
       } else if (name == "Constructors") {
@@ -44,6 +43,7 @@ const StandingsTable = ({ name }: { name: string }) => {
           constructor: item.Constructor.name,
           points: Number(item.points),
           team: item.Constructor?.constructorId || "Unknown",
+          evolution: item.positionDifference,
         }));
 
         setStandings(formattedConstructors);
@@ -96,25 +96,25 @@ const StandingsTable = ({ name }: { name: string }) => {
                     {standing.points}
                   </td>
                   <td
-                    className={`py-3 flex justify-center items-center text-center text-gray-300 border-t border-gray-700`}
+                    className={`py-3 align-middle text-center text-gray-300 border-t border-gray-700`}
                   >
                     {standing.evolution !== undefined ? (
                       standing.evolution > 0 ? (
                         <>
-                          <ChevronUp className="text-green-500" size={20} />
-                          <div className="pl-0">{Math.abs(standing.evolution)}</div>
+                          <ChevronUp className="text-green-500 inline-block align-middle" size={20} />
+                          <div className="pl-1 inline-block align-middle">{Math.abs(standing.evolution)}</div>
                           
                         </>
                       ) : standing.evolution < 0 ? (
                         <>
-                          <ChevronDown className="text-red-500" size={20} />
-                          <div className="pl-0">{Math.abs(standing.evolution)}</div>
+                          <ChevronDown className="text-red-500 inline-block align-middle" size={20} />
+                          <div className="pl-1 inline-block align-middle">{Math.abs(standing.evolution)}</div>
                         </>
                       ) : (
-                        <Minus size={12} className="text-gray-500" />
+                        <Minus size={12} className="text-gray-500 inline-block align-middle" />
                       )
                     ) : (
-                      <Minus size={12} className="text-gray-500" />
+                      <Minus size={12} className="text-gray-500 inline-block align-middle" />
                     )}
                   </td>
 
