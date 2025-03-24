@@ -104,11 +104,12 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
         interpolation="smooth"
         axisTop={null}
         axisRight={null}
-        activeLineWidth={6}
+        activeLineWidth={5}
         colors={getColor}
         useMesh={true}
         animate={true}
         enableGridY={false}
+        enableGridX={false}
         pointTooltip={CustomTooltip}
       />
     </>
