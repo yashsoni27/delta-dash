@@ -112,3 +112,44 @@ export interface RaceResults {
     time: string;
   };
 }
+
+
+export interface driverEvo {
+  code: string;
+  driverId: string;
+  constructorId: string;
+  name: string;
+  nationality: string;
+  rounds: {
+    rounds: number;
+    position: number;
+    points: number;
+  }[];
+}
+
+export interface constructorEvo {
+  constructorId: string;
+  name: string;
+  nationality: string;
+  rounds: {
+    rounds: number;
+    position: number;
+    points: number;
+  }[];
+}
+
+export interface Evolutions {
+  season: string;
+  totalRounds: number;
+  driversEvolution?: driverEvo[];
+  constructorsEvolution?: constructorEvo[];
+}
+
+export interface RankingEvolutionProps {
+  title: string;
+  rankings: Evolutions;
+}
+export interface StandingEvolutionProps {
+  title: string;
+  standings: Evolutions;
+}

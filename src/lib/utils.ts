@@ -1,6 +1,6 @@
-/**
- * Formats a timestamp into a human-readable time
- */
+ /* -------------------------------------------------------------------------- */
+ /*                Formats a timestamp into a human-readable time              */
+ /* -------------------------------------------------------------------------- */
 export function formatTime(timeString: string): string {
   if (!timeString) return '';
   
@@ -13,9 +13,10 @@ export function formatTime(timeString: string): string {
   return timeString;
 }
 
-/**
- * Formats a date string into a human-readable date
- */
+
+/* -------------------------------------------------------------------------- */
+/*              Formats a date string into a human-readable date              */
+/* -------------------------------------------------------------------------- */
 export function formatDate(dateString: string): string {
   if (!dateString) return '';
   
@@ -28,9 +29,9 @@ export function formatDate(dateString: string): string {
   });
 }
 
-/**
- * Calculates time difference between two dates
- */
+/* -------------------------------------------------------------------------- */
+/*                Calculates time difference between two dates                */
+/* -------------------------------------------------------------------------- */
 export function getTimeDifference(date1: Date, date2: Date): string {
   const diffTime = Math.abs(date2.getTime() - date1.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -46,6 +47,10 @@ export function getTimeDifference(date1: Date, date2: Date): string {
   }
 }
 
+
+/* -------------------------------------------------------------------------- */
+/*                  Gets a color in hex code for a constructor                */
+/* -------------------------------------------------------------------------- */
 export function getConstructorHex(constructorName: string): string {
   const colors: Record<string, string> = {
     'mercedes': '#27F4D2',
@@ -63,9 +68,9 @@ export function getConstructorHex(constructorName: string): string {
   return colors[constructorName] || '#333333';
 }
 
-/**
- * Gets a color for a constructor based on their name
- */
+/* -------------------------------------------------------------------------- */
+/*                   Gets a color in rgb for a constructor                    */
+/* -------------------------------------------------------------------------- */
 export function getConstructorColor(constructorName: string): string {
   const colors: Record<string, string> = {
     'mercedes': 'rgb(39,244,210,.25)',
@@ -84,6 +89,9 @@ export function getConstructorColor(constructorName: string): string {
 }
 
 
+/* -------------------------------------------------------------------------- */
+/*                   Gets color in gradient for constructors                  */
+/* -------------------------------------------------------------------------- */
 export function getConstructorGradient(constructorName: string): string {
   const baseColor = getConstructorColor(constructorName);
   // Extract RGB values to create a darker shade for the gradient
@@ -101,3 +109,4 @@ export function getConstructorGradient(constructorName: string): string {
   
   return baseColor;
 }
+

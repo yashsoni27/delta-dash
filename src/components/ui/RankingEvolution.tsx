@@ -1,47 +1,13 @@
 import { getConstructorHex } from "@/lib/utils";
+import { Evolutions, RankingEvolutionProps } from "@/types";
 import { ResponsiveBump } from "@nivo/bump";
 
-interface driverEvo {
-  code: string;
-  driverId: string;
-  constructorId: string;
-  name: string;
-  nationality: string;
-  rounds: {
-    rounds: number;
-    position: number;
-    points: number;
-  }[];
-}
 
-interface constructorEvo {
-  constructorId: string;
-  name: string;
-  nationality: string;
-  rounds: {
-    rounds: number;
-    position: number;
-    points: number;
-  }[];
-}
-
-interface Evolutions {
-  season: string;
-  totalRounds: number;
-  driversEvolution?: driverEvo[];
-  constructorsEvolution?: constructorEvo[];
-}
-
-interface RankingEvolutionProps {
-  title: string;
-  standings: Evolutions;
-}
-
-function transformData(standings: Evolutions) {
+function transformData(rankings: Evolutions) {
   const transformedData = [];
 
-  if (standings.driversEvolution) {
-    for (const driver of standings.driversEvolution) {
+  if (rankings.driversEvolution) {
+    for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
         data: { x: string; y: number }[];
@@ -65,8 +31,8 @@ function transformData(standings: Evolutions) {
     }
   }
 
-  if (standings.constructorsEvolution) {
-    for (const constructor of standings.constructorsEvolution) {
+  if (rankings.constructorsEvolution) {
+    for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
         data: { x: string; y: number }[];
@@ -93,17 +59,14 @@ function transformData(standings: Evolutions) {
   return transformedData;
 }
 
-const RankingEvolution = ({ title, standings }: RankingEvolutionProps) => {
-  const data = transformData(standings);
-  // console.log(data);
+const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
+  const data = transformData(rankings);
 
   const getColor = (series: { constructorId: string }) => {
     return getConstructorHex(series.constructorId);
   };
 
   const CustomTooltip = ({ point }: any) => {
-    // const constructorColor = getColor(point);
-
     return (
       <div
         className="bg-slate-800 space-y-2"
@@ -111,7 +74,6 @@ const RankingEvolution = ({ title, standings }: RankingEvolutionProps) => {
           fontSize: "10px",
           padding: "12px",
           borderRadius: "4px",
-          // color: point.color, // Set the font color based on constructor
           fontWeight: "light",
         }}
       >
@@ -137,7 +99,6 @@ const RankingEvolution = ({ title, standings }: RankingEvolutionProps) => {
             ? { top: 0, right: 40, bottom: 20, left: 20 }
             : { top: 0, right: 90, bottom: 20, left: 20 }
         }
-        // margin={{ top: 0, right: 90, bottom: 20, left: 20 }}
         endLabelPadding={10}
         xPadding={0.3}
         interpolation="smooth"

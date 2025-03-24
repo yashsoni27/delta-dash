@@ -73,12 +73,12 @@ export default function Home() {
             )}
             {driverEvolution && title && (
               <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                <RankingEvolution title={title} standings={driverEvolution} />
+                <RankingEvolution title={title} rankings={driverEvolution} />
               </div>
             )}
             {constructorEvolution && title && (
               <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                <RankingEvolution title={title} standings={constructorEvolution} />
+                <RankingEvolution title={title} rankings={constructorEvolution} />
               </div>
             )}
           </div>

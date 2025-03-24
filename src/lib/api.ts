@@ -392,7 +392,8 @@ export async function getDriverEvolution(
           driverMapping[driverId] = {
             driverId: driverId,
             code: driver.code,
-            name: `${driver.givenName} ${driver.familyName}`,
+            // name: `${driver.givenName} ${driver.familyName}`,
+            name: `${driver.familyName}`,
             nationality: driver.nationality,
             constructorId: standing.Constructors[0]?.constructorId,
             rounds: [],
