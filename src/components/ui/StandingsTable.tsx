@@ -1,17 +1,22 @@
 "use client";
 import { getConstructorStandings, getDriverStandings } from "@/lib/api";
+import { ChevronDown, ChevronUp, Minus, MoveRight } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Standings {
-  position: number;
+  position: number | string;
   driver: string;
   constructor: string;
   points: number;
-  evolution?: string;
+  evolution?: number;
   team?: string;
 }
 
 const StandingsTable = ({ name }: { name: string }) => {
+  const searchParams = useSearchParams();
+  const title = searchParams.get("title");
   const [standings, setStandings] = useState<Standings[]>([]);
 
   useEffect(() => {
@@ -20,26 +25,26 @@ const StandingsTable = ({ name }: { name: string }) => {
         const response = await getDriverStandings();
 
         const formattedDrivers = response.standings
-          .slice(0, 10)
+          .slice(0, title === null ? 10 : response.standings.length + 1)
           .map((item: any) => ({
             position: Number(item.position),
             driver: item.Driver.familyName,
             points: Number(item.points),
             team: item.Constructors[0]?.constructorId || "Unknown",
+            evolution: item.positionDifference,
           }));
+        console.log(response);
 
         setStandings(formattedDrivers);
       } else if (name == "Constructors") {
         const response = await getConstructorStandings();
 
-        const formattedConstructors = response.standings
-          .slice(0, 10)
-          .map((item: any) => ({
-            position: Number(item.position),
-            constructor: item.Constructor.name,
-            points: Number(item.points),
-            team: item.Constructor?.constructorId || "Unknown",
-          }));
+        const formattedConstructors = response.standings.map((item: any) => ({
+          position: Number(item.position),
+          constructor: item.Constructor.name,
+          points: Number(item.points),
+          team: item.Constructor?.constructorId || "Unknown",
+        }));
 
         setStandings(formattedConstructors);
       }
@@ -60,9 +65,9 @@ const StandingsTable = ({ name }: { name: string }) => {
             <thead>
               <tr className="text-sm font-thin text-gray-500">
                 <th className="pb-3 text-center w-1/6">Pos.</th>
-                <th className="pb-3 text-left w-7/12">{name}</th>
-                <th className="pb-3 text-center w-3/12">Points</th>
-                {/* <th className="pb-3 text-center w-1/12">Evo.</th> */}
+                <th className="pb-3 text-left w-3/6">{name}</th>
+                <th className="pb-3 text-right w-1/6">Points</th>
+                <th className="pb-3 text-center w-1/6">Evo.</th>
               </tr>
             </thead>
             <tbody>
@@ -87,23 +92,48 @@ const StandingsTable = ({ name }: { name: string }) => {
                       {standing.driver ? standing.driver : standing.constructor}
                     </div>
                   </td>
-                  <td className="py-3 align-middle text-center border-t border-gray-700">
+                  <td className="py-3 align-middle text-right border-t border-gray-700">
                     {standing.points}
                   </td>
-                  {/* <td className="py-3 align-middle text-center border-t border-gray-700 text-gray-700">-</td> */}
+                  <td
+                    className={`py-3 flex justify-center items-center text-center text-gray-300 border-t border-gray-700`}
+                  >
+                    {standing.evolution !== undefined ? (
+                      standing.evolution > 0 ? (
+                        <>
+                          <ChevronUp className="text-green-500" size={20} />
+                          <div className="pl-0">{Math.abs(standing.evolution)}</div>
+                          
+                        </>
+                      ) : standing.evolution < 0 ? (
+                        <>
+                          <ChevronDown className="text-red-500" size={20} />
+                          <div className="pl-0">{Math.abs(standing.evolution)}</div>
+                        </>
+                      ) : (
+                        <Minus size={12} className="text-gray-500" />
+                      )
+                    ) : (
+                      <Minus size={12} className="text-gray-500" />
+                    )}
+                  </td>
+
                 </tr>
               ))}
             </tbody>
-            {/* <tfoot className="flex justify-center">
-          <tr className="text-sm  font-thin">
-            <td className="">Full Standings</td>
-          </tr>
-        </tfoot> */}
           </table>
         </div>
-        <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm hover:bg-slate-900 delay-75 h-9 w-full rounded-t-none border-t border-gray-700 p-6">
-          Full Standings -&gt;
-        </button>
+        {title == null ? (
+          <Link
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm hover:bg-slate-900 delay-75 h-9 w-full rounded-t-none border-t border-gray-700 p-6"
+            href={{
+              pathname: "/standings",
+              query: { title: name },
+            }}
+          >
+            Full Standings<MoveRight className="text-gray-200 pl-2" />
+          </Link>
+        ) : null}
       </div>
     </div>
   );

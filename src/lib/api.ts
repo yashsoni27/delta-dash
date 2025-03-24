@@ -94,9 +94,9 @@ export async function getNextRace(season: string = "current") {
 
   const nextRace = races.find((race: any) => {
     const raceDate = new Date(race.date);
-    return raceDate >= today
+    return raceDate >= today;
   });
-  
+
   return nextRace;
 }
 
@@ -225,21 +225,55 @@ export async function getDriverStandings(
   limit: number = 30,
   offset: number = 0
 ) {
+
+  const nextRace = await getNextRace();
+  const evoResults = await fetchFromApi<any>(
+    `${season}/${nextRace?.round - 2}/driverStandings`,
+    "Standings",
+    limit,
+    offset
+  )
   const result = await fetchFromApi<any>(
     `${season}/driverStandings`,
     "Standings",
     limit,
     offset
   );
-  
+
+  const currentStandings = result.data?.StandingsLists[0]?.DriverStandings || [];
+  const previousStandings = evoResults.data?.StandingsLists[0]?.DriverStandings || [];
+
+  const standingsWithDifference = currentStandings.map((currentDriver: any, currentIndex: any) => {
+    const previousDriver = previousStandings.find(
+      (driver: any) => driver.Driver.driverId === currentDriver.Driver.driverId
+    );
+
+    const pointsDifference = previousDriver
+      ? parseInt(currentDriver.points) - parseInt(previousDriver.points)
+      : parseInt(currentDriver.points); // If no previous driver, difference is current points
+
+    let positionDifference = 0;
+    if (previousDriver) {
+        const previousIndex = previousStandings.findIndex((driver: any) => driver.Driver.driverId === currentDriver.Driver.driverId);
+        positionDifference = previousIndex - currentIndex;
+    }
+
+    return {
+      ...currentDriver,
+      pointsDifference,
+      positionDifference,
+    };
+  });
+
   return {
-    standings: result.data?.StandingsLists[0]?.DriverStandings || [],
+    // standings: result.data?.StandingsLists[0]?.DriverStandings || [],
+    standings: standingsWithDifference,
     season: result.data?.StandingsLists[0]?.season || "",
     pagination: {
       total: result.total,
       limit: result.limit,
-      offset: result.offset
-    }
+      offset: result.offset,
+    },
   };
 }
 
@@ -249,6 +283,15 @@ export async function getConstructorStandings(
   limit: number = 30,
   offset: number = 0
 ) {
+
+  const nextRace = await getNextRace();
+
+  const evoResults = await fetchFromApi<any>(
+    `${season}/${nextRace?.round - 2}/constructorStandings`,
+    "Standings",
+    limit,
+    offset
+  );
   const result = await fetchFromApi<any>(
     `${season}/constructorStandings`,
     "Standings",
@@ -256,13 +299,38 @@ export async function getConstructorStandings(
     offset
   );
 
+  const currentStandings = result.data?.StandingsLists[0]?.ConstructorStandings || [];
+  const previousStandings = evoResults.data?.StandingsLists[0]?.ConstructorStandings || [];
+
+  const standingsWithDifference = currentStandings.map((currentConstructor: any, currentIndex: any) => {
+    const previousConstructor = previousStandings.find(
+      (constructor: any) => constructor.Constructor.constructorId === currentConstructor.Constructor.constructorId
+    );
+
+    const pointsDifference = previousConstructor
+      ? parseInt(currentConstructor.points) - parseInt(previousConstructor.points)
+      : parseInt(currentConstructor.points); // If no previous constructor, difference is current points
+
+    let positionDifference = 0;
+    if (previousConstructor) {
+        const previousIndex = previousStandings.findIndex((constructor: any) => constructor.Constructor.constructorId === currentConstructor.Constructor.constructorId);
+        positionDifference = previousIndex - currentIndex;
+    }
+
+    return {
+      ...currentConstructor,
+      pointsDifference,
+      positionDifference,
+    };
+  });
+
   return {
-    standings: result.data?.StandingsLists[0]?.ConstructorStandings || [],
+    standings: standingsWithDifference,
     season: result.data?.StandingsLists[0]?.season || "",
     pagination: {
       total: result.total,
       limit: result.limit,
-      offset: result.offset
-    }
+      offset: result.offset,
+    },
   };
 }

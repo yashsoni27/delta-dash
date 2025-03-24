@@ -3,43 +3,6 @@ import { getNextRace } from "@/lib/api";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
-
-// function DynamicSVG({ name }: { name: string }) {
-//   const [SVGComponent, setSVGComponent] = useState(null);
-
-//   useEffect(() => {
-//     async function loadSVG() {
-//       try {
-//         const { default: LoadedSVG } = await import(
-//           // `../../../public/circuits/${name}.svg`
-//           `../../../public/circuits/${name}.avif`
-//         );
-//         setSVGComponent(() => LoadedSVG); // Store the component function
-//       } catch (error) {
-//         // console.error("Failed to load SVG:", error);
-//       }
-//     }
-
-//     loadSVG();
-//   }, [name]);
-
-//   if (!SVGComponent) {
-//     return <div className="mr-5 h-20 w-24"></div>;
-//   }
-
-//   return (
-//     <>
-//       <Image
-//         className="md:mr-5 h-20 w-24"
-//         src={SVGComponent}
-//         alt={name + "circuit"}
-//         priority={true}
-//       />
-//     </>
-//   );
-//   // return <SVGComponent fill="#fff" />;
-// }
-
 const CountdownCard = () => {
   const [season, setSeason] = useState("");
   const [raceName, setRaceName] = useState("");
@@ -51,18 +14,17 @@ const CountdownCard = () => {
     minutes: 0,
     seconds: 0,
   });
+  const [raceFinished, setRaceFinished] = useState(false);
 
   useEffect(() => {
     const fetchNextRace = async () => {
       try {
         const nextRace = await getNextRace();
-        // console.log(nextRace);
         if (nextRace) {
           setSeason(nextRace.season);
           setRaceName(nextRace.raceName);
           setCircuitId(nextRace.Circuit.circuitId);
           let timeStamp = new Date(`${nextRace.date}T${nextRace.time}`);
-
           setRaceDate(timeStamp.toISOString());
         }
       } catch (e) {
@@ -79,10 +41,21 @@ const CountdownCard = () => {
     const calculateTimeLeft = () => {
       const now = new Date().getTime();
       const raceTime = new Date(raceDate).getTime();
+      const raceEndTime = raceTime + 2 * 60 * 60 * 1000; // Adding 2 hours
+
+      if (now >= raceTime && now <= raceEndTime) {
+        setRaceFinished(true); // Race is finished, but within the 2-hour buffer
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
+
       const difference = raceTime - now;
 
-      if (difference <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      if (difference <= 0) {
+        setRaceFinished(true);
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
 
+      setRaceFinished(false); // Race has not finished
       return {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -123,7 +96,6 @@ const CountdownCard = () => {
             <p className="text-xs font-thin">SEC</p>
           </div>
         </div>
-        {/* <DynamicSVG name={circuitId} /> */}
         <Image
           className="md:mr-5 h-20 w-24"
           width={96}

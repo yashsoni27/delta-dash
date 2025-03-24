@@ -1,4 +1,5 @@
 "use client";
+import { getConstructorStandings } from "@/lib/api";
 import { getConstructorColor, getConstructorGradient } from "@/lib/utils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -6,8 +7,9 @@ import { useEffect, useRef, useState } from "react";
 export default function Home() {
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const teamContainerRef = useRef<HTMLDivElement | null>(null);
+  const [teams, setTeams] = useState<any>([])
 
-  const teams = [
+  const teamsInfo = [
     {
       name: "McLaren",
       code: "mclaren",
@@ -194,6 +196,31 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const response = await getConstructorStandings();
+        if (response) {
+          const mergedTeams = response.standings.map((standing: any) => {
+            const teamInfo = teamsInfo.find(
+              (team) => team.code === standing.Constructor.constructorId
+            );
+            return{
+              ...standing,
+              ...teamInfo,
+            };
+          })
+          console.log(mergedTeams);
+          setTeams(mergedTeams);
+        }
+      } catch (e) {
+        console.log("Error fetching drivers: ", e);
+      }
+    };
+
+    fetchDrivers();
+  }, []);
+
   return (
     <>
       <div className="min-h-screen bg-black">
@@ -202,7 +229,7 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
             ref={teamContainerRef}
           >
-            {teams.map((team, index) => (
+            {teams.map((team: any, index: string) => (
               <div key={index} className="relative">
                 <div
                   // key={index}
@@ -235,7 +262,7 @@ export default function Home() {
                         <p className="text-xs opacity-50">{team.chassis}</p>
                       </div>
                       <div className="flex space-x-1">
-                        {team.drivers.map((driver, idx) => (
+                        {team.drivers.map((driver: any, idx: string) => (
                           <div
                             key={idx}
                             className="w-10 h-10 rounded-full overflow-hidden"
@@ -266,7 +293,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Popup below team div */}
                 {selectedTeam === team.code && (
                   <div className="w-full flex justify-center">
                     <div className="absolute w-10/12 bg-gray-950 border border-gray-700 text-xs font-thin p-5 rounded-lg mt-1 shadow-lg z-20 ">
