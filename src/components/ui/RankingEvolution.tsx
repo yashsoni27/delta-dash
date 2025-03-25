@@ -1,7 +1,7 @@
 import { getConstructorHex } from "@/lib/utils";
 import { Evolutions, RankingEvolutionProps } from "@/types";
 import { ResponsiveBump } from "@nivo/bump";
-
+import { chartTheme } from "./StandingEvolution";
 
 function transformData(rankings: Evolutions) {
   const transformedData = [];
@@ -10,7 +10,7 @@ function transformData(rankings: Evolutions) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
-        data: { x: string; y: number }[];
+        data: { x: string | number; y: number | null }[];
         name: string;
         constructorId: string;
       } = {
@@ -22,7 +22,7 @@ function transformData(rankings: Evolutions) {
 
       for (let i = 0; i < driver.rounds.length; i++) {
         driverSeries.data.push({
-          x: `${i + 1}`,
+          x: i + 1 == driver.rounds[i].round ? i + 1 : driver.rounds[i].round,
           y: driver.rounds[i].position,
         });
       }
@@ -35,7 +35,7 @@ function transformData(rankings: Evolutions) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
-        data: { x: string; y: number }[];
+        data: { x: string | number; y: number }[];
         constructorId: string;
         name: string;
       } = {
@@ -47,7 +47,7 @@ function transformData(rankings: Evolutions) {
 
       for (let i = 0; i < constructor.rounds.length; i++) {
         constructorSeries.data.push({
-          x: `${i + 1}`,
+          x: constructor.rounds[i].round,
           y: constructor.rounds[i].position,
         });
       }
@@ -89,6 +89,7 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
     );
   };
 
+
   return (
     <>
       <div className="mb-3">{title} Ranking Evolution</div>
@@ -96,18 +97,22 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
         data={data}
         margin={
           title == "Drivers"
-            ? { top: 0, right: 40, bottom: 20, left: 20 }
-            : { top: 0, right: 90, bottom: 20, left: 20 }
+            ? { top: 0, right: 40, bottom: 20, left: 22 }
+            : { top: 0, right: 90, bottom: 20, left: 22 }
         }
         endLabelPadding={10}
-        xPadding={0.3}
+        xPadding={0.8}
         interpolation="smooth"
+        pointSize={4}
+        inactivePointSize={1}
         axisTop={null}
         axisRight={null}
-        activeLineWidth={5}
+        theme={chartTheme}
+        // activeLineWidth={5}
         colors={getColor}
         useMesh={true}
         animate={true}
+        motionConfig={"slow"}
         enableGridY={false}
         enableGridX={false}
         pointTooltip={CustomTooltip}

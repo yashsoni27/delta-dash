@@ -14,15 +14,15 @@ interface Standings {
   team?: string;
 }
 
-const StandingsTable = ({ name }: { name: string }) => {
+const StandingsTable = ({ name, season="current" }: { name: string , season?: string}) => {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
   const [standings, setStandings] = useState<Standings[]>([]);
 
   useEffect(() => {
-    const fetchData = async (name: string) => {
+    const fetchData = async (name: string, season: string = "current") => {
       if (name == "Drivers") {
-        const response = await getDriverStandings();
+        const response = await getDriverStandings(season);
 
         const formattedDrivers = response.standings
           .slice(0, title === null ? 10 : response.standings.length + 1)
@@ -50,8 +50,8 @@ const StandingsTable = ({ name }: { name: string }) => {
       }
     };
 
-    fetchData(name);
-  }, []);
+    fetchData(name, season);
+  }, [season]);
 
   return (
     // <div className="p-5 rounded-lg shadow-lg w-full max-w-md border border-gray-700 text-gray-300">
@@ -101,23 +101,37 @@ const StandingsTable = ({ name }: { name: string }) => {
                     {standing.evolution !== undefined ? (
                       standing.evolution > 0 ? (
                         <>
-                          <ChevronUp className="text-green-500 inline-block align-middle" size={20} />
-                          <div className="pl-1 inline-block align-middle">{Math.abs(standing.evolution)}</div>
-                          
+                          <ChevronUp
+                            className="text-green-500 inline-block align-middle"
+                            size={20}
+                          />
+                          <div className="pl-1 inline-block align-middle">
+                            {Math.abs(standing.evolution)}
+                          </div>
                         </>
                       ) : standing.evolution < 0 ? (
                         <>
-                          <ChevronDown className="text-red-500 inline-block align-middle" size={20} />
-                          <div className="pl-1 inline-block align-middle">{Math.abs(standing.evolution)}</div>
+                          <ChevronDown
+                            className="text-red-500 inline-block align-middle"
+                            size={20}
+                          />
+                          <div className="pl-1 inline-block align-middle">
+                            {Math.abs(standing.evolution)}
+                          </div>
                         </>
                       ) : (
-                        <Minus size={12} className="text-gray-500 inline-block align-middle" />
+                        <Minus
+                          size={12}
+                          className="text-gray-500 inline-block align-middle"
+                        />
                       )
                     ) : (
-                      <Minus size={12} className="text-gray-500 inline-block align-middle" />
+                      <Minus
+                        size={12}
+                        className="text-gray-500 inline-block align-middle"
+                      />
                     )}
                   </td>
-
                 </tr>
               ))}
             </tbody>
@@ -131,7 +145,8 @@ const StandingsTable = ({ name }: { name: string }) => {
               query: { title: name },
             }}
           >
-            Full Standings<MoveRight className="text-gray-200 pl-2" />
+            Full Standings
+            <MoveRight className="text-gray-200 pl-2" />
           </Link>
         ) : null}
       </div>

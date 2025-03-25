@@ -9,7 +9,7 @@ function transformData(rankings: Evolutions) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
-        data: { x: string; y: number }[];
+        data: { x: number | string; y: number }[];
         name: string;
         color: string;
         constructorId: string;
@@ -24,7 +24,7 @@ function transformData(rankings: Evolutions) {
 
       for (let i = 0; i < driver.rounds.length; i++) {
         driverSeries.data.push({
-          x: `${i + 1}`,
+          x: driver.rounds[i].round,
           y: driver.rounds[i].points,
         });
       }
@@ -37,7 +37,7 @@ function transformData(rankings: Evolutions) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
-        data: { x: string; y: number }[];
+        data: { x: string | number; y: number }[];
         constructorId: string;
         color: string;
         name: string;
@@ -51,7 +51,7 @@ function transformData(rankings: Evolutions) {
 
       for (let i = 0; i < constructor.rounds.length; i++) {
         constructorSeries.data.push({
-          x: `${i + 1}`,
+          x: constructor.rounds[i].round,
           y: constructor.rounds[i].points,
         });
       }
@@ -63,6 +63,21 @@ function transformData(rankings: Evolutions) {
   return transformedData;
 }
 
+export const chartTheme = {
+  axis: {
+    ticks: {
+      text: {
+        fill: "#fff",
+      },
+    },
+    legend: {
+      text: {
+        fill: "#fff",
+      },
+    },
+  },
+};
+
 const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
   const data = transformData(standings);
 
@@ -71,28 +86,27 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
   };
 
   const CustomTooltip = ({ slice }: { slice: any }) => {
-    const sortedPoints = slice.points
-      .slice() // Create a copy to avoid mutating the original array
-      .sort((a: any, b: any) => b.data.y - a.data.y);
+    if (!slice?.points?.length) return null;
+
+    const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
+    const round = sortedPoints[0].data.x;
 
     return (
       <div
-        className="bg-slate-800"
+        className="bg-slate-800 p-2 rounded min-w-[100px] opacity-95"
         style={{
           fontSize: "10px",
           padding: "8px",
-          borderRadius: "4px",
           fontWeight: "light",
-          minWidth: "100px",
         }}
       >
-        <div className="mb-2">{sortedPoints[0].data.x}</div>
-        {sortedPoints.map((point: any) => {
+        <div className="mb-2">Round {round}</div>
+        {sortedPoints.map((point) => {
           return (
             <div
-              key={point.id}
+              key={point.serieId}
               className="flex justify-between items-center mb-1"
-              style={{color: point.serieColor}}
+              style={{ color: point.serieColor }}
             >
               <span className="pr-2">{point.serieId}</span>
               <span style={{ color: point.serieColor }}>{point.data.y}</span>
@@ -108,9 +122,10 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
       <div className="mb-3">{title} Standings Evolution</div>
       <ResponsiveLine
         data={data}
-        margin={{ top: 0, right: 40, bottom: 20, left: 30 }}
+        margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
         axisTop={null}
         axisRight={null}
+        theme={chartTheme}
         enablePoints={true}
         pointSize={5}
         // pointLabel="data.yFormatted"
@@ -118,6 +133,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
         enableSlices="x"
         sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
         colors={getColor}
+        enableGridX={false}
         enableGridY={false}
         animate={true}
         useMesh={true}

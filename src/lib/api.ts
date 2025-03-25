@@ -53,6 +53,17 @@ async function fetchFromApi<T>(
   return transformResponse<T>(mrData.MRData, dataKey);
 }
 
+async function fetchWithDelay<T>(
+  url: string,
+  dataKey: string,
+  delay: number,
+  limit: number,
+  offset: number
+): Promise<any> {
+  await new Promise((resolve) => setTimeout(resolve, delay));
+  return fetchFromApi<T>(url, dataKey, limit, offset);
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                API Endpoints                               */
 /* -------------------------------------------------------------------------- */
@@ -367,15 +378,20 @@ export async function getDriverEvolution(
       limit,
       offset
     );
-    const fullSeasonData = fullSeasonResponse.data;
-    const totalRounds = parseInt(
-      fullSeasonData.StandingsLists[0].round
-    );
+    const fullSeasonData = fullSeasonResponse.data;    
+    const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
 
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
-      const roundResponse = await fetchFromApi<any>(
+      // const roundResponse = await fetchFromApi<any>(
+      //   `/${season}/${roundNum}/driverStandings`,
+      //   "Standings",
+      //   limit,
+      //   offset
+      // );
+      const roundResponse = await fetchWithDelay<any>(
         `/${season}/${roundNum}/driverStandings`,
         "Standings",
+        100,
         limit,
         offset
       );
@@ -439,14 +455,19 @@ export async function getConstructorEvolution(
       offset
     );
     const fullSeasonData = fullSeasonResponse.data;
-    const totalRounds = parseInt(
-      fullSeasonData.StandingsLists[0].round
-    );
+    const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
 
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
-      const roundResponse = await fetchFromApi<any>(
+      // const roundResponse = await fetchFromApi<any>(
+      //   `/${season}/${roundNum}/constructorStandings`,
+      //   "Standings",
+      //   limit,
+      //   offset
+      // );
+      const roundResponse = await fetchWithDelay<any>(
         `/${season}/${roundNum}/constructorStandings`,
         "Standings",
+        100,
         limit,
         offset
       );
@@ -487,7 +508,6 @@ export async function getConstructorEvolution(
       totalRounds: totalRounds,
       constructorsEvolution: constructorEvolution,
     };
-
   } catch (error) {
     console.error("Error fetching constructor evolution:", error);
     return { error: "Failed to fetch constructor evolution" };

@@ -113,7 +113,6 @@ export interface RaceResults {
   };
 }
 
-
 export interface driverEvo {
   code: string;
   driverId: string;
@@ -121,7 +120,7 @@ export interface driverEvo {
   name: string;
   nationality: string;
   rounds: {
-    rounds: number;
+    round: number | string;
     position: number;
     points: number;
   }[];
@@ -132,7 +131,7 @@ export interface constructorEvo {
   name: string;
   nationality: string;
   rounds: {
-    rounds: number;
+    round: number | string;
     position: number;
     points: number;
   }[];
