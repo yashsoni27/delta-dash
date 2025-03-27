@@ -1,4 +1,5 @@
 "use client";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import RankingEvolution from "@/components/ui/RankingEvolution";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
@@ -47,7 +48,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-thin">Season:</span>
             <select
-              className="inline-flex appearance-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
+              className="inline-flex appearance-none focus:border-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
@@ -61,56 +62,59 @@ export default function Home() {
         </div>
 
         {title && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
+          <>
             {isLoading ? (
-              <div className="flex items-center justify-center align-middle text-center">
-                <div className="text-sm text-gray-400">Loading data...</div>
-              </div>
+              // <div className="flex items-center justify-center align-middle text-center">
+              //   <div className="text-sm text-gray-400">Loading data...</div>
+              // </div>
+              <LoadingSpinner />
             ) : (
               <>
-                <div className="mb-4 sm:mb-0">
-                  <StandingsTable
-                    name={title}
-                    season={selectedYear.toString()}
-                  />
-                </div>
-                <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
-                  {driverEvolution && (
-                    <>
-                      <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                        <StandingEvolution
-                          title={title}
-                          standings={driverEvolution}
-                        />
-                      </div>
-                      <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                        <RankingEvolution
-                          title={title}
-                          rankings={driverEvolution}
-                        />
-                      </div>
-                    </>
-                  )}
-                  {constructorEvolution && (
-                    <>
-                      <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                        <StandingEvolution
-                          title={title}
-                          standings={constructorEvolution}
-                        />
-                      </div>
-                      <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                        <RankingEvolution
-                          title={title}
-                          rankings={constructorEvolution}
-                        />
-                      </div>
-                    </>
-                  )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
+                  <div className="mb-4 sm:mb-0">
+                    <StandingsTable
+                      name={title}
+                      season={selectedYear.toString()}
+                    />
+                  </div>
+                  <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
+                    {driverEvolution && (
+                      <>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <StandingEvolution
+                            title={title}
+                            standings={driverEvolution}
+                          />
+                        </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <RankingEvolution
+                            title={title}
+                            rankings={driverEvolution}
+                          />
+                        </div>
+                      </>
+                    )}
+                    {constructorEvolution && (
+                      <>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <StandingEvolution
+                            title={title}
+                            standings={constructorEvolution}
+                          />
+                        </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <RankingEvolution
+                            title={title}
+                            rankings={constructorEvolution}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </>
             )}
-          </div>
+          </>
         )}
       </div>
     </>

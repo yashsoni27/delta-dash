@@ -1,6 +1,7 @@
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 // const API_KEY = process.env.JOLPICA_API_KEY || '';
 
+
 // Interface for API response types
 interface ApiResponse<T> {
   data: T;
@@ -378,7 +379,7 @@ export async function getDriverEvolution(
       limit,
       offset
     );
-    const fullSeasonData = fullSeasonResponse.data;    
+    const fullSeasonData = fullSeasonResponse.data;
     const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
 
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
