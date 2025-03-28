@@ -1,4 +1,4 @@
-import { getConstructorColor, getConstructorHex } from "@/lib/utils";
+import { getConstructorHex } from "@/lib/utils";
 import { Evolutions, StandingEvolutionProps } from "@/types";
 import { ResponsiveLine } from "@nivo/line";
 
@@ -69,12 +69,23 @@ export const chartTheme = {
       text: {
         fill: "#94a3b8",
       },
+      line: {
+        stroke: 'rgba(255, 255, 255, 0.10)',
+        strokeWidth: 1,
+      }
     },
     legend: {
       text: {
         fill: "#fff",
       },
     },
+  },
+  grid: {
+    line: {
+      stroke: 'rgba(255, 255, 255, 0.10)',
+      strokeWidth: 1,
+      // strokeDasharray: '4 4' // Optional: creates a dashed line effect
+    }
   },
 };
 
@@ -133,7 +144,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
         sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
         colors={getColor}
         enableGridX={false}
-        enableGridY={false}
+        enableGridY={true}
         animate={true}
         useMesh={true}
       />

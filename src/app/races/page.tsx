@@ -105,6 +105,8 @@ export default function Home() {
   };
 
   const handleRoundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTableData(null);
+    setLapData(null);
     setRound(Number(e.target.value));
   };
 
@@ -129,7 +131,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-thin">Race:</span>
             <select
-              className="inline-flex appearance-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-32 px-4 py-2 bg-transparent bg-slate-800"
+              className="inline-flex appearance-none items-center overflow-hidden justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-32 px-4 py-2 bg-transparent bg-slate-800"
               value={round !== null ? round : ""}
               onChange={handleRoundChange}
               disabled={raceOptions.length === 0}
@@ -156,7 +158,7 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
               <div className="mb-4 sm:mb-0 min-h-80">
-                {tableData && columns && (
+                {/* {tableData && columns && ( */}
                   <Table
                     // className="tracking-tight"
                     heading="Fastest Laps"
@@ -164,12 +166,15 @@ export default function Home() {
                     data={tableData}
                     onRowClick={(item) => console.log(item)}
                   />
-                )}
+                {/* )} */}
               </div>
+
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
-                  <LapTimesChart data={lapData} />
-                </div>
+                {/* {tableData && ( */}
+                  <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                    <LapTimesChart data={lapData} />
+                  </div>
+                {/* )} */}
               </div>
             </div>
           </>
