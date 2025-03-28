@@ -1,8 +1,10 @@
-import { getRaceCalendar } from "@/lib/api";
+import { getFastestLaps, getRaceCalendar } from "@/lib/api";
 
 export default async function DashboardPage() {
   const raceCalendar = await getRaceCalendar("2024");
-  console.log(raceCalendar);
+  // console.log(raceCalendar);
+  // const fastestLaps = await getFastestLaps("current", "1");
+  // console.log("fastestLaps: ",fastestLaps);
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,7 +1,6 @@
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 // const API_KEY = process.env.JOLPICA_API_KEY || '';
 
-
 // Interface for API response types
 interface ApiResponse<T> {
   data: T;
@@ -112,6 +111,25 @@ export async function getNextRace(season: string = "current") {
   return nextRace;
 }
 
+// Previous Races
+export async function getPreviousRaces(season: string = "current") {
+  const result = await fetchFromApi<any>(`${season}/races`, "Race");
+  const races = result.data?.Races;
+
+  if (!races || races.length === 0) return [];
+
+  const today = new Date();
+
+  const previousRaces = races
+    .filter((race: any) => {
+      const raceDate = new Date(race.date);
+      return raceDate < today;
+    })
+    .sort((a: any, b: any) => b.round - a.round);
+
+  return previousRaces;
+}
+
 // Constructor info
 export async function getConstructors(
   season: string = "current",
@@ -148,6 +166,30 @@ export async function getDriverInfo(
       "Driver"
     );
     return result;
+  }
+}
+
+// Get Driver Constructor Pairings
+export async function getDriverConstructorPairing(
+  season: string = "current"
+) {
+  try {
+    // Get Driver constructor pairing, and family Name
+  const standingsResponse = await getDriverStandings(season);
+  const driverConstructorObject: Record<string, { constructorId: string, driverName: string }> = {};
+
+  standingsResponse.standings.forEach((driver: any) => {
+    driver.Constructors.forEach((constructor: any) => {
+      driverConstructorObject[driver.Driver.driverId] = {
+        constructorId: constructor.constructorId,
+        driverName: driver.Driver.familyName,
+      };
+    });
+  });
+  return driverConstructorObject;
+
+  } catch (error) {
+    console.error("Error fetching driver constructor pairings:", error);
   }
 }
 
@@ -215,20 +257,94 @@ export async function getPitStopInfo(
   return result;
 }
 
-// Lap info
-export async function getLapInfo(
+// Get fastest lap info
+export async function getFastestLaps(
   season: string = "current",
   round: string,
   limit: number = 30,
   offset: number = 0
 ) {
-  const result = await fetchFromApi(
+  interface LapTiming {
+    driverId: string;
+    time: number;
+    lapNumber: number;
+    constructorId: string;
+    familyName: string;
+  }
+
+  // Get Driver constructor pairing, and family Name
+  const driverConstructorObject = await getDriverConstructorPairing(season);
+
+  const initialResult = await fetchFromApi(
     `${season}/${round}/laps`,
     "Race",
-    limit,
-    offset
+    1,
+    0
   );
-  return result;
+
+  const totalLaps = initialResult.total;
+  let resLimit = 100;
+  const requiredRequests = Math.ceil(totalLaps / resLimit);
+  const offsets = Array.from({ length: requiredRequests }, (_, i) => i * resLimit);
+
+  // Fetch all pages in parallel with delay
+  const allResults = await Promise.all(
+    offsets.map((offset, index) =>
+      fetchWithDelay<{ data: any }>(
+        `${season}/${round}/laps`,
+        "Race",
+        index * 100, // Stagger requests to avoid rate limiting
+        // 100, // Stagger requests to avoid rate limiting
+        resLimit,
+        offset
+      )
+    )
+  );
+
+  const allLapTimes: LapTiming[] = [];
+
+  // Process laps
+  const driverMap = new Map<string, LapTiming>();
+
+  for (const result of allResults) {
+    const laps = result.data.Races[0].Laps;
+
+    for (const lap of laps) {
+      for (const timing of lap.Timings) {
+        // Convert time to seconds
+        const [minutes, seconds] = timing.time.split(":");
+        const totalSeconds = parseInt(minutes) * 60 + parseFloat(seconds);
+        const formattedTime = Number(totalSeconds.toFixed(3));
+
+        allLapTimes.push({
+          driverId: timing.driverId,
+          lapNumber: lap.number,
+          time: formattedTime,
+          constructorId: driverConstructorObject?.[timing.driverId]?.constructorId ?? "Unknown",
+          familyName: driverConstructorObject?.[timing.driverId]?.driverName ?? timing.driverId,
+        });
+
+        // Update driver fastest lap
+        if (
+          !driverMap.has(timing.driverId) ||
+          formattedTime < driverMap.get(timing.driverId)!.time
+        ) {
+          driverMap.set(timing.driverId, {
+            driverId: timing.driverId,
+            lapNumber: lap.number,
+            time: formattedTime,
+            constructorId: driverConstructorObject?.[timing.driverId]?.constructorId ?? "Unknown",
+            familyName: driverConstructorObject?.[timing.driverId]?.driverName ?? "Unknown",
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    drivers: Array.from(driverMap.values()).sort((a, b) => a.time - b.time),
+    allLaps: allLapTimes.sort((a, b) => a.lapNumber - b.lapNumber),
+  };
 }
 
 // Driver standings
@@ -400,9 +516,31 @@ export async function getDriverEvolution(
       const standingsList = roundData.StandingsLists[0];
       const currentRound = standingsList.round;
 
+      let nextAvailablePosition = 1;
+
       for (const standing of standingsList.DriverStandings) {
         const driver = standing.Driver;
         const driverId = driver.driverId;
+
+        // Track occupied positions in this round
+        const occupiedPositions = new Set(
+          standingsList.DriverStandings.filter(
+            (s: any) => s.positionText !== "-"
+          ).map((s: any) => parseInt(s.position))
+        );
+
+        // Find the first unoccupied position
+        let positionValue;
+        if (standing.positionText === "-") {
+          // Find the next available position, incrementing nextAvailablePosition
+          while (occupiedPositions.has(nextAvailablePosition)) {
+            nextAvailablePosition++;
+          }
+          positionValue = nextAvailablePosition.toString();
+          nextAvailablePosition++; // Increment for the next blank entry
+        } else {
+          positionValue = standing.position;
+        }
 
         // Add driver to mapping if new
         if (!driverMapping[driverId]) {
@@ -420,7 +558,8 @@ export async function getDriverEvolution(
         // Add this round's data
         driverMapping[driverId].rounds.push({
           round: parseInt(currentRound),
-          position: parseInt(standing.position),
+          // position: parseInt(standing.position),
+          position: parseInt(positionValue),
           points: parseFloat(standing.points),
         });
       }
@@ -428,6 +567,8 @@ export async function getDriverEvolution(
 
     // Convert mapping to array
     const driverEvolution = Object.values(driverMapping);
+
+    console.log(driverEvolution);
 
     return {
       season: fullSeasonData.season,
@@ -468,7 +609,7 @@ export async function getConstructorEvolution(
       const roundResponse = await fetchWithDelay<any>(
         `/${season}/${roundNum}/constructorStandings`,
         "Standings",
-        100,
+        150,
         limit,
         offset
       );

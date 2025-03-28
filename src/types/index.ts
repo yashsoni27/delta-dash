@@ -152,3 +152,21 @@ export interface StandingEvolutionProps {
   title: string;
   standings: Evolutions;
 }
+
+
+
+export interface Column {
+  key: string;
+  header: string;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+  render?: (value: any, item: any) => React.ReactNode;
+}
+
+export interface TableProps {
+  heading?: string;
+  columns: Column[];
+  data: any[];
+  className?: string;
+  onRowClick?: (item: any) => void;
+}

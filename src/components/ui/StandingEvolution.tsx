@@ -67,7 +67,7 @@ export const chartTheme = {
   axis: {
     ticks: {
       text: {
-        fill: "#fff",
+        fill: "#94a3b8",
       },
     },
     legend: {
@@ -127,9 +127,8 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
         axisRight={null}
         theme={chartTheme}
         enablePoints={true}
-        pointSize={5}
-        // pointLabel="data.yFormatted"
-        // colors={getColor}
+        lineWidth={2}
+        pointSize={4}
         enableSlices="x"
         sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
         colors={getColor}

@@ -22,7 +22,7 @@ export default function Navbar() {
         
         {/* Desktop navigation */}
         <div className="hidden md:flex space-x-4">
-          <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
+          {/* <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link> */}
           <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
           <Link href="/teams" className="hover:text-red-500">Teams</Link>
           <Link href="/races" className="hover:text-red-500">Races</Link>
@@ -32,7 +32,7 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="absolute top-16 right-4 bg-slate-800 p-4 rounded-md shadow-lg md:hidden">
             <div className="flex flex-col space-y-2">
-              <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link>
+              {/* <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link> */}
               <Link href="/drivers" className="hover:text-red-500">Drivers</Link>
               <Link href="/teams" className="hover:text-red-500">Teams</Link>
               <Link href="/races" className="hover:text-red-500">Races</Link>

@@ -109,4 +109,3 @@ export function getConstructorGradient(constructorName: string): string {
   
   return baseColor;
 }
-
