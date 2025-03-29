@@ -176,13 +176,14 @@ export async function getDriverConstructorPairing(
   try {
     // Get Driver constructor pairing, and family Name
   const standingsResponse = await getDriverStandings(season);
-  const driverConstructorObject: Record<string, { constructorId: string, driverName: string }> = {};
+  const driverConstructorObject: Record<string, { constructorId: string, driverName: string, driverCode?:string }> = {};
 
   standingsResponse.standings.forEach((driver: any) => {
     driver.Constructors.forEach((constructor: any) => {
       driverConstructorObject[driver.Driver.driverId] = {
         constructorId: constructor.constructorId,
         driverName: driver.Driver.familyName,
+        driverCode: driver.Driver.code,
       };
     });
   });
@@ -270,6 +271,7 @@ export async function getFastestLaps(
     lapNumber: number;
     constructorId: string;
     familyName: string;
+    driverCode?: string;
   }
 
   // Get Driver constructor pairing, and family Name
@@ -322,6 +324,7 @@ export async function getFastestLaps(
           time: formattedTime,
           constructorId: driverConstructorObject?.[timing.driverId]?.constructorId ?? "Unknown",
           familyName: driverConstructorObject?.[timing.driverId]?.driverName ?? timing.driverId,
+          driverCode: driverConstructorObject?.[timing.driverId]?.driverCode ?? timing.driverId,
         });
 
         // Update driver fastest lap

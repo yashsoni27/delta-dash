@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nivo/boxplot": "^0.88.0",
     "@nivo/bump": "^0.88.0",
     "@nivo/line": "^0.88.0",
     "express": "^4.21.2",

@@ -1,4 +1,5 @@
 "use client";
+import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
@@ -42,7 +43,6 @@ export default function Home() {
           );
 
           if (response) {
-            console.log(response);
             const drivers = response.drivers.map((item, index) => ({
               ...item,
               pos: index + 1,
@@ -158,23 +158,22 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
               <div className="mb-4 sm:mb-0 min-h-80">
-                {/* {tableData && columns && ( */}
-                  <Table
-                    // className="tracking-tight"
-                    heading="Fastest Laps"
-                    columns={columns}
-                    data={tableData}
-                    onRowClick={(item) => console.log(item)}
-                  />
-                {/* )} */}
+                <Table
+                  // className="tracking-tight"
+                  heading="Fastest Laps"
+                  columns={columns}
+                  data={tableData}
+                  onRowClick={(item) => console.log(item)}
+                />
               </div>
 
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
-                {/* {tableData && ( */}
-                  <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
-                    <LapTimesChart data={lapData} />
-                  </div>
-                {/* )} */}
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                  <LapTimesChart data={lapData} heading="Lap Times" />
+                </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                  <BoxPlotChart data={lapData} heading="Race Pace" />
+                </div>
               </div>
             </div>
           </>

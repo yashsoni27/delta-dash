@@ -1,13 +1,12 @@
 import { ResponsiveLine } from "@nivo/line";
-import React from "react";
 import { chartTheme } from "./StandingEvolution";
 import { getConstructorHex } from "@/lib/utils";
 
 function transformData(lapData: any) {
   const transformedData: any = [];
-  
+
   const driverLaps: { [key: string]: any[] } = {};
-  
+
   // Grouping laps by drivers
   Object.values(lapData).forEach((lap: any) => {
     if (!driverLaps[lap.driverId]) {
@@ -15,7 +14,7 @@ function transformData(lapData: any) {
     }
     driverLaps[lap.driverId].push(lap);
   });
-  
+
   // Transforming the data for each driver
   Object.entries(driverLaps).forEach(([driverId, laps]) => {
     const driverSeries = {
@@ -26,31 +25,30 @@ function transformData(lapData: any) {
       })),
       color: getConstructorHex(laps[0].constructorId),
     };
-    
+
     transformedData.push(driverSeries);
   });
-  
+
   return transformedData;
 }
 
-export default function LapTimesChart({ data }: any) {
-
+export default function LapTimesChart({ data, heading }: any) {
   if (!data) {
     return (
-      <div
-        className={`md:row-start-4 lg:row-start-3 rounded-lg pt-2`}
-      >
-        <div className="scroll-m-20 mb-3">Lap Times</div>
-        <div className="p-4 text-sm text-center text-gray-500">No data available</div>
+      <div className={`md:row-start-4 lg:row-start-3 rounded-lg pt-2`}>
+        <div className="scroll-m-20 mb-3">{heading}</div>
+        <div className="p-4 text-sm text-center text-gray-500">
+          No data available
+        </div>
       </div>
     );
   }
   const formattedData = transformData(data);
-  
+
   const getColor = (series: { color: string }) => {
     return series.color;
   };
-  
+
   const CustomTooltip = ({ slice }: { slice: any }) => {
     if (!slice?.points?.length) return null;
 
@@ -83,10 +81,9 @@ export default function LapTimesChart({ data }: any) {
     );
   };
 
-
   return (
     <>
-      <div className="scroll-m-20 mb-3">Lap Times</div>
+      <div className="scroll-m-20 mb-3">{heading}</div>
       <ResponsiveLine
         data={formattedData}
         margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
