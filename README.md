@@ -1,37 +1,64 @@
-f1-dash/
-├── public/
-│   ├── favicon.ico
-│   └── images/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── dashboard/
-│   │   │   └── page.tsx
-│   │   ├── drivers/
-│   │   │   └── page.tsx
-│   │   ├── constructors/
-│   │   │   └── page.tsx
-│   │   └── races/
-│   │       └── page.tsx
-│   ├── components/
-│   │   ├── ui/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   └── Table.tsx
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── Footer.tsx
-│   │   ├── Dashboard/
-│   │   ├── Drivers/
-│   │   ├── Constructors/
-│   │   └── Races/
-│   ├── lib/
-│   │   ├── api.ts
-│   │   └── utils.ts
-│   └── types/
-│       └── index.ts
-├── package.json
-├── next.config.js
-└── tsconfig.json
+# 🏎️ F1 Dashboard
+
+A sleek and modern Formula 1 dashboard application for real-time race statistics and analytics.
+
+## ✨ Features
+
+- Live race timing and tracking
+- Driver and constructor standings
+- Circuit information and lap analysis
+- Historical race data comparison
+- Interactive track maps
+- Real-time tire strategy insights
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js v16 or higher
+- npm or yarn package manager
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/f1-dash.git
+
+# Install dependencies
+cd f1-dash
+npm install
+
+# Start the development server
+npm run dev
+```
+
+## 🛠️ Tech Stack
+
+- React.js - Frontend framework
+- TypeScript - Type-safe development
+- TailwindCSS - Styling
+- Formula 1 API - Race data integration
+
+## 📱 Screenshots
+
+[Add screenshots of your application here]
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<!-- ## 💬 Contact -->
+
+<!-- Your Name - [@yourtwitter](https://twitter.com/yourtwitter) -->
+
+Project Link: [https://github.com/yashsoni27/f1-dash](https://github.com/yashsoni27/f1-dash)
