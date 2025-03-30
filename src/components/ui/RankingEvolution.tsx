@@ -89,7 +89,6 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
     );
   };
 
-
   return (
     <>
       <div className="mb-3">{title} Ranking Evolution</div>
@@ -101,7 +100,8 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
             : { top: 0, right: 90, bottom: 20, left: 22 }
         }
         endLabelPadding={10}
-        xPadding={0.8}
+        xPadding={0.6}
+        xOuterPadding={0.3}
         interpolation="smooth"
         pointSize={4}
         inactivePointSize={1}

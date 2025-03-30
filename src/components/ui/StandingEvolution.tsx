@@ -146,6 +146,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
         enableGridX={false}
         enableGridY={true}
         animate={true}
+        motionConfig={"slow"}
         useMesh={true}
       />
     </>

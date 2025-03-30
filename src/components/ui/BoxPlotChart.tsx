@@ -4,16 +4,39 @@ import { chartTheme as baseChartTheme } from "./StandingEvolution";
 
 const chartTheme = {
   ...baseChartTheme,
-  translation: {}, // Add a valid `translation` property here based on the expected type
+  translation: {},
 };
 
 function transformData(data: any) {
-  return data.map((item: any) => ({
-    // group: item.familyName,
-    group: item.driverCode,
-    value: item.time,
-    color: getConstructorHex(item.constructorId),
-  }));
+  const allValues = data.map((item: any) => item.time);
+
+  // Calculate quartiles
+  const sorted = [...allValues].sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length * 0.25)];
+  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const iqr = q3 - q1;
+
+  // Define outlier thresholds (typically 1.5 * IQR)
+  const lowerThreshold = q1 - 1.5 * iqr;
+  const upperThreshold = q3 + 1.5 * iqr;
+
+  return data
+    .filter((item: any) => {
+      const value = item.time;
+      return value >= lowerThreshold && value <= upperThreshold;
+    })
+    .map((item: any) => ({
+      group: item.driverCode,
+      value: item.time,
+      color: getConstructorHex(item.constructorId),
+    }));
+
+  // return data.map((item: any) => ({
+  //   // group: item.familyName,
+  //   group: item.driverCode,
+  //   value: item.time,
+  //   color: getConstructorHex(item.constructorId),
+  // }));
 }
 
 export default function BoxPlotChart({ data, heading }: any) {
@@ -32,7 +55,7 @@ export default function BoxPlotChart({ data, heading }: any) {
 
   const getColor = (series: { group: string }) => {
     const entry = formattedData.find((d: any) => d.group === series.group);
-    return entry?.color || "#999"; // Fallback to gray if not found
+    return entry?.color || "#999";
   };
 
   const CustomTooltip = ({ slice }: { slice: any }) => {
@@ -40,7 +63,6 @@ export default function BoxPlotChart({ data, heading }: any) {
 
     const color = slice.color || "#999";
     const { group, n, mean, extrema, quantiles, values } = slice.data || {};
-    const data = slice.data;
 
     return (
       <div
@@ -65,7 +87,7 @@ export default function BoxPlotChart({ data, heading }: any) {
             </div>
 
             <div className="mb-1">
-              <span className="font-bold">Summary</span>
+              <span className="font-normal">Summary</span>
               <div className="ml-1">
                 <div>
                   mean:{" "}
@@ -75,11 +97,15 @@ export default function BoxPlotChart({ data, heading }: any) {
                 </div>
                 <div>
                   min:{" "}
-                  <span className="font-semibold">{extrema?.[0] ?? "N/A"}</span>
+                  <span className="font-semibold">
+                    {extrema?.[0].toFixed(2) ?? "N/A"}
+                  </span>
                 </div>
                 <div>
                   max:{" "}
-                  <span className="font-semibold">{extrema?.[1] ?? "N/A"}</span>
+                  <span className="font-semibold">
+                    {extrema?.[1].toFixed(2) ?? "N/A"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -87,11 +113,11 @@ export default function BoxPlotChart({ data, heading }: any) {
 
           <div className="">
             <div className="mb-1">
-              <span className="font-bold">Quantiles</span>
+              <span className="font-normal">Quantiles</span>
               <div className="ml-1">
                 {values?.map((value: number, index: number) => (
                   <div key={index}>
-                    {quantiles?.[index] ?? "?"}%:{" "}
+                    {Number(quantiles?.[index] * 100) ?? "?"}%:{" "}
                     <span className="font-semibold">
                       {value?.toFixed(2) ?? "N/A"}
                     </span>
@@ -110,7 +136,7 @@ export default function BoxPlotChart({ data, heading }: any) {
       <div className="scroll-m-20 mb-3">{heading}</div>
       <ResponsiveBoxPlot
         data={formattedData}
-        margin={{ top: 10, right: 40, bottom: 30, left: 30 }}
+        margin={{ top: 10, right: 40, bottom: 30, left: 35 }}
         axisTop={null}
         axisRight={null}
         theme={chartTheme}

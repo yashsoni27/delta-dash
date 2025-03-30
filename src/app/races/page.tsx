@@ -5,98 +5,123 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
 import { getFastestLaps, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [round, setRound] = useState<number | null>(null);
+  const [raceName, setRaceName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [raceOptions, setRaceOptions] = useState<
-    { name: string; value: number }[]
+    { name: string; value: number; raceName: string }[]
   >([]);
   const [columns, setColumns] = useState<any | null>(null);
   const [tableData, setTableData] = useState<any | null>(null);
   const [lapData, setLapData] = useState<any | null>(null);
 
   useEffect(() => {
-    const fetchFastestLaps = async () => {
-      try {
-        setIsLoading(true);
-        const previousRaces = await getPreviousRaces(selectedYear.toString());
+    const column: Column[] = [
+      { key: "pos", header: "#", width: "w-2/8", align: "center" },
+      {
+        key: "familyName",
+        header: "Driver",
+        width: "w-3/8",
+        align: "left",
+        render: (value, item) => (
+          <div className="flex item-center gap-2">
+            {item.constructorId && (
+              <img
+                src={`/teams/${item.constructorId}.svg`}
+                alt={item.constructorId}
+                className="w-5 h-5"
+                onError={(e) => (e.currentTarget.src = "/vercel.svg")}
+              />
+            )}
+            {value || item.constructorId}
+          </div>
+        ),
+      },
+      {
+        key: "lapNumber",
+        header: "Lap",
+        width: "w-1/8",
+        align: "right",
+      },
+      {
+        key: "time",
+        header: "Time (sec)",
+        width: "w-2/8",
+        align: "center",
+      },
+    ];
+    setColumns(column);
+  }, []);
 
-        // Extract race names and rounds for the select options
-        const options = previousRaces.map((race: any) => ({
-          name: race.Circuit.Location.country,
-          value: parseInt(race.round, 10),
-        }));
-        setRaceOptions(options);
-
-        if (round == null) {
-          setRound(options[0].value);
-        }
-
-        // Fetch fastest laps if a round is selected
-        if (round !== null) {
-          const response = await getFastestLaps(
-            selectedYear.toString(),
-            round.toString()
-          );
-
-          if (response) {
-            const drivers = response.drivers.map((item, index) => ({
-              ...item,
-              pos: index + 1,
-            }));
-            setLapData(response.allLaps);
-
-            // Setting table data
-            const column: Column[] = [
-              { key: "pos", header: "#", width: "w-2/8", align: "center" },
-              {
-                key: "familyName",
-                header: "Driver",
-                width: "w-3/8",
-                align: "left",
-                render: (value, item) => (
-                  <div className="flex item-center gap-2">
-                    {item.constructorId && (
-                      <img
-                        src={`/teams/${item.constructorId}.svg`}
-                        alt={item.constructorId}
-                        className="w-5 h-5"
-                        onError={(e) => (e.currentTarget.src = "/vercel.svg")}
-                      />
-                    )}
-                    {value || item.constructorId}
-                  </div>
-                ),
-              },
-              {
-                key: "lapNumber",
-                header: "Lap",
-                width: "w-1/8",
-                align: "right",
-              },
-              {
-                key: "time",
-                header: "Time (sec)",
-                width: "w-2/8",
-                align: "center",
-              },
-            ];
-            setColumns(column);
-            setTableData(drivers);
-          }
-        }
-      } catch (e) {
-        console.log("Error fetching drivers: ", e);
-      } finally {
-        setIsLoading(false);
+  // Separate fetch for races data
+  const fetchRaces = useCallback(async (year: string) => {
+    try {
+      setIsLoading(true);
+      const previousRaces = await getPreviousRaces(year);
+      console.log(previousRaces);
+      const options = previousRaces.map((race: any) => ({
+        name: race.Circuit.Location.country,
+        value: parseInt(race.round, 10),
+        raceName: race.raceName,
+      }));
+      setRaceOptions(options);
+      
+      if (options.length > 0 && round === null) {
+        setRound(options[0].value);
+        setRaceName(options[0].raceName);
       }
-    };
+    } catch (e) {
+      console.log("Error fetching races: ", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [round]);
 
-    fetchFastestLaps();
-  }, [selectedYear, round]);
+  // Separate fetch for lap data
+  const fetchLapData = useCallback(async (year: string, raceRound: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Find the race name from options
+      const selectedRace = raceOptions.find(race => race.value === Number(raceRound));
+      if (selectedRace) {
+        setRaceName(selectedRace.raceName);
+      }
+      
+      const response = await getFastestLaps(year, raceRound);
+
+      if (response) {
+        const drivers = response.drivers.map((item, index) => ({
+          ...item,
+          pos: index + 1,
+        }));
+        setLapData(response.allLaps);
+        setTableData(drivers);
+      }
+    } catch (e) {
+      console.log("Error fetching lap data: ", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [raceOptions]);
+
+
+  // Effect to fetch races when year changes
+  useEffect(() => {
+    fetchRaces(selectedYear.toString());
+  }, [selectedYear, fetchRaces]);
+
+  // Effect to fetch lap data when round changes
+  useEffect(() => {
+    if (round !== null) {
+      fetchLapData(selectedYear.toString(), round.toString());
+    }
+  }, [selectedYear, round, fetchLapData]);
+
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(Number(e.target.value));
@@ -113,43 +138,46 @@ export default function Home() {
   return (
     <>
       <div className="p-10 pt-0 md:pt-0 gap-4">
-        <div className="top-16 text-right z-10 py-4 w-full ml-auto px-4 sm:pr-0 flex gap-2 justify-end">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-thin">Season:</span>
-            <select
-              className="inline-flex appearance-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
-              value={selectedYear}
-              onChange={handleYearChange}
-            >
-              {Array.from({ length: 3 }, (_, i) => 2025 - i).map((year) => (
-                <option key={year} value={year} className="bg-slate-800">
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-thin">Race:</span>
-            <select
-              className="inline-flex appearance-none items-center overflow-hidden justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-32 px-4 py-2 bg-transparent bg-slate-800"
-              value={round !== null ? round : ""}
-              onChange={handleRoundChange}
-              disabled={raceOptions.length === 0}
-            >
-              {raceOptions.length === 0 ? (
-                <option className="bg-slate-800">No races available</option>
-              ) : (
-                raceOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                    className="bg-slate-800"
-                  >
-                    R{option.value} {option.name}
+        <div className="top-16 z-10 w-full ml-auto sm:pr-0 flex gap-2 justify-between">
+          <div className="p-4 text-xl">{raceName}</div>
+          <div className="flex gap-2 p-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-thin">Season:</span>
+              <select
+                className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
+                value={selectedYear}
+                onChange={handleYearChange}
+              >
+                {Array.from({ length: 3 }, (_, i) => 2025 - i).map((year) => (
+                  <option key={year} value={year} className="bg-slate-800">
+                    {year}
                   </option>
-                ))
-              )}
-            </select>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-thin">Race:</span>
+              <select
+                className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-40 px-4 py-2 bg-transparent bg-slate-800"
+                value={round !== null ? round : ""}
+                onChange={handleRoundChange}
+                disabled={raceOptions.length === 0}
+              >
+                {raceOptions.length === 0 ? (
+                  <option className="bg-slate-800">No races available</option>
+                ) : (
+                  raceOptions.map((option) => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      className="bg-slate-800"
+                    >
+                      R{option.value}&nbsp;&nbsp;&nbsp;{option.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
         </div>
         {isLoading ? (

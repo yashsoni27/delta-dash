@@ -48,7 +48,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-thin">Season:</span>
             <select
-              className="inline-flex appearance-none focus:border-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
+              className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
