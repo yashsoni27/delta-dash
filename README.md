@@ -4,12 +4,12 @@ A sleek and modern Formula 1 dashboard application for real-time race statistics
 
 ## ✨ Features
 
-- Live race timing and tracking
+- Live race timing and tracking (WIP)
 - Driver and constructor standings
-- Circuit information and lap analysis
+- Circuit information and lap analysis (WIP)
 - Historical race data comparison
-- Interactive track maps
-- Real-time tire strategy insights
+- Interactive track maps (WIP)
+- Real-time tire strategy insights (WIP)
 
 ## 🚀 Getting Started
 
@@ -22,7 +22,7 @@ A sleek and modern Formula 1 dashboard application for real-time race statistics
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/f1-dash.git
+git clone https://github.com/yashsoni27/f1-dash.git
 
 # Install dependencies
 cd f1-dash
@@ -34,14 +34,14 @@ npm run dev
 
 ## 🛠️ Tech Stack
 
-- React.js - Frontend framework
+- Next.js - Frontend framework
 - TypeScript - Type-safe development
 - TailwindCSS - Styling
-- Formula 1 API - Race data integration
+- Jolpica API - Race data integration
 
-## 📱 Screenshots
+<!-- ## 📱 Screenshots
 
-[Add screenshots of your application here]
+[Add screenshots of your application here] -->
 
 ## 🤝 Contributing
 
