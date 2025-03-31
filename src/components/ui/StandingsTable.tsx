@@ -85,7 +85,7 @@ const StandingsTable = ({ name, season="current" }: { name: string , season?: st
                         <img
                           src={`/teams/${standing.team}.svg`}
                           alt={standing.team}
-                          className="w-5 h-5"
+                          className="w-6 h-6"
                           onError={(e) => (e.currentTarget.src = "/vercel.svg")}
                         />
                       )}

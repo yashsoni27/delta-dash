@@ -3,9 +3,16 @@ import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
-import { getFastestLaps, getPreviousRaces } from "@/lib/api";
+import { getDHLInfo, getFastestLaps, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
+
+// export async function getServerSideProps() {
+//   const data = await getDHLInfo();
+//   return {
+//     props: {data}
+//   }
+// }
 
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -33,7 +40,7 @@ export default function Home() {
               <img
                 src={`/teams/${item.constructorId}.svg`}
                 alt={item.constructorId}
-                className="w-5 h-5"
+                className="w-6 h-6"
                 onError={(e) => (e.currentTarget.src = "/vercel.svg")}
               />
             )}
@@ -61,8 +68,9 @@ export default function Home() {
   const fetchRaces = useCallback(async (year: string) => {
     try {
       setIsLoading(true);
+      const DHLRes = await getDHLInfo();
+      console.log("frontend: ", DHLRes);
       const previousRaces = await getPreviousRaces(year);
-      console.log(previousRaces);
       const options = previousRaces.map((race: any) => ({
         name: race.Circuit.Location.country,
         value: parseInt(race.round, 10),
@@ -95,7 +103,9 @@ export default function Home() {
       const response = await getFastestLaps(year, raceRound);
 
       if (response) {
-        const drivers = response.drivers.map((item, index) => ({
+        console.log(response);
+        // const drivers = response.drivers.map((item, index) => ({
+        const drivers = response.fastest20Laps.map((item, index) => ({
           ...item,
           pos: index + 1,
         }));

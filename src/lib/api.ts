@@ -1,4 +1,6 @@
+
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
+const DHL_BASE_URL = "https://inmotion.dhl/api/f1-award-element-data/6365";
 // const API_KEY = process.env.JOLPICA_API_KEY || '';
 
 // Interface for API response types
@@ -62,6 +64,21 @@ async function fetchWithDelay<T>(
 ): Promise<any> {
   await new Promise((resolve) => setTimeout(resolve, delay));
   return fetchFromApi<T>(url, dataKey, limit, offset);
+}
+
+async function fetchFromDHL(): Promise<any> {
+  try {
+    const response = await fetch('dhl', {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) throw new Error(`DHL error: ${response.status}`);
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch DHL data");
+    return null;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -170,25 +187,25 @@ export async function getDriverInfo(
 }
 
 // Get Driver Constructor Pairings
-export async function getDriverConstructorPairing(
-  season: string = "current"
-) {
+export async function getDriverConstructorPairing(season: string = "current") {
   try {
     // Get Driver constructor pairing, and family Name
-  const standingsResponse = await getDriverStandings(season);
-  const driverConstructorObject: Record<string, { constructorId: string, driverName: string, driverCode?:string }> = {};
+    const standingsResponse = await getDriverStandings(season);
+    const driverConstructorObject: Record<
+      string,
+      { constructorId: string; driverName: string; driverCode?: string }
+    > = {};
 
-  standingsResponse.standings.forEach((driver: any) => {
-    driver.Constructors.forEach((constructor: any) => {
-      driverConstructorObject[driver.Driver.driverId] = {
-        constructorId: constructor.constructorId,
-        driverName: driver.Driver.familyName,
-        driverCode: driver.Driver.code,
-      };
+    standingsResponse.standings.forEach((driver: any) => {
+      driver.Constructors.forEach((constructor: any) => {
+        driverConstructorObject[driver.Driver.driverId] = {
+          constructorId: constructor.constructorId,
+          driverName: driver.Driver.familyName,
+          driverCode: driver.Driver.code,
+        };
+      });
     });
-  });
-  return driverConstructorObject;
-
+    return driverConstructorObject;
   } catch (error) {
     console.error("Error fetching driver constructor pairings:", error);
   }
@@ -285,23 +302,31 @@ export async function getFastestLaps(
   );
 
   const totalLaps = initialResult.total;
-  let resLimit = 100;
-  const requiredRequests = Math.ceil(totalLaps / resLimit);
-  const offsets = Array.from({ length: requiredRequests }, (_, i) => i * resLimit);
-
-  // Fetch all pages in parallel with delay
-  const allResults = await Promise.all(
-    offsets.map((offset, index) =>
-      fetchWithDelay<{ data: any }>(
-        `${season}/${round}/laps`,
-        "Race",
-        index * 100, // Stagger requests to avoid rate limiting
-        // 100, // Stagger requests to avoid rate limiting
-        resLimit,
-        offset
-      )
-    )
+  const batchSize = 80;
+  const requiredRequests = Math.ceil(totalLaps / batchSize);
+  const offsets = Array.from(
+    { length: requiredRequests },
+    (_, i) => i * batchSize
   );
+
+  const allResults: any = [];
+  const concurrencyLimits = 3;
+
+  for (let i = 0; i < offsets.length; i += concurrencyLimits) {
+    const batch = offsets.slice(i, i + concurrencyLimits);
+    const batchResults = await Promise.all(
+      batch.map((offset, index) =>
+        fetchWithDelay<{ data: any }>(
+          `${season}/${round}/laps`,
+          "Race",
+          index * 100,
+          batchSize,
+          offset
+        )
+      )
+    );
+    allResults.push(...batchResults);
+  }
 
   const allLapTimes: LapTiming[] = [];
 
@@ -322,9 +347,15 @@ export async function getFastestLaps(
           driverId: timing.driverId,
           lapNumber: lap.number,
           time: formattedTime,
-          constructorId: driverConstructorObject?.[timing.driverId]?.constructorId ?? "Unknown",
-          familyName: driverConstructorObject?.[timing.driverId]?.driverName ?? timing.driverId,
-          driverCode: driverConstructorObject?.[timing.driverId]?.driverCode ?? timing.driverId,
+          constructorId:
+            driverConstructorObject?.[timing.driverId]?.constructorId ??
+            "Unknown",
+          familyName:
+            driverConstructorObject?.[timing.driverId]?.driverName ??
+            timing.driverId,
+          driverCode:
+            driverConstructorObject?.[timing.driverId]?.driverCode ??
+            timing.driverId,
         });
 
         // Update driver fastest lap
@@ -336,17 +367,27 @@ export async function getFastestLaps(
             driverId: timing.driverId,
             lapNumber: lap.number,
             time: formattedTime,
-            constructorId: driverConstructorObject?.[timing.driverId]?.constructorId ?? "Unknown",
-            familyName: driverConstructorObject?.[timing.driverId]?.driverName ?? "Unknown",
+            constructorId:
+              driverConstructorObject?.[timing.driverId]?.constructorId ??
+              "Unknown",
+            familyName:
+              driverConstructorObject?.[timing.driverId]?.driverName ??
+              "Unknown",
           });
         }
       }
     }
   }
 
+  // Get top 20 fastest laps overall
+  const fastest20Laps = [...allLapTimes]
+    .sort((a, b) => a.time - b.time)
+    .slice(0, 20);
+
   return {
     drivers: Array.from(driverMap.values()).sort((a, b) => a.time - b.time),
     allLaps: allLapTimes.sort((a, b) => a.lapNumber - b.lapNumber),
+    fastest20Laps: fastest20Laps,
   };
 }
 
@@ -656,5 +697,15 @@ export async function getConstructorEvolution(
   } catch (error) {
     console.error("Error fetching constructor evolution:", error);
     return { error: "Failed to fetch constructor evolution" };
+  }
+}
+
+export async function getDHLInfo() {
+  try {
+    const response = await fetchFromDHL();
+    console.log("DHL response: ", response);
+    return response;
+  } catch (e) {
+    console.log("Error in DHL API: ", e);
   }
 }

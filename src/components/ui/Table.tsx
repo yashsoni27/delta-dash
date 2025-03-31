@@ -1,39 +1,5 @@
 import { TableProps } from "@/types";
 
-// // Example usage in another component
-// const columns: Column[] = [
-//   { key: 'position', header: 'Pos.', width: 'w-1/6', align: 'center' },
-//   {
-//     key: 'driver',
-//     header: 'Driver',
-//     width: 'w-3/6',
-//     align: 'left',
-//     render: (value, item) => (
-//       <div className="flex items-center gap-2">
-//         {item.team && (
-//           <img
-//             src={`/teams/${item.team}.svg`}
-//             alt={item.team}
-//             className="w-5 h-5"
-//             onError={(e) => (e.currentTarget.src = "/vercel.svg")}
-//           />
-//         )}
-//         {value || item.constructor}
-//       </div>
-//     ),
-//   },
-//   { key: 'points', header: 'Points', width: 'w-1/6', align: 'right' },
-//   { key: 'status', header: 'Status', width: 'w-1/6', align: 'center' },
-// ];
-
-// // Using the table
-// <Table
-//   heading="Race Results"
-//   columns={columns}
-//   data={items}
-//   onRowClick={(item) => console.log(item)}
-// />
-
 export default function Table({
   heading,
   columns,
@@ -51,8 +17,6 @@ export default function Table({
         return "text-center";
     }
   };
-  // console.log(columns);
-  // console.log(data);
 
   // Early return if no data or columns
   if (!data || !columns) {
@@ -97,7 +61,7 @@ export default function Table({
             {data.map((item, index) => (
               <tr
                 key={item.id || index}
-                className="text-sm hover:bg-slate-900 transition-colors duration-200"
+                className={`text-sm hover:bg-slate-900 transition-colors duration-200`}
                 onClick={() => onRowClick?.(item)}
                 role={onRowClick ? "button" : undefined}
               >
@@ -121,3 +85,39 @@ export default function Table({
     </div>
   );
 }
+
+
+
+// // Example usage in another component
+// const columns: Column[] = [
+//   { key: 'position', header: 'Pos.', width: 'w-1/6', align: 'center' },
+//   {
+//     key: 'driver',
+//     header: 'Driver',
+//     width: 'w-3/6',
+//     align: 'left',
+//     render: (value, item) => (
+//       <div className="flex items-center gap-2">
+//         {item.team && (
+//           <img
+//             src={`/teams/${item.team}.svg`}
+//             alt={item.team}
+//             className="w-5 h-5"
+//             onError={(e) => (e.currentTarget.src = "/vercel.svg")}
+//           />
+//         )}
+//         {value || item.constructor}
+//       </div>
+//     ),
+//   },
+//   { key: 'points', header: 'Points', width: 'w-1/6', align: 'right' },
+//   { key: 'status', header: 'Status', width: 'w-1/6', align: 'center' },
+// ];
+
+// // Using the table
+// <Table
+//   heading="Race Results"
+//   columns={columns}
+//   data={items}
+//   onRowClick={(item) => console.log(item)}
+// />

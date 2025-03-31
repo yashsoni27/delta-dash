@@ -140,8 +140,8 @@ export default function BoxPlotChart({ data, heading }: any) {
         axisTop={null}
         axisRight={null}
         theme={chartTheme}
-        groupBy="group"
-        colorBy="group"
+        // groupBy="group"
+        // colorBy="group"
         tooltip={(slice) => <CustomTooltip slice={slice} />}
         axisBottom={{
           tickRotation: -40,
@@ -149,12 +149,11 @@ export default function BoxPlotChart({ data, heading }: any) {
         colors={getColor}
         enableGridX={false}
         whiskerWidth={1}
-        whiskerEndSize={0.5}
-        medianWidth={2}
-        borderRadius={2}
+        whiskerEndSize={0.6}
+        medianWidth={1}
+        borderRadius={5}
         enableGridY={true}
         animate={true}
-        // useMesh={true}
       />
     </>
   );
