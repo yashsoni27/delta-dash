@@ -1,3 +1,4 @@
+import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 const DHL_BASE_URL = "https://inmotion.dhl/api/f1-award-element-data/6365";
@@ -66,10 +67,12 @@ async function fetchWithDelay<T>(
   return fetchFromApi<T>(url, dataKey, limit, offset);
 }
 
-async function fetchFromDHL(): Promise<any> {
+async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any> {
   try {
-    const response = await fetch('dhl', {
+    // const url = endpoint.includes('?') ? 
+    const response = await fetch(`dhl/${endpoint}`, {
       headers: { "Content-Type": "application/json" },
+      next: {revalidate: 3600},
     });
 
     if (!response.ok) throw new Error(`DHL error: ${response.status}`);
@@ -700,12 +703,30 @@ export async function getConstructorEvolution(
   }
 }
 
-export async function getDHLInfo() {
+export async function getFastestPitstop(eventId?: string) {
   try {
-    const response = await fetchFromDHL();
-    console.log("DHL response: ", response);
+    const evtResponse = await fetchFromDHL('avgPitStopAndEventId');
+    console.log("Event Response: ", evtResponse);
+
+    const response = await fetchFromDHL(eventId ? `pitStopByEvent?event=${eventId}` : 'pitStopByEvent');
+    console.log("getFastestPitstop response: ", response);
+
+    const standingResponse = await fetchFromDHL('fastestPitStopAndStanding');
+    console.log("Standing response: ", standingResponse);
+
     return response;
   } catch (e) {
     console.log("Error in DHL API: ", e);
   }
 }
+
+export async function getPitStopStanding() {
+  try {
+    const response = await fetchFromDHL('fastestPitStopAndStanding');
+    console.log("getPitStopStanding response: ", response);
+    return response;
+  } catch (e) {
+    console.log("Error in DHL API: ", e);
+  }
+}
+

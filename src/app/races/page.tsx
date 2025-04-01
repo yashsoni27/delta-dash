@@ -3,7 +3,7 @@ import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
-import { getDHLInfo, getFastestLaps, getPreviousRaces } from "@/lib/api";
+import { getFastestLaps, getFastestPitstop, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -68,8 +68,9 @@ export default function Home() {
   const fetchRaces = useCallback(async (year: string) => {
     try {
       setIsLoading(true);
-      const DHLRes = await getDHLInfo();
-      console.log("frontend: ", DHLRes);
+      // const DHLRes = await getDHLInfo();
+      const DHLRes = await getFastestPitstop('1086');
+      // console.log("frontend: ", DHLRes);
       const previousRaces = await getPreviousRaces(year);
       const options = previousRaces.map((race: any) => ({
         name: race.Circuit.Location.country,
