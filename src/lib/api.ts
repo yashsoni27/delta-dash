@@ -705,14 +705,8 @@ export async function getConstructorEvolution(
 
 export async function getFastestPitstop(eventId?: string) {
   try {
-    const evtResponse = await fetchFromDHL('avgPitStopAndEventId');
-    console.log("Event Response: ", evtResponse);
-
     const response = await fetchFromDHL(eventId ? `pitStopByEvent?event=${eventId}` : 'pitStopByEvent');
     console.log("getFastestPitstop response: ", response);
-
-    const standingResponse = await fetchFromDHL('fastestPitStopAndStanding');
-    console.log("Standing response: ", standingResponse);
 
     return response;
   } catch (e) {
@@ -720,13 +714,25 @@ export async function getFastestPitstop(eventId?: string) {
   }
 }
 
-export async function getPitStopStanding() {
+export async function getAvgPitStopAndEvtId() {
   try {
-    const response = await fetchFromDHL('fastestPitStopAndStanding');
-    console.log("getPitStopStanding response: ", response);
-    return response;
+    const response = await fetchFromDHL('avgPitStopAndEventId');
+    // console.log("Event response: ", response);
+
+    return response.chart;
   } catch (e) {
     console.log("Error in DHL API: ", e);
+  }
+}
+
+export async function getFastestPitstopAndStanding() {
+  try {
+    const response = await fetchFromDHL('fastestPitStopAndStanding');
+    console.log("Standing response: ", response);
+
+    return response;
+  } catch (e) {
+    console.log("Error in DHL API", e)
   }
 }
 

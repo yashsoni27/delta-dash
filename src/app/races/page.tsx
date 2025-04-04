@@ -68,9 +68,6 @@ export default function Home() {
   const fetchRaces = useCallback(async (year: string) => {
     try {
       setIsLoading(true);
-      // const DHLRes = await getDHLInfo();
-      const DHLRes = await getFastestPitstop('1086');
-      // console.log("frontend: ", DHLRes);
       const previousRaces = await getPreviousRaces(year);
       const options = previousRaces.map((race: any) => ({
         name: race.Circuit.Location.country,
