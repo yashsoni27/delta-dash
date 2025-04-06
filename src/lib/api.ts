@@ -1,8 +1,6 @@
 import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
-const DHL_BASE_URL = "https://inmotion.dhl/api/f1-award-element-data/6365";
-// const API_KEY = process.env.JOLPICA_API_KEY || '';
 
 // Interface for API response types
 interface ApiResponse<T> {

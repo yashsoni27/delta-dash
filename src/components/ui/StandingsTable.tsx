@@ -14,7 +14,13 @@ interface Standings {
   team?: string;
 }
 
-const StandingsTable = ({ name, season="current" }: { name: string , season?: string}) => {
+const StandingsTable = ({
+  name,
+  season = "current",
+}: {
+  name: string;
+  season?: string;
+}) => {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
   const [standings, setStandings] = useState<Standings[]>([]);
@@ -30,7 +36,9 @@ const StandingsTable = ({ name, season="current" }: { name: string , season?: st
             position: Number(item.position),
             driver: item.Driver.familyName,
             points: Number(item.points),
-            team: item.Constructors[0]?.constructorId || "Unknown",
+            team:
+              item.Constructors[item.Constructors.length - 1]?.constructorId ||
+              "Unknown",
             evolution: item.positionDifference,
           }));
 

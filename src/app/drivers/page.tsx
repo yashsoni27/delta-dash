@@ -37,6 +37,7 @@ export default function Home() {
       try {
         const response = await getDriverStandings();
         if (response) {
+          // console.log("respoine", response);
           setDrivers(response.standings);
         }
       } catch (e) {
@@ -57,10 +58,10 @@ export default function Home() {
               className={`relative rounded-md overflow-hidden h-[190px] transition-transform duration-300 border group`}
               style={{
                 background: getConstructorGradient(
-                  driver.Constructors[0].constructorId
+                  driver.Constructors[driver.Constructors.length - 1].constructorId
                 ),
                 borderColor: getConstructorColor(
-                  driver.Constructors[0].constructorId
+                  driver.Constructors[driver.Constructors.length - 1].constructorId
                 ),
               }}
             >
@@ -68,8 +69,8 @@ export default function Home() {
               <div className="absolute inset-0 flex items-center justify-end pl-14 opacity-20 pointer-events-none transition-all duration-500 ease-in-out group-hover:justify-center group-hover:pr-16">
                 <div className="relative w-full h-3/4">
                   <Image
-                    src={`/teams/${driver.Constructors[0].constructorId}.svg`}
-                    alt={`${driver.Constructors[0].name} logo`}
+                    src={`/teams/${driver.Constructors[driver.Constructors.length - 1].constructorId}.svg`}
+                    alt={`${driver.Constructors[driver.Constructors.length - 1].name} logo`}
                     layout="fill"
                     objectFit="contain"
                   />
@@ -82,14 +83,14 @@ export default function Home() {
                   className="text-lg font-bold"
                   style={{
                     color: getConstructorHex(
-                      driver.Constructors[0].constructorId
+                      driver.Constructors[driver.Constructors.length - 1].constructorId
                     ),
                   }}
                 >
                   {driver.Driver.familyName}
                 </p>
                 <p className="text-xs opacity-50">
-                  {driver.Constructors[0].name}
+                  {driver.Constructors[driver.Constructors.length - 1].name}
                 </p>
               </div>
 
@@ -99,7 +100,7 @@ export default function Home() {
                   className="text-4xl"
                   style={{
                     color: getConstructorHex(
-                      driver.Constructors[0].constructorId
+                      driver.Constructors[driver.Constructors.length - 1].constructorId
                     ),
                   }}
                 >

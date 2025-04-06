@@ -50,7 +50,7 @@ export default function Home() {
       chassis: "RB21",
       carImage: "/cars/red_bull.avif",
       logoImage: "/teams/red_bull.svg",
-      drivers: ["/drivers/max_verstappen.avif", "/drivers/lawson.avif"],
+      drivers: ["/drivers/max_verstappen.avif", "/drivers/tsunoda.avif"],
       details: {
         fullName: "Oracle Red Bull Racing",
         base: "Milton Keynes, United Kingdom",
@@ -152,7 +152,7 @@ export default function Home() {
       chassis: "VCARB 02",
       carImage: "/cars/rb.avif",
       logoImage: "/teams/rb.svg",
-      drivers: ["/drivers/tsunoda.avif", "/drivers/hadjar.avif"],
+      drivers: ["/drivers/lawson.avif", "/drivers/hadjar.avif"],
       details: {
         fullName: "Visa Cash App Racing Bulls Formula One Team",
         base: "Faenza, Italy",
