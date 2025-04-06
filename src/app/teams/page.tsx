@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 export default function Home() {
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const teamContainerRef = useRef<HTMLDivElement | null>(null);
-  const [teams, setTeams] = useState<any>([])
+  const [teams, setTeams] = useState<any>([]);
 
   const teamsInfo = [
     {
@@ -205,11 +205,11 @@ export default function Home() {
             const teamInfo = teamsInfo.find(
               (team) => team.code === standing.Constructor.constructorId
             );
-            return{
+            return {
               ...standing,
               ...teamInfo,
             };
-          })
+          });
           console.log(mergedTeams);
           setTeams(mergedTeams);
         }
@@ -223,114 +223,110 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-black">
-        <div className="container mx-auto px-4 py-8">
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-            ref={teamContainerRef}
-          >
-            {teams.map((team: any, index: string) => (
-              <div key={index} className="relative">
-                <div
-                  // key={index}
-                  onClick={() =>
-                    setSelectedTeam(
-                      selectedTeam === team.code ? null : team.code
-                    )
-                  }
-                  className={`rounded-lg overflow-hidden transition-all duration-300 relative border group cursor-pointer`}
-                  style={{
-                    background: getConstructorGradient(team.code),
-                    borderColor: getConstructorColor(team.code),
-                  }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center opacity-50 pointer-events-none transition-transform duration-300 group-hover:-translate-y-3">
-                    <div className="relative w-full h-3/6">
-                      <Image
-                        src={team.logoImage}
-                        alt={`${team.name} logo`}
-                        layout="fill"
-                        objectFit="contain"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-5 pb-0 relative z-10">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="text-lg">{team.name}</p>
-                        <p className="text-xs opacity-50">{team.chassis}</p>
-                      </div>
-                      <div className="flex space-x-1">
-                        {team.drivers.map((driver: any, idx: string) => (
-                          <div
-                            key={idx}
-                            className="w-10 h-10 rounded-full overflow-hidden"
-                            style={{
-                              backgroundColor: getConstructorColor(team.code)                          
-                            }}
-                          >
-                            <Image
-                              src={driver}
-                              width={40}
-                              height={40}
-                              alt={`${team.name} driver ${idx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="relative mt-10 h-32 sm:h-40 md:h-32 lg:h-40 xl:h-32 w-full">
-                      <Image
-                        src={team.carImage}
-                        layout="fill"
-                        alt={`${team.name} car`}
-                        className="object-contain"
-                      />
-                    </div>
+      <div className="container mx-auto py-10 min-h-screen">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          ref={teamContainerRef}
+        >
+          {teams.map((team: any, index: string) => (
+            <div key={index} className="relative">
+              <div
+                // key={index}
+                onClick={() =>
+                  setSelectedTeam(selectedTeam === team.code ? null : team.code)
+                }
+                className={`rounded-lg overflow-hidden transition-all duration-300 relative border group cursor-pointer`}
+                style={{
+                  background: getConstructorGradient(team.code),
+                  borderColor: getConstructorColor(team.code),
+                }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center opacity-50 pointer-events-none transition-transform duration-300 group-hover:-translate-y-3">
+                  <div className="relative w-full h-3/6">
+                    <Image
+                      src={team.logoImage}
+                      alt={`${team.name} logo`}
+                      layout="fill"
+                      objectFit="contain"
+                    />
                   </div>
                 </div>
 
-                {selectedTeam === team.code && (
-                  <div className="w-full flex justify-center">
-                    <div className="absolute w-10/12 bg-gray-950 border border-gray-700 text-xs font-thin p-5 rounded-lg mt-1 shadow-lg z-20 ">
-                      <p className="text-center text-base pb-5">
-                        {team.details.fullName}
-                      </p>
-                      <div className="grid grid-cols-2 text-xs text-center gap-y-3">
-                        <div>
-                          <p className="opacity-50">Base</p>
-                          <p>{team.details.base}</p>
+                <div className="p-5 pb-0 relative z-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-lg">{team.name}</p>
+                      <p className="text-xs opacity-50">{team.chassis}</p>
+                    </div>
+                    <div className="flex space-x-1">
+                      {team.drivers.map((driver: any, idx: string) => (
+                        <div
+                          key={idx}
+                          className="w-10 h-10 rounded-full overflow-hidden"
+                          style={{
+                            backgroundColor: getConstructorColor(team.code),
+                          }}
+                        >
+                          <Image
+                            src={driver}
+                            width={40}
+                            height={40}
+                            alt={`${team.name} driver ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <div>
-                          <p className="opacity-50">Team Chief</p>
-                          <p>{team.details.teamChief}</p>
-                        </div>
-                        <div>
-                          <p className="opacity-50">Technical Chief</p>
-                          <p>{team.details.technicalChief}</p>
-                        </div>
-                        <div>
-                          <p className="opacity-50">Power Unit</p>
-                          <p>{team.details.powerUnit}</p>
-                        </div>
-                        <div>
-                          <p className="opacity-50">First Entry</p>
-                          <p>{team.details.firstEntry}</p>
-                        </div>
-                        <div>
-                          <p className="opacity-50">World Championships</p>
-                          <p>{team.details.worldChampionships}</p>
-                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="relative mt-10 h-32 sm:h-40 md:h-32 lg:h-40 xl:h-32 w-full">
+                    <Image
+                      src={team.carImage}
+                      layout="fill"
+                      alt={`${team.name} car`}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {selectedTeam === team.code && (
+                <div className="w-full flex justify-center">
+                  <div className="absolute w-10/12 bg-gray-950 border border-gray-700 text-xs font-thin p-5 rounded-lg mt-1 shadow-lg z-20 ">
+                    <p className="text-center text-base pb-5">
+                      {team.details.fullName}
+                    </p>
+                    <div className="grid grid-cols-2 text-xs text-center gap-y-3">
+                      <div>
+                        <p className="opacity-50">Base</p>
+                        <p>{team.details.base}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">Team Chief</p>
+                        <p>{team.details.teamChief}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">Technical Chief</p>
+                        <p>{team.details.technicalChief}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">Power Unit</p>
+                        <p>{team.details.powerUnit}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">First Entry</p>
+                        <p>{team.details.firstEntry}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">World Championships</p>
+                        <p>{team.details.worldChampionships}</p>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </>

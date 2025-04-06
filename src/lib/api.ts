@@ -726,9 +726,9 @@ export async function getAvgPitStopAndEvtId() {
 export async function getFastestPitstopAndStanding() {
   try {
     const response = await fetchFromDHL('fastestPitStopAndStanding');
-    console.log("Standing response: ", response);
+    // console.log("Standing response: ", response);
 
-    return response;
+    return response.chart;
   } catch (e) {
     console.log("Error in DHL API", e)
   }

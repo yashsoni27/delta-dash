@@ -161,6 +161,7 @@ export interface Column {
   width?: string;
   align?: 'left' | 'center' | 'right';
   render?: (value: any, item: any) => React.ReactNode;
+  tooltip?: (value: any, item: any) => string | null;
 }
 
 export interface TableProps {

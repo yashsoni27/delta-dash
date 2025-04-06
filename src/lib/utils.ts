@@ -109,3 +109,25 @@ export function getConstructorGradient(constructorName: string): string {
   
   return baseColor;
 }
+
+
+/* -------------------------------------------------------------------------- */
+/*                        Get jolpica DHL constructorId                       */
+/* -------------------------------------------------------------------------- */
+export function DHLtoJolpicaConstructor(constructorName: string):string {
+
+  const constructors: Record<string, string> = {
+    'Mercedes': 'mercedes',
+    'Red Bull': 'red_bull',
+    'Ferrari': 'ferrari',
+    'McLaren': 'mclaren',
+    'Alpine': 'alpine' ,
+    'Racing Bulls': 'rb',
+    'Aston Martin': 'aston_martin',
+    'Williams': 'williams',
+    'Sauber': 'sauber',
+    'Haas': 'haas'
+  };
+  
+  return constructors[constructorName] || 'Unknown';
+}

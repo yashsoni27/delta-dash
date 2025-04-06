@@ -71,6 +71,7 @@ export default function Table({
                     className={`py-3 align-middle border-t border-gray-700 ${getAlignment(
                       column.align
                     )}`}
+                    title={column.tooltip ? column.tooltip(item[column.key], item) || undefined : undefined}
                   >
                     {column.render
                       ? column.render(item[column.key], item)

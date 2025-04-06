@@ -109,6 +109,7 @@ export default function Home() {
         }));
         setLapData(response.allLaps);
         setTableData(drivers);
+        console.log(drivers);
       }
     } catch (e) {
       console.log("Error fetching lap data: ", e);
