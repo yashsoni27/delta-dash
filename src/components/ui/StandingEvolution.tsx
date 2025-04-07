@@ -70,9 +70,9 @@ export const chartTheme = {
         fill: "#94a3b8",
       },
       line: {
-        stroke: 'rgba(255, 255, 255, 0.10)',
+        stroke: "rgba(255, 255, 255, 0.10)",
         strokeWidth: 1,
-      }
+      },
     },
     legend: {
       text: {
@@ -82,10 +82,15 @@ export const chartTheme = {
   },
   grid: {
     line: {
-      stroke: 'rgba(255, 255, 255, 0.10)',
+      stroke: "rgba(255, 255, 255, 0.10)",
       strokeWidth: 1,
       // strokeDasharray: '4 4' // Optional: creates a dashed line effect
-    }
+    },
+  },
+  text: {
+    fill: "#fff",
+    fontSize: 11,
+    fontWeight: 300,
   },
 };
 

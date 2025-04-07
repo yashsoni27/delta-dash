@@ -3,16 +3,9 @@ import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
-import { getFastestLaps, getFastestPitstop, getPreviousRaces } from "@/lib/api";
+import { getFastestLaps, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
-
-// export async function getServerSideProps() {
-//   const data = await getDHLInfo();
-//   return {
-//     props: {data}
-//   }
-// }
 
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState(2025);

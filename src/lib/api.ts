@@ -67,10 +67,10 @@ async function fetchWithDelay<T>(
 
 async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any> {
   try {
-    // const url = endpoint.includes('?') ? 
+    // const url = endpoint.includes('?') ?
     const response = await fetch(`dhl/${endpoint}`, {
       headers: { "Content-Type": "application/json" },
-      next: {revalidate: 3600},
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) throw new Error(`DHL error: ${response.status}`);
@@ -701,12 +701,53 @@ export async function getConstructorEvolution(
   }
 }
 
-export async function getFastestPitstop(eventId?: string) {
+/* -------------------------------------------------------------------------- */
+/*                                  DHL APIs                                  */
+/* -------------------------------------------------------------------------- */
+export async function getDriverAvgAndPoints(eventId?: string) {
   try {
-    const response = await fetchFromDHL(eventId ? `pitStopByEvent?event=${eventId}` : 'pitStopByEvent');
-    console.log("getFastestPitstop response: ", response);
+    const response = await fetchFromDHL(
+      eventId ? `pitStopByEvent?event=${eventId}` : "pitStopByEvent"
+    );
+    const n = response.sort;
+    const Ids = response.event_id;
+    let eventIds = [];
+    for (let i = n; i >= 1; i--) {
+      eventIds.push(`${Ids - i + 1}`);
+    }
 
-    return response;
+    const allResults = await Promise.all(
+      eventIds.map(async (evtId:any) => {
+        const response = await fetchFromDHL(`pitStopByEvent?event=${evtId}`);
+        return {
+          evtId,
+          chart: response?.chart ?? [],
+        };
+      })
+    )
+    console.log("all: ", allResults);
+
+    const driverPoints:any = {};
+    allResults.forEach(event => {
+      event.chart.forEach((driver:any) => {
+        const id = driver.driverNr;
+        if (!driverPoints[id]) {
+          driverPoints[id] = {
+            driverNr: id,
+            firstName: driver.firstName,
+            lastName: driver.lastName,
+            team: driver.team,
+            points: 0
+          };
+        }
+        driverPoints[id].points += driver.points;
+      });
+    });
+    
+    const result = Object.values(driverPoints);
+    // console.log("DriverDHL:", result);
+
+    return result;
   } catch (e) {
     console.log("Error in DHL API: ", e);
   }
@@ -714,8 +755,8 @@ export async function getFastestPitstop(eventId?: string) {
 
 export async function getAvgPitStopAndEvtId() {
   try {
-    const response = await fetchFromDHL('avgPitStopAndEventId');
-    // console.log("Event response: ", response);
+    const response = await fetchFromDHL("avgPitStopAndEventId");
+    console.log("Event response: ", response.chart);
 
     return response.chart;
   } catch (e) {
@@ -725,12 +766,11 @@ export async function getAvgPitStopAndEvtId() {
 
 export async function getFastestPitstopAndStanding() {
   try {
-    const response = await fetchFromDHL('fastestPitStopAndStanding');
-    // console.log("Standing response: ", response);
+    const response = await fetchFromDHL("fastestPitStopAndStanding");
+    console.log("Standing response: ", response.chart);
 
     return response.chart;
   } catch (e) {
-    console.log("Error in DHL API", e)
+    console.log("Error in DHL API", e);
   }
 }
-

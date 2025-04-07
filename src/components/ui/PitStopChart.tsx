@@ -43,7 +43,6 @@ export default function PitStopChart({
   }
 
   const formattedData = transformData(data);
-  // console.log("check", formattedData);
 
   const getColor = (series: { color: string }) => series.color;
 
@@ -52,7 +51,6 @@ export default function PitStopChart({
 
     const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
     const lapNumber = sortedPoints[0].data.x;
-    // console.log(sortedPoints);
     return (
       <div
         className="bg-slate-800 p-2 rounded min-w-[130px] opacity-95"
@@ -95,11 +93,6 @@ export default function PitStopChart({
           min: "auto",
           max: "auto",
         }}
-        // xScale={{
-        //   type: "linear",
-        //   min: "auto",
-        //   max: "auto",
-        // }}
         enableSlices="x"
         sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
         colors={getColor}
