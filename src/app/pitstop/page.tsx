@@ -19,6 +19,7 @@ export default function Home() {
   const [constStanding, setConstStanding] = useState<any | null>(null);
   const [constAvg, setConstAvg] = useState<any | null>(null);
   const [driverStanding, setDriverStanding] = useState<any | null>(null);
+  const [driverAvg, setDriverAvg] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -100,15 +101,20 @@ export default function Home() {
       setIsLoading(true);
       const driverRes = await getDriverAvgAndPoints();
       if (driverRes) {
-        const drivers = driverRes
-          .map((item: any, index: any) => ({
-            ...item,
-            color: getConstructorHex(DHLtoJolpicaConstructor(item.team)),
-          }))
-          .sort((a: any, b: any) => a.points - b.points);
-        setDriverStanding(drivers);
+        const driversWithColors = driverRes.map((item: any) => ({
+          ...item,
+          color: getConstructorHex(DHLtoJolpicaConstructor(item.team)),
+        }));
 
-        // const avgDriverPitstop = driverRes.
+        const driversByPoints = [...driversWithColors].sort(
+          (a: any, b: any) => a.points - b.points
+        );
+        setDriverStanding(driversByPoints);
+
+        const driversByAvgTime = [...driversWithColors].sort(
+          (a: any, b: any) => b.avgDuration - a.avgDuration
+        );
+        setDriverAvg(driversByAvgTime);
       }
 
       const response = await getFastestPitstopAndStanding();
@@ -165,17 +171,30 @@ export default function Home() {
                   {driverStanding == null ? null : (
                     <BarChart
                       heading="Driver DHL Points"
-                      height={400}
+                      height={380}
                       width={320}
                       data={driverStanding}
                       indexBy="lastName"
                       keys={["points"]}
                       layout="horizontal"
-                      margin={{ top: 20, right: 70, bottom: 50, left: 70 }}
+                      margin={{ top: 20, right: 70, bottom: 20, left: 70 }}
                     />
                   )}
                 </div>
-                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900"></div>
+                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
+                  {driverAvg == null ? null : (
+                    <BarChart
+                      heading="Driver Avg Pit Stop Time"
+                      height={380}
+                      width={320}
+                      data={driverAvg}
+                      indexBy="lastName"
+                      keys={["avgDuration"]}
+                      layout="horizontal"
+                      margin={{ top: 30, right: 70, bottom: 20, left: 70 }}
+                    />
+                  )}
+                </div>
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                   <PitStopChart
                     data={avgPitStop}

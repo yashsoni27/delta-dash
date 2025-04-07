@@ -725,7 +725,7 @@ export async function getDriverAvgAndPoints(eventId?: string) {
         };
       })
     )
-    console.log("all: ", allResults);
+    // console.log("all: ", allResults);
 
     const driverPoints:any = {};
     allResults.forEach(event => {
@@ -737,15 +737,30 @@ export async function getDriverAvgAndPoints(eventId?: string) {
             firstName: driver.firstName,
             lastName: driver.lastName,
             team: driver.team,
-            points: 0
+            points: 0,
+            totalDuration: 0,
+            pitStopCount: 0,
+            avgDuration: 0
           };
         }
         driverPoints[id].points += driver.points;
+        if (driver.duration && !driver.irregular) {
+          driverPoints[id].totalDuration += driver.duration;
+          driverPoints[id].pitStopCount++;
+        }
       });
     });
     
+    // Calculate average durations
+    Object.values(driverPoints).forEach((driver: any) => {
+      driver.avgDuration = driver.pitStopCount > 0 
+        ? Number((driver.totalDuration / driver.pitStopCount).toFixed(3))
+        : 0;
+      delete driver.totalDuration;  // Clean up helper properties
+      delete driver.pitStopCount;
+    });
+    
     const result = Object.values(driverPoints);
-    // console.log("DriverDHL:", result);
 
     return result;
   } catch (e) {
@@ -756,7 +771,7 @@ export async function getDriverAvgAndPoints(eventId?: string) {
 export async function getAvgPitStopAndEvtId() {
   try {
     const response = await fetchFromDHL("avgPitStopAndEventId");
-    console.log("Event response: ", response.chart);
+    // console.log("Event response: ", response.chart);
 
     return response.chart;
   } catch (e) {
@@ -767,7 +782,7 @@ export async function getAvgPitStopAndEvtId() {
 export async function getFastestPitstopAndStanding() {
   try {
     const response = await fetchFromDHL("fastestPitStopAndStanding");
-    console.log("Standing response: ", response.chart);
+    // console.log("Standing response: ", response.chart);
 
     return response.chart;
   } catch (e) {
