@@ -94,7 +94,6 @@ export default function Home() {
       const response = await getFastestLaps(year, raceRound);
 
       if (response) {
-        // console.log(response);
         // const drivers = response.drivers.map((item, index) => ({
         const drivers = response.fastest20Laps.map((item, index) => ({
           ...item,
@@ -102,7 +101,6 @@ export default function Home() {
         }));
         setLapData(response.allLaps);
         setTableData(drivers);
-        console.log(drivers);
       }
     } catch (e) {
       console.log("Error fetching lap data: ", e);

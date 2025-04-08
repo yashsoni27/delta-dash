@@ -2,6 +2,7 @@
 import { getNextRace } from "@/lib/api";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import CountdownCardSkeleton from "../loading/CountdownCardSkeleton";
 
 const CountdownCard = () => {
   const [season, setSeason] = useState("");
@@ -15,9 +16,11 @@ const CountdownCard = () => {
     seconds: 0,
   });
   const [raceFinished, setRaceFinished] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchNextRace = async () => {
+      setIsLoading(true);
       try {
         const nextRace = await getNextRace();
         if (nextRace) {
@@ -29,6 +32,8 @@ const CountdownCard = () => {
         }
       } catch (e) {
         console.log("Error fetching next race: ", e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -70,6 +75,10 @@ const CountdownCard = () => {
 
     return () => clearInterval(timer);
   }, [raceDate]);
+
+  if (isLoading) {
+    return <CountdownCardSkeleton />;
+  }
 
   return (
     <div className="bg-gradient-to-tr from-red-900 to-red-700 p-5 rounded-lg shadow-lg border border-red-600 min-w-max max-w-md text-center">

@@ -260,20 +260,15 @@ export async function getRaceResults(
   return result;
 }
 
-// PitStop info
-export async function getPitStopInfo(
-  season: string = "current",
-  round: string,
-  limit: number = 30,
-  offset: number = 0
-) {
-  const result = await fetchFromApi(
-    `${season}/${round}/pitstops`,
-    "Race",
-    limit,
-    offset
-  );
-  return result;
+// Fastest Single Pitstop
+export async function getSingleFastestPitStop() {
+  try {
+    const result = await getFastestPitstopAndStanding();
+    const response = result.season_fastest[0];
+    return response;
+  } catch (e) {
+    console.log("Error in fetching DHL API: ", e);
+  }
 }
 
 // Get fastest lap info
@@ -544,12 +539,6 @@ export async function getDriverEvolution(
     const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
 
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
-      // const roundResponse = await fetchFromApi<any>(
-      //   `/${season}/${roundNum}/driverStandings`,
-      //   "Standings",
-      //   limit,
-      //   offset
-      // );
       const roundResponse = await fetchWithDelay<any>(
         `/${season}/${roundNum}/driverStandings`,
         "Standings",
@@ -717,19 +706,19 @@ export async function getDriverAvgAndPoints(eventId?: string) {
     }
 
     const allResults = await Promise.all(
-      eventIds.map(async (evtId:any) => {
+      eventIds.map(async (evtId: any) => {
         const response = await fetchFromDHL(`pitStopByEvent?event=${evtId}`);
         return {
           evtId,
           chart: response?.chart ?? [],
         };
       })
-    )
+    );
     // console.log("all: ", allResults);
 
-    const driverPoints:any = {};
-    allResults.forEach(event => {
-      event.chart.forEach((driver:any) => {
+    const driverPoints: any = {};
+    allResults.forEach((event) => {
+      event.chart.forEach((driver: any) => {
         const id = driver.driverNr;
         if (!driverPoints[id]) {
           driverPoints[id] = {
@@ -740,7 +729,7 @@ export async function getDriverAvgAndPoints(eventId?: string) {
             points: 0,
             totalDuration: 0,
             pitStopCount: 0,
-            avgDuration: 0
+            avgDuration: 0,
           };
         }
         driverPoints[id].points += driver.points;
@@ -750,16 +739,17 @@ export async function getDriverAvgAndPoints(eventId?: string) {
         }
       });
     });
-    
+
     // Calculate average durations
     Object.values(driverPoints).forEach((driver: any) => {
-      driver.avgDuration = driver.pitStopCount > 0 
-        ? Number((driver.totalDuration / driver.pitStopCount).toFixed(3))
-        : 0;
-      delete driver.totalDuration;  // Clean up helper properties
+      driver.avgDuration =
+        driver.pitStopCount > 0
+          ? Number((driver.totalDuration / driver.pitStopCount).toFixed(3))
+          : 0;
+      delete driver.totalDuration; // Clean up helper properties
       delete driver.pitStopCount;
     });
-    
+
     const result = Object.values(driverPoints);
 
     return result;

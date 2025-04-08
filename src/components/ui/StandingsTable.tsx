@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Minus, MoveRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import StandingsTableSkeleton from "../loading/StandingsTableSkeleton";
 
 interface Standings {
   position: number | string;
@@ -24,45 +25,54 @@ const StandingsTable = ({
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
   const [standings, setStandings] = useState<Standings[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async (name: string, season: string = "current") => {
-      if (name == "Drivers") {
-        const response = await getDriverStandings(season);
+      setIsLoading(true);
+      try {
+        if (name == "Drivers") {
+          const response = await getDriverStandings(season);
 
-        const formattedDrivers = response.standings
-          .slice(0, title === null ? 10 : response.standings.length + 1)
-          .map((item: any) => ({
+          const formattedDrivers = response.standings
+            .slice(0, title === null ? 10 : response.standings.length + 1)
+            .map((item: any) => ({
+              position: Number(item.position),
+              driver: item.Driver.familyName,
+              points: Number(item.points),
+              team:
+                item.Constructors[item.Constructors.length - 1]
+                  ?.constructorId || "Unknown",
+              evolution: item.positionDifference,
+            }));
+
+          setStandings(formattedDrivers);
+        } else if (name == "Constructors") {
+          const response = await getConstructorStandings();
+
+          const formattedConstructors = response.standings.map((item: any) => ({
             position: Number(item.position),
-            driver: item.Driver.familyName,
+            constructor: item.Constructor.name,
             points: Number(item.points),
-            team:
-              item.Constructors[item.Constructors.length - 1]?.constructorId ||
-              "Unknown",
+            team: item.Constructor?.constructorId || "Unknown",
             evolution: item.positionDifference,
           }));
 
-        setStandings(formattedDrivers);
-      } else if (name == "Constructors") {
-        const response = await getConstructorStandings();
-
-        const formattedConstructors = response.standings.map((item: any) => ({
-          position: Number(item.position),
-          constructor: item.Constructor.name,
-          points: Number(item.points),
-          team: item.Constructor?.constructorId || "Unknown",
-          evolution: item.positionDifference,
-        }));
-
-        setStandings(formattedConstructors);
+          setStandings(formattedConstructors);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData(name, season);
   }, [season]);
 
+  if (isLoading) {
+    return <StandingsTableSkeleton />;
+  }
+
   return (
-    // <div className="p-5 rounded-lg shadow-lg w-full max-w-md border border-gray-700 text-gray-300">
     <div className="md:row-start-4 lg:row-start-3 rounded-lg border border-gray-700 pt-2">
       <h2 className="scroll-m-20 text-xl font-semibold tracking-tight p-4">
         {name} Standings
