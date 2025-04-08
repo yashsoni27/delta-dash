@@ -1,33 +1,12 @@
 import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
+import { LapTiming, PaginationInfo } from "@/types";
+import { fetchWithDelay, transformResponse } from "./utils";
 
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 
-// Interface for API response types
-interface ApiResponse<T> {
-  data: T;
-  status: number;
-}
 
-interface PaginationInfo {
-  total: number;
-  limit: number;
-  offset: number;
-}
 
-function transformResponse<T>(
-  mrData: any,
-  dataKey: string
-): { data: T } & PaginationInfo {
-  return {
-    data: mrData[`${dataKey}Table`],
-    total: parseInt(mrData.total),
-    limit: parseInt(mrData.limit),
-    offset: parseInt(mrData.offset),
-  };
-}
-
-// Generic fetch function with error handling
-async function fetchFromApi<T>(
+export async function fetchFromApi<T>(
   endpoint: string,
   dataKey: string,
   limit: number = 30,
@@ -54,18 +33,7 @@ async function fetchFromApi<T>(
   return transformResponse<T>(mrData.MRData, dataKey);
 }
 
-async function fetchWithDelay<T>(
-  url: string,
-  dataKey: string,
-  delay: number,
-  limit: number,
-  offset: number
-): Promise<any> {
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  return fetchFromApi<T>(url, dataKey, limit, offset);
-}
-
-async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any> {
+export async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any> {
   try {
     // const url = endpoint.includes('?') ?
     const response = await fetch(`dhl/${endpoint}`, {
@@ -278,14 +246,6 @@ export async function getFastestLaps(
   limit: number = 30,
   offset: number = 0
 ) {
-  interface LapTiming {
-    driverId: string;
-    time: number;
-    lapNumber: number;
-    constructorId: string;
-    familyName: string;
-    driverCode?: string;
-  }
 
   // Get Driver constructor pairing, and family Name
   const driverConstructorObject = await getDriverConstructorPairing(season);
