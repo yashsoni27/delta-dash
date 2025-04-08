@@ -1,5 +1,29 @@
 // Type definitions
+export interface ApiResponse<T> {
+  data: T;
+  status: number;
+}
 
+export interface PaginationInfo {
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface LapTiming {
+  driverId: string;
+  time: number;
+  lapNumber: number;
+  constructorId: string;
+  familyName: string;
+  driverCode?: string;
+}
+
+export interface DriverConstructorPairing {
+  constructorId: string;
+  driverName: string;
+  driverCode?: string;
+}
 export interface SeasonData {
   season: string;
   currentRound: number;

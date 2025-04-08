@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 // const myFont = Titillium_Web({ weight: ["200", "300", "400", "600", "700", "900"], subsets: ["latin"] });
 const myFont = localFont({
   src: '../../public/fonts/Formula1.otf', // Path relative to public folder
-  weight: "200",
+  weight: "100",
   style: "normal",
 });
 

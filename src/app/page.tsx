@@ -6,6 +6,7 @@ import StandingsTable from "@/components/ui/StandingsTable";
 import { getSingleFastestPitStop } from "@/lib/api";
 import { Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
@@ -23,20 +24,31 @@ export default function Home() {
   return (
     <main className="p-10 md:p-20 gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:pt-0">
+        {/* Card Grid */}
         <CountdownCard />
+
         {pitStopInfo == null ? (
           <CardSkeleton />
         ) : (
-          <Card
-            title="Fastest Pit Stop"
-            icon={<Timer size={18} />}
-            stat={`${pitStopInfo.duration} s`}
-            subtitle={`${pitStopInfo.lastName}`}
-          />
+          <Link
+            href={{
+              pathname: "/pitstop",
+            }}
+          >
+            <Card
+              title="Fastest Pit Stop"
+              icon={<Timer size={18} />}
+              stat={`${pitStopInfo.duration} s`}
+              subtitle={`${pitStopInfo.lastName}`}
+              className="h-full"
+            />
+          </Link>
         )}
 
-        {/* </div>
-      <div className="pt-5 flex flex-col md:flex-row gap-5"> */}
+        <CardSkeleton />
+        <CardSkeleton />
+
+        {/* Table grid */}
         <StandingsTable name={"Drivers"} />
         <StandingsTable name={"Constructors"} />
       </div>
