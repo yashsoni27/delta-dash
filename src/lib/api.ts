@@ -4,8 +4,6 @@ import { fetchWithDelay, transformResponse } from "./utils";
 
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 
-
-
 export async function fetchFromApi<T>(
   endpoint: string,
   dataKey: string,
@@ -33,7 +31,9 @@ export async function fetchFromApi<T>(
   return transformResponse<T>(mrData.MRData, dataKey);
 }
 
-export async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any> {
+export async function fetchFromDHL(
+  endpoint: DHLEndpoint | string
+): Promise<any> {
   try {
     // const url = endpoint.includes('?') ?
     const response = await fetch(`dhl/${endpoint}`, {
@@ -54,22 +54,6 @@ export async function fetchFromDHL(endpoint: DHLEndpoint | string): Promise<any>
 /*                                API Endpoints                               */
 /* -------------------------------------------------------------------------- */
 
-// Season info [Testing]
-export async function getSeason(
-  season = "current",
-  limit: number = 30,
-  offset: number = 0
-) {
-  const result = await fetchFromApi(
-    `${season}/seasons`,
-    "Season",
-    limit,
-    offset
-  );
-  // console.log(result);
-  return result;
-}
-
 // Race calendar
 export async function getRaceCalendar(
   season: string = "current",
@@ -77,6 +61,15 @@ export async function getRaceCalendar(
   offset: number = 0
 ) {
   const result = await fetchFromApi(`${season}/races`, "Race", limit, offset);
+  return result;
+}
+
+// Round Details -- to be used
+export async function getRoundDetails(
+  season: string = "current",
+  round: number
+) {
+  const result = await fetchFromApi(`${season}/${round}/races`, "Race");
   return result;
 }
 
@@ -131,7 +124,7 @@ export async function getConstructors(
   return result;
 }
 
-// Driver info
+// Driver info -- unused
 export async function getDriverInfo(
   season: string = "current",
   driverId: string = "",
@@ -180,7 +173,7 @@ export async function getDriverConstructorPairing(season: string = "current") {
   }
 }
 
-// Qualifying results
+// Qualifying results - unused
 export async function getQualificationResults(
   season: string = "current",
   round: string,
@@ -196,7 +189,7 @@ export async function getQualificationResults(
   return result;
 }
 
-// Sprint results
+// Sprint results - unused
 export async function getSprintResults(
   season: string = "current",
   round: string,
@@ -212,7 +205,7 @@ export async function getSprintResults(
   return result;
 }
 
-// Race results
+// Race results - unused
 export async function getRaceResults(
   season: string,
   round: string,
@@ -246,7 +239,6 @@ export async function getFastestLaps(
   limit: number = 30,
   offset: number = 0
 ) {
-
   // Get Driver constructor pairing, and family Name
   const driverConstructorObject = await getDriverConstructorPairing(season);
 

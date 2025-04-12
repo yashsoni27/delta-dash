@@ -1,3 +1,5 @@
+import { capitalizeWords } from "@/lib/utils";
+
 interface CardProps {
   title: string;
   stat: string | number | null;
@@ -23,7 +25,14 @@ export default function Card({
       </div>
       <div className="flex flex-col">
         <div className="text-xl font-semibold mb-1">{stat}</div>
-        {subtitle && <div className="text-xs font-medium text-gray-500">{subtitle}</div>}
+        {subtitle && (
+          <div className="text-xs font-medium text-gray-500">
+            {/* {typeof subtitle === "string"
+              ? capitalizeWords(subtitle)
+              : subtitle} */}
+              {subtitle}
+          </div>
+        )}
       </div>
     </div>
   );

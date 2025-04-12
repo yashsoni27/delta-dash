@@ -13,7 +13,7 @@ export default function Home() {
 
   const fetchFastestPitstop = useCallback(async () => {
     const pitstopRes = await getSingleFastestPitStop();
-    // console.log(pitstopRes);
+    console.log(pitstopRes);
     setPitStopInfo(pitstopRes);
   }, []);
 
@@ -39,7 +39,7 @@ export default function Home() {
               title="Fastest Pit Stop"
               icon={<Timer size={18} />}
               stat={`${pitStopInfo.duration} s`}
-              subtitle={`${pitStopInfo.lastName}`}
+              subtitle={`${pitStopInfo.lastName} at ${pitStopInfo.abbreviation}`}
               className="h-full"
             />
           </Link>

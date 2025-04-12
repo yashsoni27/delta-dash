@@ -58,57 +58,65 @@ export default function Home() {
   }, []);
 
   // Separate fetch for races data
-  const fetchRaces = useCallback(async (year: string) => {
-    try {
-      setIsLoading(true);
-      const previousRaces = await getPreviousRaces(year);
-      const options = previousRaces.map((race: any) => ({
-        name: race.Circuit.Location.country,
-        value: parseInt(race.round, 10),
-        raceName: race.raceName,
-      }));
-      setRaceOptions(options);
-      
-      if (options.length > 0 && round === null) {
-        setRound(options[0].value);
-        setRaceName(options[0].raceName);
+  const fetchRaces = useCallback(
+    async (year: string) => {
+      try {
+        setIsLoading(true);
+        const previousRaces = await getPreviousRaces(year);
+        console.log(previousRaces);
+        const options = previousRaces.map((race: any) => ({
+          name: race.Circuit.Location.country,
+          value: parseInt(race.round, 10),
+          raceName: race.raceName,
+        }));
+        setRaceOptions(options);
+
+        if (options.length > 0 && round === null) {
+          setRound(options[0].value);
+          setRaceName(options[0].raceName);
+        }
+      } catch (e) {
+        console.log("Error fetching races: ", e);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.log("Error fetching races: ", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [round]);
+    },
+    [round]
+  );
 
   // Separate fetch for lap data
-  const fetchLapData = useCallback(async (year: string, raceRound: string) => {
-    try {
-      setIsLoading(true);
-      
-      // Find the race name from options
-      const selectedRace = raceOptions.find(race => race.value === Number(raceRound));
-      if (selectedRace) {
-        setRaceName(selectedRace.raceName);
-      }
-      
-      const response = await getFastestLaps(year, raceRound);
+  const fetchLapData = useCallback(
+    async (year: string, raceRound: string) => {
+      try {
+        setIsLoading(true);
 
-      if (response) {
-        // const drivers = response.drivers.map((item, index) => ({
-        const drivers = response.fastest20Laps.map((item, index) => ({
-          ...item,
-          pos: index + 1,
-        }));
-        setLapData(response.allLaps);
-        setTableData(drivers);
-      }
-    } catch (e) {
-      console.log("Error fetching lap data: ", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [raceOptions]);
+        // Find the race name from options
+        const selectedRace = raceOptions.find(
+          (race) => race.value === Number(raceRound)
+        );
+        if (selectedRace) {
+          setRaceName(selectedRace.raceName);
+        }
 
+        const response = await getFastestLaps(year, raceRound);
+
+        if (response) {
+          // const drivers = response.drivers.map((item, index) => ({
+          const drivers = response.fastest20Laps.map((item, index) => ({
+            ...item,
+            pos: index + 1,
+          }));
+          setLapData(response.allLaps);
+          setTableData(drivers);
+        }
+      } catch (e) {
+        console.log("Error fetching lap data: ", e);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [raceOptions]
+  );
 
   // Effect to fetch races when year changes
   useEffect(() => {
@@ -121,7 +129,6 @@ export default function Home() {
       fetchLapData(selectedYear.toString(), round.toString());
     }
   }, [selectedYear, round, fetchLapData]);
-
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(Number(e.target.value));
