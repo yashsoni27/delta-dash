@@ -44,7 +44,6 @@ export default function Home() {
             />
           </Link>
         )}
-
         <CardSkeleton />
         <CardSkeleton />
 
