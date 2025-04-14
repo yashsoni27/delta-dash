@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const DHL_ENDPOINTS = {
   pitStopByEvent: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_PITSTOP_EVENT_ID}`,
-  fastestPitStopAndStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_PITSTOP_ID}`,
   avgPitStopAndEventId: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_AVG_PITSTOP_ID}`,
+  fastestPitStopAndStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_PITSTOP_ID}`,
 } as const;
 
 export type DHLEndpoint = keyof typeof DHL_ENDPOINTS;

@@ -166,26 +166,17 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10]  sm:rounded-lg p-4 bg-slate-900"></div>
-                <div className="2xl:col-start-3 h-[450px] sm:rounded-lg p-4 bg-slate-900">
-                  {driverStanding == null ? null : (
-                    <BarChart
-                      heading="Driver DHL Points"
-                      height={380}
-                      width={320}
-                      data={driverStanding}
-                      indexBy="lastName"
-                      keys={["points"]}
-                      layout="horizontal"
-                      margin={{ top: 20, right: 70, bottom: 20, left: 70 }}
-                    />
-                  )}
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10]  sm:rounded-lg p-4 bg-slate-900">
+                  <PitStopChart
+                    data={avgPitStop}
+                    heading="Average Pit Stop Times per GP"
+                  />
                 </div>
-                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
+                <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
                   {driverAvg == null ? null : (
                     <BarChart
                       heading="Driver Avg Pit Stop Time"
-                      height={380}
+                      height={400}
                       width={320}
                       data={driverAvg}
                       indexBy="lastName"
@@ -195,27 +186,22 @@ export default function Home() {
                     />
                   )}
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
-                  <PitStopChart
-                    data={avgPitStop}
-                    heading="Average Pit Stop Times per GP"
-                  />
-                </div>
-                <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
-                  {constStanding == null ? null : (
+                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
+                  {driverStanding == null ? null : (
                     <BarChart
-                      heading="Constructor DHL Points"
+                      heading="Driver DHL Points"
                       height={400}
                       width={320}
-                      data={constStanding}
-                      indexBy="team"
+                      data={driverStanding}
+                      indexBy="lastName"
                       keys={["points"]}
                       layout="horizontal"
-                      margin={{ top: 30, right: 70, bottom: 50, left: 80 }}
+                      margin={{ top: 20, right: 70, bottom: 20, left: 70 }}
                     />
                   )}
                 </div>
-                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
+                {/* <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900"></div> */}
+                <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
                   {constAvg == null ? null : (
                     <BarChart
                       heading="Constructor Avg Pit Stop Time"
@@ -224,6 +210,20 @@ export default function Home() {
                       data={constAvg}
                       indexBy="team"
                       keys={["averageDuration"]}
+                      layout="horizontal"
+                      margin={{ top: 30, right: 70, bottom: 50, left: 80 }}
+                    />
+                  )}
+                </div>
+                <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
+                  {constStanding == null ? null : (
+                    <BarChart
+                      heading="Constructor DHL Points"
+                      height={400}
+                      width={320}
+                      data={constStanding}
+                      indexBy="team"
+                      keys={["points"]}
                       layout="horizontal"
                       margin={{ top: 30, right: 70, bottom: 50, left: 80 }}
                     />

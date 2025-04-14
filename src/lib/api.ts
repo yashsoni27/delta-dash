@@ -1,10 +1,14 @@
 import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 import { LapTiming, PaginationInfo } from "@/types";
-import { circuitIdToF1Adapter, fetchWithDelay, transformResponse } from "./utils";
+import {
+  circuitIdToF1Adapter,
+  fetchWithDelay,
+  transformResponse,
+} from "./utils";
 
 const JOLPICA_API_BASE = process.env.NEXT_PUBLIC_JOLPICA_API_BASE;
 const F1_MEDIA_BASE = process.env.NEXT_PUBLIC_F1_MEDIA_BASE;
-const REVALIDATION_TIME = parseInt(process.env.REVALIDATION_TIME || '3600');
+const REVALIDATION_TIME = parseInt(process.env.REVALIDATION_TIME || "3600");
 
 export async function fetchFromApi<T>(
   endpoint: string,
@@ -649,15 +653,27 @@ export async function getConstructorEvolution(
 /* -------------------------------------------------------------------------- */
 export async function getDriverAvgAndPoints(eventId?: string) {
   try {
-    const response = await fetchFromDHL(
-      eventId ? `pitStopByEvent?event=${eventId}` : "pitStopByEvent"
-    );
-    const n = response.sort;
-    const Ids = response.event_id;
+    // const response = await fetchFromDHL(
+    //   eventId ? `pitStopByEvent?event=${eventId}` : "pitStopByEvent"
+    // );
+    // const n = response.sort;
+    // const Ids = response.event_id;
+    // let eventIds = [];
+    // for (let i = n; i >= 1; i--) {
+    //   eventIds.push(`${Ids - i + 1}`);
+    // }
+    const roundRes = await getNextRace();
+    const round = parseInt(roundRes.round);
+
+    const response = await fetchFromDHL("avgPitStopAndEventId");
+    // const n = Object.keys(response.chart.events).length;
+    const Id = response.chart.events[0].id;
     let eventIds = [];
-    for (let i = n; i >= 1; i--) {
-      eventIds.push(`${Ids - i + 1}`);
+    for (let i = Id; i < Id + round; i++) {
+      eventIds.push(`${i}`);
     }
+
+    // console.log("response: ", response);
 
     const allResults = await Promise.all(
       eventIds.map(async (evtId: any) => {
@@ -700,11 +716,14 @@ export async function getDriverAvgAndPoints(eventId?: string) {
         driver.pitStopCount > 0
           ? Number((driver.totalDuration / driver.pitStopCount).toFixed(3))
           : 0;
+
       delete driver.totalDuration; // Clean up helper properties
       delete driver.pitStopCount;
     });
 
     const result = Object.values(driverPoints);
+
+    // console.log("res: ", result);
 
     return result;
   } catch (e) {
@@ -734,7 +753,6 @@ export async function getFastestPitstopAndStanding() {
   }
 }
 
-
 /* -------------------------------------------------------------------------- */
 /*                              Track Media APIs                              */
 /* -------------------------------------------------------------------------- */
@@ -743,8 +761,8 @@ export async function getTrackImg(circuitId: string) {
     const circuit = circuitIdToF1Adapter(circuitId);
 
     const response = await fetch(`${F1_MEDIA_BASE}${circuit}_Circuit`, {
-      next: {revalidate: REVALIDATION_TIME}, 
-    })
+      next: { revalidate: REVALIDATION_TIME },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch track image: ${response.status}`);
@@ -752,8 +770,7 @@ export async function getTrackImg(circuitId: string) {
 
     const imageBlob = await response.blob();
     return URL.createObjectURL(imageBlob);
-
   } catch (e) {
-    console.log("Error in fetching from F1: ",e);
+    console.log("Error in fetching from F1: ", e);
   }
 }

@@ -24,10 +24,10 @@ export default function BarChart({
   layout = "vertical",
   margin = { top: 20, right: 60, bottom: 30, left: 60 },
 }: BarChartProps) {
+  // console.log(heading, data);
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
-      {/* <ResponsiveBar */}
       <Bar
         data={data}
         height={height}
