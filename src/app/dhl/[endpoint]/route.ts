@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const DHL_ENDPOINTS = {
-  pitStopByEvent: "https://inmotion.dhl/api/f1-award-element-data/6365",
-  fastestPitStopAndStanding:
-    "https://inmotion.dhl/api/f1-award-element-data/6366",
-  avgPitStopAndEventId: "https://inmotion.dhl/api/f1-award-element-data/6367",
+  pitStopByEvent: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_PITSTOP_EVENT_ID}`,
+  fastestPitStopAndStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_PITSTOP_ID}`,
+  avgPitStopAndEventId: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_AVG_PITSTOP_ID}`,
 } as const;
 
 export type DHLEndpoint = keyof typeof DHL_ENDPOINTS;
@@ -31,7 +30,7 @@ export async function GET(
       headers: {
         "Content-Type": "application/json",
       },
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: parseInt(process.env.REVALIDATION_TIME || '3600') },
     });
 
     if (!response.ok) {

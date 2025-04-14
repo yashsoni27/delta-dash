@@ -2,7 +2,9 @@ import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 import { LapTiming, PaginationInfo } from "@/types";
 import { circuitIdToF1Adapter, fetchWithDelay, transformResponse } from "./utils";
 
-const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
+const JOLPICA_API_BASE = process.env.NEXT_PUBLIC_JOLPICA_API_BASE;
+const F1_MEDIA_BASE = process.env.NEXT_PUBLIC_F1_MEDIA_BASE;
+const REVALIDATION_TIME = parseInt(process.env.REVALIDATION_TIME || '3600');
 
 export async function fetchFromApi<T>(
   endpoint: string,
@@ -738,11 +740,10 @@ export async function getFastestPitstopAndStanding() {
 /* -------------------------------------------------------------------------- */
 export async function getTrackImg(circuitId: string) {
   try {
-    const baseUrl = "https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/";
     const circuit = circuitIdToF1Adapter(circuitId);
 
-    const response = await fetch(`${baseUrl}${circuit}_Circuit`, {
-      next: {revalidate: 86400}, //Cache for 24 hours
+    const response = await fetch(`${F1_MEDIA_BASE}${circuit}_Circuit`, {
+      next: {revalidate: REVALIDATION_TIME}, 
     })
 
     if (!response.ok) {
