@@ -3,6 +3,7 @@ import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
+import TrackImg from "@/components/ui/TrackImg";
 import { getFastestLaps, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
@@ -13,7 +14,13 @@ export default function Home() {
   const [raceName, setRaceName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [raceOptions, setRaceOptions] = useState<
-    { name: string; value: number; raceName: string }[]
+    {
+      name: string;
+      value: number;
+      raceName: string;
+      circuitId: string;
+      circuitName: string;
+    }[]
   >([]);
   const [columns, setColumns] = useState<any | null>(null);
   const [tableData, setTableData] = useState<any | null>(null);
@@ -68,6 +75,8 @@ export default function Home() {
           name: race.Circuit.Location.country,
           value: parseInt(race.round, 10),
           raceName: race.raceName,
+          circuitId: race.Circuit.circuitId,
+          circuitName: race.Circuit.circuitName,
         }));
         setRaceOptions(options);
 
@@ -142,6 +151,10 @@ export default function Home() {
     setRound(Number(e.target.value));
   };
 
+  const selectedRace = round
+    ? raceOptions.find((race) => race.value === round)
+    : null;
+
   return (
     <>
       <div className="p-10 pt-0 md:pt-0 gap-4">
@@ -208,6 +221,16 @@ export default function Home() {
                 </div>
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
                   <BoxPlotChart data={lapData} heading="Race Pace" />
+                </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900"></div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                  {selectedRace && (
+                    <TrackImg
+                      circuitId={selectedRace.circuitId}
+                      circuitName={selectedRace.circuitName}
+                      className=" object-contain"
+                    />
+                  )}
                 </div>
               </div>
             </div>

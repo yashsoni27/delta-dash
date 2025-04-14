@@ -1,6 +1,6 @@
 import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 import { LapTiming, PaginationInfo } from "@/types";
-import { fetchWithDelay, transformResponse } from "./utils";
+import { circuitIdToF1Adapter, fetchWithDelay, transformResponse } from "./utils";
 
 const JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1/";
 
@@ -729,5 +729,30 @@ export async function getFastestPitstopAndStanding() {
     return response.chart;
   } catch (e) {
     console.log("Error in DHL API", e);
+  }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/*                              Track Media APIs                              */
+/* -------------------------------------------------------------------------- */
+export async function getTrackImg(circuitId: string) {
+  try {
+    const baseUrl = "https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/";
+    const circuit = circuitIdToF1Adapter(circuitId);
+
+    const response = await fetch(`${baseUrl}${circuit}_Circuit`, {
+      next: {revalidate: 86400}, //Cache for 24 hours
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch track image: ${response.status}`);
+    }
+
+    const imageBlob = await response.blob();
+    return URL.createObjectURL(imageBlob);
+
+  } catch (e) {
+    console.log("Error in fetching from F1: ",e);
   }
 }

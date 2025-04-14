@@ -173,3 +173,35 @@ export const capitalizeWords = (str: string): string => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 };
+
+
+export function circuitIdToF1Adapter(circuitId: string): string|null {
+  const circuit: Record<string, string> = {
+    'albert_park': 'Australia',
+    'shanghai': 'China',
+    'suzuka': 'Japan',
+    'bahrain': 'Bahrain',
+    'jeddah': 'Saudi_Arabia',
+    'miami': 'Miami',
+    'imola': 'Emilia_Romagna',
+    'monaco': 'Monaco',
+    'catalunya': 'Spain',
+    'villeneuve': 'Canada',
+    'red_bull_ring': 'Austria',
+    'silverstone': 'Great_Britain',
+    'spa': 'Belgium',
+    'hungaroring': 'Hungary',
+    'zandvoort': 'Netherlands',
+    'monza': 'Italy',
+    'baku': 'Azerbaijan',
+    'marina_bay': 'Singapore',
+    'americas': 'USA',
+    'rodriguez': 'Mexico',
+    'interlagos': 'Brazil',
+    'vegas': 'Las_Vegas',
+    'losail': 'Qatar',
+    'yas_marina': 'Abu_Dhabi',
+  }
+
+  return circuit[circuitId] || null;
+}
