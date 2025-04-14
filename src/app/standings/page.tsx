@@ -4,12 +4,15 @@ import RankingEvolution from "@/components/ui/RankingEvolution";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
 import { getConstructorEvolution, getDriverEvolution } from "@/lib/api";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const searchParams = useSearchParams();
-  const title = searchParams.get("title");
+  // const searchParams = useSearchParams();
+  // const title = searchParams.get("title");
+  const router = useRouter();
+  const title = router.query.title as string;
   const [driverEvolution, setDriverEvolution] = useState<any>();
   const [constructorEvolution, setConstructorEvolution] = useState<any>();
   const [selectedYear, setSelectedYear] = useState(2025);

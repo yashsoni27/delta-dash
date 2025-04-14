@@ -2,9 +2,9 @@
 import { getConstructorStandings, getDriverStandings } from "@/lib/api";
 import { ChevronDown, ChevronUp, Minus, MoveRight } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import StandingsTableSkeleton from "../loading/StandingsTableSkeleton";
+import { useRouter } from "next/router";
 
 interface Standings {
   position: number | string;
@@ -22,8 +22,10 @@ const StandingsTable = ({
   name: string;
   season?: string;
 }) => {
-  const searchParams = useSearchParams();
-  const title = searchParams.get("title");
+  // const searchParams = useSearchParams();
+  // const title = searchParams.get("title");
+  const router = useRouter();
+  const title = router.query.title as string;
   const [standings, setStandings] = useState<Standings[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
