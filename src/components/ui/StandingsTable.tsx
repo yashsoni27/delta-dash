@@ -2,9 +2,9 @@
 import { getConstructorStandings, getDriverStandings } from "@/lib/api";
 import { ChevronDown, ChevronUp, Minus, MoveRight } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import StandingsTableSkeleton from "../loading/StandingsTableSkeleton";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 interface Standings {
   position: number | string;
@@ -15,17 +15,15 @@ interface Standings {
   team?: string;
 }
 
-const StandingsTable = ({
+function StandingsTableContent({
   name,
   season = "current",
 }: {
   name: string;
   season?: string;
-}) => {
-  // const searchParams = useSearchParams();
-  // const title = searchParams.get("title");
-  const router = useRouter();
-  const title = router.query.title as string;
+}) {
+  const searchParams = useSearchParams();
+  const title = searchParams.get("title");
   const [standings, setStandings] = useState<Standings[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,7 +31,7 @@ const StandingsTable = ({
     const fetchData = async (name: string, season: string = "current") => {
       setIsLoading(true);
       try {
-        if (name == "Drivers") {
+        if (name === "Drivers") {
           const response = await getDriverStandings(season);
 
           const formattedDrivers = response.standings
@@ -49,7 +47,7 @@ const StandingsTable = ({
             }));
 
           setStandings(formattedDrivers);
-        } else if (name == "Constructors") {
+        } else if (name === "Constructors") {
           const response = await getConstructorStandings();
 
           const formattedConstructors = response.standings.map((item: any) => ({
@@ -171,6 +169,14 @@ const StandingsTable = ({
         ) : null}
       </div>
     </div>
+  );
+}
+
+const StandingsTable = (props: { name: string; season?: string }) => {
+  return (
+    <Suspense fallback={<StandingsTableSkeleton />}>
+      <StandingsTableContent {...props} />
+    </Suspense>
   );
 };
 

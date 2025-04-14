@@ -4,15 +4,12 @@ import RankingEvolution from "@/components/ui/RankingEvolution";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
 import { getConstructorEvolution, getDriverEvolution } from "@/lib/api";
-// import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
-export default function Home() {
-  // const searchParams = useSearchParams();
-  // const title = searchParams.get("title");
-  const router = useRouter();
-  const title = router.query.title as string;
+function StandingsContent() {
+  const searchParams = useSearchParams();
+  const title = searchParams.get("title");
   const [driverEvolution, setDriverEvolution] = useState<any>();
   const [constructorEvolution, setConstructorEvolution] = useState<any>();
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -22,11 +19,11 @@ export default function Home() {
     const fetchEvolution = async () => {
       setIsLoading(true);
       try {
-        if (title == "Drivers") {
+        if (title === "Drivers") {
           const evolution = await getDriverEvolution(selectedYear.toString());
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
-        } else if (title == "Constructors") {
+        } else if (title === "Constructors") {
           const evolution = await getConstructorEvolution(
             selectedYear.toString()
           );
@@ -122,4 +119,12 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+export default function Home () {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <StandingsContent />
+    </Suspense>
+  )
 }
