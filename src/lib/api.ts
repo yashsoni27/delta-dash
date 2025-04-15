@@ -628,15 +628,32 @@ export async function getConstructorEvolution(
   }
 }
 
-// Driver stats
+// Driver stats -- for Stats and Pt Distribution
 export async function getFinishingStats(season: string = "current") {
   try {
     const driverStats: Record<string, any> = {};
     const constructorStats: Record<string, any> = {};
+    const driverPointsByRound: Record<string, any> = {};
+    const constructorPointsByRound: Record<string, any> = {};
 
-    const initialResult = await fetchFromApi(`${season}/results`, "Race", 1, 0);
+    const initialResult = await getPreviousRaces();
+    const gpNames = initialResult.reduce(
+      (acc: Record<string, string>, race: any) => {
+        const gpName = race.raceName.replace("Grand Prix", "").trim();
+        const abbreviation = gpName.includes(" ")
+          ? gpName
+              .split(" ")
+              .map((word: any) => word[0])
+              .join("")
+          : gpName.slice(0, 3).toUpperCase();
+        // acc[race.round] = gpName;
+        acc[race.round] = abbreviation;
+        return acc;
+      },
+      {}
+    );
 
-    const totalRaces = initialResult.total;
+    const totalRaces = parseInt(initialResult[0].round);
     const batchSize = 80;
     const requiredRequests = Math.ceil(totalRaces / batchSize);
     const offsets = Array.from(
@@ -660,29 +677,31 @@ export async function getFinishingStats(season: string = "current") {
           )
         )
       );
-      
+
       // Process each batch of results
       for (const batchResult of batchResults) {
         if (batchResult?.data?.Races) {
           // Process each race
           for (const race of batchResult.data.Races) {
             if (!race.Results) continue;
-            
+
+            const round = parseInt(race.round);
+
             // Process each result in this race
             for (const result of race.Results) {
               if (!result.Driver || !result.Constructor) continue;
-              
+
               // Extract data
               const driverId = result.Driver.driverId;
               const constructorId = result.Constructor.constructorId;
               const position = parseInt(result.position);
               const points = parseFloat(result.points);
-              
+
               // Process driver statistics
               if (!driverStats[driverId]) {
                 driverStats[driverId] = {
                   id: driverId,
-                  name: `${result.Driver.familyName}`,
+                  name: result.Driver.familyName,
                   code: result.Driver.code,
                   number: result.Driver.permanentNumber,
                   constructor: result.Constructor.name,
@@ -693,10 +712,10 @@ export async function getFinishingStats(season: string = "current") {
                   DNF: 0,
                   DSQ: 0,
                   totalPoints: 0,
-                  racesCompleted: 0
+                  racesCompleted: 0,
                 };
               }
-              
+
               // Process constructor statistics
               if (!constructorStats[constructorId]) {
                 constructorStats[constructorId] = {
@@ -708,10 +727,10 @@ export async function getFinishingStats(season: string = "current") {
                   DNF: 0,
                   DSQ: 0,
                   totalPoints: 0,
-                  entries: 0
+                  entries: 0,
                 };
               }
-              
+
               // Update driver statistics
               const driver = driverStats[driverId];
               driver.racesCompleted++;
@@ -719,9 +738,13 @@ export async function getFinishingStats(season: string = "current") {
               if (position <= 3) driver.Podiums++;
               if (points > 0) driver.PointsFinish++;
               if (result.status === "Disqualified") driver.DSQ--;
-              else if (result.status !== "Finished" && !result.status.includes("Lap")) driver.DNF--;
+              else if (
+                result.status !== "Finished" &&
+                !result.status.includes("Lap")
+              )
+                driver.DNF--;
               driver.totalPoints += points;
-              
+
               // Update constructor statistics
               const constructor = constructorStats[constructorId];
               constructor.entries++;
@@ -729,8 +752,34 @@ export async function getFinishingStats(season: string = "current") {
               if (position <= 3) constructor.Podiums++;
               if (points > 0) constructor.PointsFinish++;
               if (result.status === "Disqualified") constructor.DSQ--;
-              else if (result.status !== "Finished" && !result.status.includes("Lap")) constructor.DNF--;
+              else if (
+                result.status !== "Finished" &&
+                !result.status.includes("Lap")
+              )
+                constructor.DNF--;
               constructor.totalPoints += points;
+
+              // Initialize driver if not exists
+              if (!driverPointsByRound[driverId]) {
+                driverPointsByRound[driverId] = {
+                  name: result.Driver.familyName,
+                  constructor: result.Constructor.constructorId,
+                  points: Array(totalRaces).fill(0),
+                };
+              }
+              // Add points for this round
+              driverPointsByRound[driverId].points[round - 1] = points;
+
+              // Initialize constructor if not exists
+              if (!constructorPointsByRound[constructorId]) {
+                constructorPointsByRound[constructorId] = {
+                  name: result.Constructor.name,
+                  points: Array(totalRaces).fill(0),
+                };
+              }
+              // Add points for this round
+              constructorPointsByRound[constructorId].points[round - 1] +=
+                points;
             }
           }
         }
@@ -739,12 +788,87 @@ export async function getFinishingStats(season: string = "current") {
 
     // Sort by total points
     const sortByPoints = (a: any, b: any) => b.totalPoints - a.totalPoints;
-    
+
+    // Transform data for stacked bar chart
+    const driverRoundData = Object.entries(driverPointsByRound)
+      .map(([driverId, data]) => {
+        return {
+          driver: driverId,
+          name: data.name,
+          constructor: data.constructor,
+          pointsByRound: data.points,
+          totalPoints: data.points.reduce(
+            (sum: number, points: number) => sum + points,
+            0
+          ),
+        };
+      })
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    // Transform data for constructor stacked bar chart
+    const constructorRoundData = Object.entries(constructorPointsByRound)
+      .map(([constructorId, data]) => {
+        return {
+          constructor: constructorId,
+          constructorId: constructorId,
+          name: data.name,
+          pointsByRound: data.points,
+          totalPoints: data.points.reduce(
+            (sum: number, points: number) => sum + points,
+            0
+          ),
+        };
+      })
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    // Format driver data for visualization
+    const formattedDriverData = Array.from(
+      { length: totalRaces },
+      (_, index) => {
+        const roundNumber = index + 1;
+        const roundPoints: any = {
+          name: gpNames[roundNumber] || `R${roundNumber}`, // Use GP abbreviation if available
+        };
+
+        driverRoundData.forEach((driver) => {
+          roundPoints[driver.driver] = {
+            name: driver.name,
+            constructor: driver.constructor,
+            points: driver.pointsByRound[index],
+          };
+        });
+
+        return roundPoints;
+      }
+    );
+
+    // Format constructor data for visualization
+    const formattedConstructorData = Array.from(
+      { length: totalRaces },
+      (_, index) => {
+        const roundNumber = index + 1;
+        const roundPoints: any = {
+          name: gpNames[roundNumber] || `R${roundNumber}`,
+        };
+
+        constructorRoundData.forEach((constructor) => {
+          roundPoints[constructor.constructor] = {
+            name: constructor.name,
+            constructor: constructor.constructorId,
+            points: constructor.pointsByRound[index],
+          };
+        });
+
+        return roundPoints;
+      }
+    );
+
     return {
       drivers: Object.values(driverStats).sort(sortByPoints),
-      constructors: Object.values(constructorStats).sort(sortByPoints)
+      constructors: Object.values(constructorStats).sort(sortByPoints),
+      driversRound: formattedDriverData,
+      constructorRound: formattedConstructorData,
     };
-
   } catch (e) {
     console.log("Error in getDriverStats: ", e);
   }

@@ -1,6 +1,7 @@
 "use client";
 import BarChart from "@/components/ui/BarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import PtDistributionChart from "@/components/ui/PtDistributionChart";
 import RankingEvolution from "@/components/ui/RankingEvolution";
 import StackedBarChart from "@/components/ui/StackedBarChart";
 import StandingEvolution from "@/components/ui/StandingEvolution";
@@ -21,6 +22,7 @@ function StandingsContent() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>();
+  const [ptDistribution, setPtDistribution] = useState<any>();
 
   useEffect(() => {
     const fetchEvolution = async () => {
@@ -33,6 +35,7 @@ function StandingsContent() {
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
           setStats(finishingStat?.drivers);
+          setPtDistribution(finishingStat?.driversRound);
         } else if (title === "Constructors") {
           const evolution = await getConstructorEvolution(
             selectedYear.toString()
@@ -40,6 +43,7 @@ function StandingsContent() {
           setConstructorEvolution(evolution);
           setDriverEvolution(undefined);
           setStats(finishingStat?.constructors);
+          setPtDistribution(finishingStat?.constructorRound);
         }
       } catch (e) {
         console.log(`Error fetching ${title} evolution`);
@@ -105,10 +109,36 @@ function StandingsContent() {
                             heading="Stats"
                             data={stats}
                             indexBy="code"
-                            keys={["Wins", "Podiums", "PointsFinish", "DNF", "DSQ"]}
+                            keys={[
+                              "Wins",
+                              "Podiums",
+                              "PointsFinish",
+                              "DNF",
+                              "DSQ",
+                            ]}
                             groupMode="grouped"
-                            margin={{ top: 20, right: 20, bottom: 40, left: 30 }}
-                          />                          
+                            margin={{
+                              top: 20,
+                              right: 20,
+                              bottom: 40,
+                              left: 30,
+                            }}
+                          />
+                        </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <PtDistributionChart
+                            heading="Points Distribution"                        
+                            data={ptDistribution}
+                            indexBy="name"
+                            groupMode="stacked"
+                            layout="horizontal"
+                            margin={{
+                              top: 20,
+                              right: 20,
+                              bottom: 40,
+                              left: 40,
+                            }}
+                          />
                         </div>
                       </>
                     )}
@@ -131,10 +161,36 @@ function StandingsContent() {
                             heading="Stats"
                             data={stats}
                             indexBy="name"
-                            keys={["Wins", "Podiums", "PointsFinish", "DNF", "DSQ"]}
+                            keys={[
+                              "Wins",
+                              "Podiums",
+                              "PointsFinish",
+                              "DNF",
+                              "DSQ",
+                            ]}
                             groupMode="grouped"
-                            margin={{ top: 20, right: 20, bottom: 70, left: 30 }}
-                          />                          
+                            margin={{
+                              top: 20,
+                              right: 20,
+                              bottom: 70,
+                              left: 30,
+                            }}
+                          />
+                        </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <PtDistributionChart
+                            heading="Points Distribution"                        
+                            data={ptDistribution}
+                            indexBy="name"
+                            groupMode="stacked"
+                            layout="horizontal"
+                            margin={{
+                              top: 20,
+                              right: 40,
+                              bottom: 40,
+                              left: 40,
+                            }}
+                          />
                         </div>
                       </>
                     )}

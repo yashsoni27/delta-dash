@@ -23,7 +23,7 @@ const CustomTooltip = ({
 
     <div className="text-xs py-2 flex justify-between">
       <div>{id}</div>
-      <div style={{ color }}>{value}</div>
+      <div>{value}</div>
     </div>
   </div>
 );
