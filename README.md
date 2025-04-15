@@ -1,4 +1,4 @@
-# 🏎️ F1 Dashboard (https://img.shields.io/badge/beta-yellow)
+# 🏎️ F1 Dashboard ![Static Badge](https://img.shields.io/badge/beta-yellow)
 
 A sleek and modern Formula 1 dashboard application for real-time race statistics and analytics.
 
