@@ -37,7 +37,6 @@ export default function Home() {
       try {
         const response = await getDriverStandings();
         if (response) {
-          // console.log("respoine", response);
           setDrivers(response.standings);
         }
       } catch (e) {

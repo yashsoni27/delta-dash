@@ -1,9 +1,15 @@
 "use client";
+import BarChart from "@/components/ui/BarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import RankingEvolution from "@/components/ui/RankingEvolution";
+import StackedBarChart from "@/components/ui/StackedBarChart";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { getConstructorEvolution, getDriverEvolution } from "@/lib/api";
+import {
+  getConstructorEvolution,
+  getDriverEvolution,
+  getFinishingStats,
+} from "@/lib/api";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -14,21 +20,26 @@ function StandingsContent() {
   const [constructorEvolution, setConstructorEvolution] = useState<any>();
   const [selectedYear, setSelectedYear] = useState(2025);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<any>();
 
   useEffect(() => {
     const fetchEvolution = async () => {
       setIsLoading(true);
       try {
+        const finishingStat = await getFinishingStats(selectedYear.toString());
+        console.log(finishingStat);
         if (title === "Drivers") {
           const evolution = await getDriverEvolution(selectedYear.toString());
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
+          setStats(finishingStat?.drivers);
         } else if (title === "Constructors") {
           const evolution = await getConstructorEvolution(
             selectedYear.toString()
           );
           setConstructorEvolution(evolution);
           setDriverEvolution(undefined);
+          setStats(finishingStat?.constructors);
         }
       } catch (e) {
         console.log(`Error fetching ${title} evolution`);
@@ -64,9 +75,6 @@ function StandingsContent() {
         {title && (
           <>
             {isLoading ? (
-              // <div className="flex items-center justify-center align-middle text-center">
-              //   <div className="text-sm text-gray-400">Loading data...</div>
-              // </div>
               <LoadingSpinner />
             ) : (
               <>
@@ -92,6 +100,16 @@ function StandingsContent() {
                             rankings={driverEvolution}
                           />
                         </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <StackedBarChart
+                            heading="Stats"
+                            data={stats}
+                            indexBy="code"
+                            keys={["Wins", "Podiums", "PointsFinish", "DNF", "DSQ"]}
+                            groupMode="grouped"
+                            margin={{ top: 20, right: 20, bottom: 40, left: 30 }}
+                          />                          
+                        </div>
                       </>
                     )}
                     {constructorEvolution && (
@@ -108,6 +126,16 @@ function StandingsContent() {
                             rankings={constructorEvolution}
                           />
                         </div>
+                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                          <StackedBarChart
+                            heading="Stats"
+                            data={stats}
+                            indexBy="name"
+                            keys={["Wins", "Podiums", "PointsFinish", "DNF", "DSQ"]}
+                            groupMode="grouped"
+                            margin={{ top: 20, right: 20, bottom: 70, left: 30 }}
+                          />                          
+                        </div>
                       </>
                     )}
                   </div>
@@ -121,10 +149,10 @@ function StandingsContent() {
   );
 }
 
-export default function Home () {
+export default function Home() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <StandingsContent />
     </Suspense>
-  )
+  );
 }

@@ -11,6 +11,7 @@ interface BarChartProps {
   keys?: string[];
   indexBy?: string;
   layout?: "vertical" | "horizontal";
+  groupMode?: "grouped" | "stacked";
   margin?: { top: number; right: number; bottom: number; left: number };
 }
 
@@ -22,9 +23,9 @@ export default function BarChart({
   keys,
   indexBy,
   layout = "vertical",
+  groupMode = "stacked",
   margin = { top: 20, right: 60, bottom: 30, left: 60 },
 }: BarChartProps) {
-  // console.log(heading, data);
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
@@ -42,6 +43,7 @@ export default function BarChart({
         enableLabel={false}
         isInteractive={false}
         layout={layout}
+        groupMode={groupMode}
         axisTop={null}
         axisRight={null}
         axisBottom={null}
