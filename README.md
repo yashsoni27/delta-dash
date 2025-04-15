@@ -1,4 +1,5 @@
-# 🏎️ F1 Dashboard ![Static Badge](https://img.shields.io/badge/beta-yellow)
+# 🏎️ F1 Dashboard 
+![Static Badge](https://img.shields.io/badge/beta-yellow) ![GitHub package.json version](https://img.shields.io/github/package-json/v/yashsoni27/f1-dash)
 
 A sleek and modern Formula 1 dashboard application for real-time race statistics and analytics.
 
