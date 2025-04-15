@@ -1,15 +1,15 @@
-# 🏎️ F1 Dashboard
+# 🏎️ F1 Dashboard (https://img.shields.io/badge/beta-yellow)
 
 A sleek and modern Formula 1 dashboard application for real-time race statistics and analytics.
 
 ## ✨ Features
 
-- Live race timing and tracking (WIP)
-- Driver and constructor standings
-- Circuit information and lap analysis (WIP)
 - Historical race data comparison
-- Interactive track maps (WIP)
-- Real-time tire strategy insights (WIP)
+- Driver and constructor standings (WIP)
+- Circuit information and lap analysis (WIP)
+- Interactive track maps (planned in future)
+- Real-time tire strategy insights (planned in future)
+- Live race timing and tracking (planned in future)
 
 ## 🚀 Getting Started
 
@@ -26,7 +26,7 @@ git clone https://github.com/yashsoni27/f1-dash.git
 
 # Install dependencies
 cd f1-dash
-npm install
+npm install --legacy-peer-deps
 
 # Start the development server
 npm run dev
@@ -38,10 +38,8 @@ npm run dev
 - TypeScript - Type-safe development
 - TailwindCSS - Styling
 - Jolpica API - Race data integration
+- DHL API - Pitstop data integration
 
-<!-- ## 📱 Screenshots
-
-[Add screenshots of your application here] -->
 
 ## 🤝 Contributing
 
@@ -56,9 +54,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-<!-- ## 💬 Contact -->
-
-<!-- Your Name - [@yourtwitter](https://twitter.com/yourtwitter) -->
-
-Project Link: [https://github.com/yashsoni27/f1-dash](https://github.com/yashsoni27/f1-dash)
