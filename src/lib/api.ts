@@ -79,6 +79,34 @@ export async function getRoundDetails(
   return result;
 }
 
+// Get rounds having sprint races
+export async function getSprintRounds(season: string = "current") {
+  try {
+    const races = await getRaceCalendar(season);
+    const sprintRounds: number[] = [];
+
+    // Check each race for Sprint property
+    (races.data as { Races: any[] }).Races.forEach((race: any) => {
+      if (race.Sprint) {
+        sprintRounds.push(parseInt(race.round));
+      }
+    });
+
+    return {
+      season,
+      sprintRounds,
+      total: sprintRounds.length,
+    };
+  } catch (error) {
+    console.error("Error fetching sprint rounds:", error);
+    return {
+      season,
+      sprintRounds: [],
+      total: 0,
+    };
+  }
+}
+
 // Next Race
 export async function getNextRace(season: string = "current") {
   const result = await fetchFromApi<any>(`${season}/races`, "Race");
@@ -171,10 +199,10 @@ export async function getQualificationResults(
   return result;
 }
 
-// Sprint results - unused
+// Sprint results
 export async function getSprintResults(
   season: string = "current",
-  round: string,
+  round: string | number,
   limit: number = 30,
   offset: number = 0
 ) {
@@ -187,10 +215,10 @@ export async function getSprintResults(
   return result;
 }
 
-// Race results
+// Race results - unused
 export async function getRaceResults(
   season: string,
-  round: number,
+  round: number | string,
   limit: number = 30,
   offset: number = 0
 ) {
@@ -646,7 +674,6 @@ export async function getFinishingStats(season: string = "current") {
               .map((word: any) => word[0])
               .join("")
           : gpName.slice(0, 3).toUpperCase();
-        // acc[race.round] = gpName;
         acc[race.round] = abbreviation;
         return acc;
       },
@@ -781,6 +808,40 @@ export async function getFinishingStats(season: string = "current") {
               constructorPointsByRound[constructorId].points[round - 1] +=
                 points;
             }
+          }
+        }
+      }
+    }
+
+    // For including Sprint weekend points
+    const sprintRoundsData = await getSprintRounds(season);
+
+    // Process sprint results for sprint rounds
+    for (const round of sprintRoundsData.sprintRounds) {
+      const sprintResult = await getSprintResults(season, round)
+
+      if ((sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults) {
+        const data = sprintResult.data as { Races: { SprintResults: any[] }[] };
+        const results = data.Races[0].SprintResults;
+
+        // Process sprint results similar to race results
+        for (const result of results) {
+          if (!result.Driver || !result.Constructor) continue;
+
+          const driverId = result.Driver.driverId;
+          const constructorId = result.Constructor.constructorId;
+          const position = parseInt(result.position);
+          const points = parseFloat(result.points);
+
+          // Update points in existing stats objects
+          if (driverPointsByRound[driverId]) {
+            driverPointsByRound[driverId].points[round - 1] += points;
+            driverStats[driverId].totalPoints += points;
+          }
+
+          if (constructorPointsByRound[constructorId]) {
+            constructorPointsByRound[constructorId].points[round - 1] += points;
+            constructorStats[constructorId].totalPoints += points;
           }
         }
       }

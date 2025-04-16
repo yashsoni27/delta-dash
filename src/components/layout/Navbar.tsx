@@ -1,80 +1,111 @@
 "use client";
-import { Flame, Fuel, IdCard, Rocket, Users } from "lucide-react";
+import {
+  Crown,
+  Flag,
+  Flame,
+  IdCard,
+  LucideIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Timer,
+  Trophy,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+
+type NavItemProps = {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  isExpanded: boolean;
+};
+
+const NavItem = ({href, icon: Icon, label, isExpanded}: NavItemProps) => {
+  if (!isExpanded) {
+    return (
+      <Tooltip text={label}>
+        <Link href={href} className="flex items-center p-2 hover:bg-slate-800 rounded-lg transition-colors justify-center">
+          <Icon strokeWidth={1} size={22} />
+        </Link>
+      </Tooltip>
+    );
+  }
+  return (
+    <Link href={href} className="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg transition-colors">
+      <Icon strokeWidth={1} size={22} />
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+const navigationItems = [
+  { href: '/drivers', icon: IdCard, label: 'Drivers' },
+  { href: '/standings?title=Drivers', icon: Trophy, label: 'Driver Championship' },
+  { href: '/teams', icon: Users, label: 'Constructors' },
+  { href: '/standings?title=Constructors', icon: Crown, label: 'Constructor Championship' },
+  { href: '/races', icon: Flag, label: 'Races' },
+  { href: '/pitstop', icon: Timer, label: 'Pitstop' },
+];
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSidebarExpanded, setSidebarExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarExpanded(!isSidebarExpanded);
+  };
+
+  useEffect(() => {
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+      mainContent.style.marginLeft = isSidebarExpanded ? "15rem" : "4rem";
+    }
+  }, [isSidebarExpanded]);
 
   return (
-    <nav className="p-4 border-b border-gray-800">
-      <div className="mx-16 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
-          F1 Dashboard
-        </Link>
-
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-
-        {/* Desktop navigation */}
-        <div className="hidden md:flex space-x-4">
-          {/* <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link> */}
-          <Link href="/drivers" className="hover:text-red-500 flex gap-1">
-            <IdCard strokeWidth={1} />
-            Drivers
-          </Link>
-          <Link href="/teams" className="hover:text-red-500 flex gap-1">
-            <Users strokeWidth={1} />
-            Teams
-          </Link>
-          <Link href="/races" className="hover:text-red-500 flex gap-1">
-            <Rocket strokeWidth={1} />
-            Races
-          </Link>
-          <Link href="/pitstop" className="hover:text-red-500 flex gap-1">
-            <Fuel strokeWidth={1} />
-            Pitstop
+    <>
+      <nav className="p-4 border-b border-gray-800">
+        <div className="ml-20 flex justify-between items-center">
+          <Link href="/" className="text-xl">
+            Delta Dash
           </Link>
         </div>
-
-        {/* Mobile navigation */}
-        {isMenuOpen && (
-          <div className="absolute top-16 right-4 bg-slate-800 p-4 rounded-md shadow-lg md:hidden">
-            <div className="flex flex-col space-y-2">
-              {/* <Link href="/dashboard" className="hover:text-red-500">Dashboard</Link> */}
-              <Link href="/drivers" className="hover:text-red-500 flex gap-1">
-                <IdCard strokeWidth={1} />
-                Drivers
+      </nav>
+      <nav
+        className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-gray-800 transition-all duration-300 z-50 ${
+          isSidebarExpanded ? "w-60" : "w-16"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo Header */}
+          <div className="p-4 flex items-center justify-between border-b border-gray-800">
+            {isSidebarExpanded && (
+              <Link href="/" className="flex items-center gap-2">
+                <Flame className="text-f1-red" />
+                <span className="font-bold">Delta Dash</span>
               </Link>
-              <Link href="/teams" className="hover:text-red-500 flex gap-1">
-                <Users strokeWidth={1} />
-                Teams
-              </Link>
-              <Link href="/races" className="hover:text-red-500 flex gap-1">
-                <Rocket strokeWidth={1} />
-                Races
-              </Link>
-            </div>
+            )}
+            <button
+              onClick={toggleSidebar}
+              className="p-1 hover:bg-slate-800 rounded-lg"
+            >
+              {isSidebarExpanded ? (
+                <PanelLeftClose size={20} />
+              ) : (
+                <PanelLeftOpen size={20} />
+              )}
+            </button>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-1 p-2 text-sm">
+          {navigationItems.map((item) => (
+              <NavItem key={item.href} {...item} isExpanded={isSidebarExpanded} />
+            ))}
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }

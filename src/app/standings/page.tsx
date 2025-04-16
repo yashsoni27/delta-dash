@@ -29,13 +29,12 @@ function StandingsContent() {
       setIsLoading(true);
       try {
         const finishingStat = await getFinishingStats(selectedYear.toString());
-        console.log(finishingStat);
         if (title === "Drivers") {
           const evolution = await getDriverEvolution(selectedYear.toString());
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
           setStats(finishingStat?.drivers);
-          setPtDistribution(finishingStat?.driversRound);
+          setPtDistribution(finishingStat?.driversRound?.slice().reverse());
         } else if (title === "Constructors") {
           const evolution = await getConstructorEvolution(
             selectedYear.toString()
@@ -43,7 +42,7 @@ function StandingsContent() {
           setConstructorEvolution(evolution);
           setDriverEvolution(undefined);
           setStats(finishingStat?.constructors);
-          setPtDistribution(finishingStat?.constructorRound);
+          setPtDistribution(finishingStat?.constructorRound?.slice().reverse());
         }
       } catch (e) {
         console.log(`Error fetching ${title} evolution`);
@@ -134,7 +133,7 @@ function StandingsContent() {
                             layout="horizontal"
                             margin={{
                               top: 20,
-                              right: 20,
+                              right: 30,
                               bottom: 40,
                               left: 40,
                             }}
@@ -186,7 +185,7 @@ function StandingsContent() {
                             layout="horizontal"
                             margin={{
                               top: 20,
-                              right: 40,
+                              right: 30,
                               bottom: 40,
                               left: 40,
                             }}

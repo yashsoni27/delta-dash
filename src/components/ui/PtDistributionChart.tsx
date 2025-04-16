@@ -1,4 +1,4 @@
-import { BarTooltipProps, ResponsiveBar } from "@nivo/bar";
+import { BarItemProps, BarTooltipProps, ResponsiveBar } from "@nivo/bar";
 import { chartTheme } from "./StandingEvolution";
 import { getConstructorHex } from "@/lib/utils";
 import { useMemo } from "react";
@@ -20,7 +20,6 @@ export default function PtDistributionChart({
   groupMode = "stacked",
   margin = { top: 20, right: 20, bottom: 40, left: 30 },
 }: PtDistributionChartProps) {
-
   // Get all keys (excluding 'name')
   const keys = Object.keys(data[0]).filter(
     (key) =>
@@ -33,9 +32,13 @@ export default function PtDistributionChart({
   // Create driver names mapping
   const driverNames: Record<string, string> = useMemo(() => {
     const names: Record<string, string> = {};
-    keys.forEach(driverId => {
+    keys.forEach((driverId) => {
       const driverData = data[0][driverId];
-      if (driverData && typeof driverData === "object" && "name" in driverData) {
+      if (
+        driverData &&
+        typeof driverData === "object" &&
+        "name" in driverData
+      ) {
         names[driverId] = driverData.name as string;
       } else {
         names[driverId] = driverId;
@@ -57,7 +60,6 @@ export default function PtDistributionChart({
       </div>
     );
   };
-
 
   // Transform data for Nivo
   const chartData = data.map((round) => {
@@ -82,12 +84,14 @@ export default function PtDistributionChart({
   // Color function with proper type safety
   const getColor = (key: string) => {
     const driverData = data[0][key];
-    const constructor = driverData && typeof driverData === "object" && "constructor" in driverData 
-      ? driverData.constructor as string
-      : undefined;
+    const constructor =
+      driverData &&
+      typeof driverData === "object" &&
+      "constructor" in driverData
+        ? (driverData.constructor as string)
+        : undefined;
     return getConstructorHex(constructor);
   };
-
 
   return (
     <>
@@ -97,17 +101,17 @@ export default function PtDistributionChart({
         theme={chartTheme}
         keys={keys}
         indexBy={indexBy}
-        valueFormat={(value) => `${value} pts`}
         colors={({ id }) => getColor(String(id))}
         tooltip={CustomTooltip}
         margin={margin}
         innerPadding={1.5}
-        padding={0.2}
+        padding={0.1}
         layout={layout}
         groupMode={groupMode}
         enableLabel={false}
+        // enableTotals={true}
         isInteractive={true}
-        axisBottom={null}
+        // axisBottom={null}
         axisLeft={{
           tickSize: 5,
           tickPadding: 5,
@@ -116,6 +120,8 @@ export default function PtDistributionChart({
         enableGridX={true}
         enableGridY={false}
         animate={true}
+        role="application"
+        ariaLabel="Points Distribution"
       />
     </>
   );
