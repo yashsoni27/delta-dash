@@ -42,9 +42,9 @@ const NavItem = ({href, icon: Icon, label, isExpanded}: NavItemProps) => {
 
 const navigationItems = [
   { href: '/drivers', icon: IdCard, label: 'Drivers' },
-  { href: '/standings?title=Drivers', icon: Trophy, label: 'Driver Championship' },
+  { href: '/standings?title=Drivers', icon: Trophy, label: 'Drivers Championship' },
   { href: '/teams', icon: Users, label: 'Constructors' },
-  { href: '/standings?title=Constructors', icon: Crown, label: 'Constructor Championship' },
+  { href: '/standings?title=Constructors', icon: Crown, label: 'Constructors Championship' },
   { href: '/races', icon: Flag, label: 'Races' },
   { href: '/pitstop', icon: Timer, label: 'Pitstop' },
 ];
@@ -79,7 +79,7 @@ export default function Navbar() {
       >
         <div className="flex flex-col h-full">
           {/* Logo Header */}
-          <div className="p-4 flex items-center justify-between border-b border-gray-800">
+          <div className="p-4 flex items-center justify-between">
             {isSidebarExpanded && (
               <Link href="/" className="flex items-center gap-2">
                 <Flame className="text-f1-red" />
@@ -99,7 +99,7 @@ export default function Navbar() {
           </div>
 
           {/* Navigation Links */}
-          <div className="flex flex-col gap-1 p-2 text-sm">
+          <div className="flex flex-col gap-1 p-2 mt-6 text-sm">
           {navigationItems.map((item) => (
               <NavItem key={item.href} {...item} isExpanded={isSidebarExpanded} />
             ))}

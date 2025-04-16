@@ -4,6 +4,8 @@ import { Titillium_Web } from "next/font/google";
 import localFont from "next/font/local";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { Analytics } from '@vercel/analytics/next';
+
 
 // const myFont = Titillium_Web({ weight: ["200", "300", "400", "600", "700", "900"], subsets: ["latin"] });
 const myFont = localFont({
@@ -28,6 +30,7 @@ export default function RootLayout({
         <Navbar />
         <main id="main-content" className="min-h-screen transition-all duration-300 ml-16">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
