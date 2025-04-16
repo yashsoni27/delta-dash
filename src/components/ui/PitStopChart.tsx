@@ -3,15 +3,11 @@ import { chartTheme } from "./StandingEvolution";
 import { DHLtoJolpicaConstructor, getConstructorHex } from "@/lib/utils";
 
 function transformData(pitStopData: any) {
-  const eventIds = [
-    ...new Set(pitStopData.flatMap((team: any) => Object.keys(team.duration))),
-  ].sort();
-  const roundMap = Object.fromEntries(eventIds.map((id, index) => [id, index + 1]));
-  
   const transformedData = pitStopData.map((team: any) => {
     const data = Object.entries(team.duration).map(([evtId, time]) => ({
-      x: roundMap[evtId],
+      x: evtId,
       y: typeof time === "number" ? Number(time.toFixed(3)) : null,
+      country: evtId,
     }));
 
     return {
@@ -50,7 +46,9 @@ export default function PitStopChart({
     if (!slice?.points?.length) return null;
 
     const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
-    const lapNumber = sortedPoints[0].data.x;
+    const num = sortedPoints[0].id.split(".")[1];
+    const lapNumber = parseInt(num) + 1;
+    const country = sortedPoints[0].data.country;
     return (
       <div
         className="bg-slate-800 p-2 rounded min-w-[130px] opacity-95"
@@ -60,7 +58,9 @@ export default function PitStopChart({
           fontWeight: "light",
         }}
       >
-        <div className="mb-2">Round {lapNumber}</div>
+        <div className="mb-2 font-bold">
+          R{lapNumber}&nbsp;&nbsp;-&nbsp;&nbsp;{country}
+        </div>
         {sortedPoints.map((point) => (
           <div
             key={point.serieId}
@@ -80,13 +80,17 @@ export default function PitStopChart({
       <div className="scroll-m-20 mb-3">{heading}</div>
       <ResponsiveLine
         data={formattedData}
-        margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
-        axisTop={null}
-        axisRight={null}
+        margin={{ top: 10, right: 40, bottom: 30, left: 30 }}
         theme={chartTheme}
         enablePoints={true}
         lineWidth={2}
         pointSize={4}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize:2,
+          tickRotation: -45
+        }}
         yScale={{
           type: "linear",
           stacked: false,

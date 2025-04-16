@@ -3,18 +3,21 @@ import Card from "@/components/ui/Card";
 import CardSkeleton from "@/components/loading/CardSkeleton";
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { getSingleFastestPitStop } from "@/lib/api";
+import { getFastestLapStanding, getSingleFastestPitStop } from "@/lib/api";
 import { Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
+  const [fastestLap, setFastestLap] = useState<any | null>(null);
 
   const fetchFastestPitstop = useCallback(async () => {
     const pitstopRes = await getSingleFastestPitStop();
-    console.log(pitstopRes);
+    // console.log(pitstopRes);
     setPitStopInfo(pitstopRes);
+    const standing = await getFastestLapStanding();
+    setFastestLap(standing.standings[0]);
   }, []);
 
   useEffect(() => {
@@ -44,7 +47,23 @@ export default function Home() {
             />
           </Link>
         )}
-        <CardSkeleton />
+        {fastestLap == null ? (
+          <CardSkeleton />
+        ) : (
+          // <Link
+          //   href={{
+          //     pathname: "/races",
+          //   }}
+          // >
+            <Card
+              title="DHL Fastest Laps"
+              icon={<Timer size={18} />}
+              stat={`${fastestLap.flCount} Fastest Laps`}
+              subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
+              className="h-full"
+            />
+          // </Link>
+        )}
         <CardSkeleton />
 
         {/* Table grid */}

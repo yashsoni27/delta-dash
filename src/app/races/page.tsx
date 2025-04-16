@@ -70,7 +70,7 @@ export default function Home() {
       try {
         setIsLoading(true);
         const previousRaces = await getPreviousRaces(year);
-        console.log(previousRaces);
+        // console.log(previousRaces);
         const options = previousRaces.map((race: any) => ({
           name: race.Circuit.Location.country,
           value: parseInt(race.round, 10),

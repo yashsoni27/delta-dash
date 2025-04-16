@@ -818,7 +818,7 @@ export async function getFinishingStats(season: string = "current") {
 
     // Process sprint results for sprint rounds
     for (const round of sprintRoundsData.sprintRounds) {
-      const sprintResult = await getSprintResults(season, round)
+      const sprintResult = await getSprintResults(season, round);
 
       if ((sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults) {
         const data = sprintResult.data as { Races: { SprintResults: any[] }[] };
@@ -1021,9 +1021,30 @@ export async function getDriverAvgAndPoints(eventId?: string) {
 export async function getAvgPitStopAndEvtId() {
   try {
     const response = await fetchFromDHL("avgPitStopAndEventId");
-    // console.log("Event response: ", response.chart);
+    const { events, values } = response.chart;
 
-    return response.chart;
+    // Create mapping of event IDs to abbreviations
+    const eventMap = events.reduce(
+      (acc: Record<string, string>, event: any) => {
+        acc[event.id] = event.abbr;
+        return acc;
+      },
+      {}
+    );
+
+    // Transform values to use abbreviations instead of event IDs
+    const transformedValues = values.map((team: any) => ({
+      ...team,
+      duration: Object.entries(team.duration).reduce(
+        (acc: Record<string, number>, [eventId, duration]) => {
+          acc[eventMap[eventId]] = duration as number;
+          return acc;
+        },
+        {}
+      ),
+    }));
+
+    return { events: events, values: transformedValues };
   } catch (e) {
     console.log("Error in DHL API: ", e);
   }
@@ -1033,6 +1054,16 @@ export async function getFastestPitstopAndStanding() {
   try {
     const response = await fetchFromDHL("fastestPitStopAndStanding");
     // console.log("Standing response: ", response.chart);
+
+    return response.chart;
+  } catch (e) {
+    console.log("Error in DHL API", e);
+  }
+}
+
+export async function getFastestLapStanding() {
+  try {
+    const response = await fetchFromDHL("fastestLapStanding");
 
     return response.chart;
   } catch (e) {

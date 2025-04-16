@@ -1,5 +1,6 @@
 "use client";
 import {
+  ChartColumn,
   Crown,
   Flag,
   Flame,
@@ -45,8 +46,9 @@ const navigationItems = [
   { href: '/standings?title=Drivers', icon: Trophy, label: 'Drivers Championship' },
   { href: '/teams', icon: Users, label: 'Constructors' },
   { href: '/standings?title=Constructors', icon: Crown, label: 'Constructors Championship' },
+  { href: '/stats', icon: ChartColumn, label: 'Driver Stats' },
   { href: '/races', icon: Flag, label: 'Races' },
-  { href: '/pitstop', icon: Timer, label: 'Pitstop' },
+  { href: '/pitstop', icon: Timer, label: 'Pit Stops' },
 ];
 
 export default function Navbar() {

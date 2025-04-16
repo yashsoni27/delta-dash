@@ -1,4 +1,5 @@
 "use client";
+import StandingsTableSkeleton from "@/components/loading/StandingsTableSkeleton";
 import BarChart from "@/components/ui/BarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import PitStopChart from "@/components/ui/PitStopChart";
@@ -45,8 +46,8 @@ export default function Home() {
         ),
       },
       {
-        key: "country",
-        // key: "abbreviation",
+        // key: "country",
+        key: "abbreviation",
         header: "GP",
         width: "w-1/8",
         align: "right",
@@ -66,10 +67,9 @@ export default function Home() {
     try {
       setIsLoading(true);
       const pitStopResponse = await getAvgPitStopAndEvtId();
-      const { events, values } = pitStopResponse;
-      setAvgPitStop(values);
+      setAvgPitStop(pitStopResponse?.values);
 
-      const teamAverages = values
+      const teamAverages = pitStopResponse?.values
         .map((team: any) => ({
           team: team.team_name,
           averageDuration: parseFloat(
@@ -156,13 +156,17 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
               <div className="mb-4 sm:mb-0 min-h-80">
-                <Table
-                  // className="tracking-tight"
-                  heading="Fastest Pit Stops"
-                  columns={columns}
-                  data={tableData}
-                  onRowClick={(item) => console.log(item)}
-                />
+                {!tableData ? (
+                  <StandingsTableSkeleton />
+                ) : (
+                  <Table
+                    heading="Fastest Pit Stops"
+                    className="tracking-tight"
+                    columns={columns}
+                    data={tableData}
+                    // onRowClick={(item) => console.log(item)}
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
