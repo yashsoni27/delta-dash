@@ -30,13 +30,6 @@ function transformData(data: any) {
       value: item.time,
       color: getConstructorHex(item.constructorId),
     }));
-
-  // return data.map((item: any) => ({
-  //   // group: item.familyName,
-  //   group: item.driverCode,
-  //   value: item.time,
-  //   color: getConstructorHex(item.constructorId),
-  // }));
 }
 
 export default function BoxPlotChart({ data, heading }: any) {

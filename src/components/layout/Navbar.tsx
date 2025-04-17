@@ -27,14 +27,14 @@ const NavItem = ({href, icon: Icon, label, isExpanded}: NavItemProps) => {
   if (!isExpanded) {
     return (
       <Tooltip text={label}>
-        <Link href={href} className="flex items-center p-2 hover:bg-slate-800 rounded-lg transition-colors justify-center">
+        <Link href={href} className="flex items-center p-2 my-1 hover:bg-slate-800 rounded-lg transition-colors justify-center">
           <Icon strokeWidth={1} size={22} />
         </Link>
       </Tooltip>
     );
   }
   return (
-    <Link href={href} className="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg transition-colors">
+    <Link href={href} className="flex items-center gap-3 p-2 my-1 hover:bg-slate-800 rounded-lg transition-colors">
       <Icon strokeWidth={1} size={22} />
       <span>{label}</span>
     </Link>
@@ -52,7 +52,7 @@ const navigationItems = [
 ];
 
 export default function Navbar() {
-  const [isSidebarExpanded, setSidebarExpanded] = useState(false);
+  const [isSidebarExpanded, setSidebarExpanded] = useState(true);
 
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);

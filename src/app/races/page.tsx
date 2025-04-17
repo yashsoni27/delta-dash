@@ -6,6 +6,7 @@ import Table from "@/components/ui/Table";
 import TrackImg from "@/components/ui/TrackImg";
 import { getFastestLaps, getPreviousRaces } from "@/lib/api";
 import { Column } from "@/types";
+import { Calendar, Flag } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
@@ -64,7 +65,7 @@ export default function Home() {
     setColumns(column);
   }, []);
 
-  // Separate fetch for races data
+  // Fetch for races data
   const fetchRaces = useCallback(
     async (year: string) => {
       try {
@@ -160,9 +161,11 @@ export default function Home() {
       <div className="p-10 pt-0 md:pt-0 gap-4">
         <div className="top-16 z-10 w-full ml-auto sm:pr-0 flex gap-2 justify-between">
           <div className="p-4 text-xl">{raceName}</div>
-          <div className="flex gap-2 p-4">
+          <div className="flex gap-5 p-4">
+
+            {/* Season selector */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-thin">Season:</span>
+              <span className="text-xs font-thin flex items-center"><Calendar size={16} />&nbsp;Season</span>
               <select
                 className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
                 value={selectedYear}
@@ -175,8 +178,10 @@ export default function Home() {
                 ))}
               </select>
             </div>
+
+            {/* Race Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-thin">Race:</span>
+              <span className="text-xs font-thin flex items-center"><Flag size={16}/>&nbsp;Race</span>
               <select
                 className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-40 px-4 py-2 bg-transparent bg-slate-800"
                 value={round !== null ? round : ""}

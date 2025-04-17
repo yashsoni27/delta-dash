@@ -73,7 +73,7 @@ function StandingsTableContent({
   }
 
   return (
-    <div className="md:row-start-4 lg:row-start-3 rounded-lg border border-gray-700 pt-2">
+    <div className="md:row-start-4 lg:row-start-3 rounded-lg border max-w-md border-gray-700 pt-2">
       <h2 className="scroll-m-20 text-xl font-semibold tracking-tight p-4">
         {name} Standings
       </h2>

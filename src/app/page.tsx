@@ -3,7 +3,7 @@ import Card from "@/components/ui/Card";
 import CardSkeleton from "@/components/loading/CardSkeleton";
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { getFastestLapStanding, getSingleFastestPitStop } from "@/lib/api";
+import { getFastestLapStanding, getSingleFastestPitStop, getMeetingId } from "@/lib/api";
 import { Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -14,10 +14,12 @@ export default function Home() {
 
   const fetchFastestPitstop = useCallback(async () => {
     const pitstopRes = await getSingleFastestPitStop();
-    // console.log(pitstopRes);
     setPitStopInfo(pitstopRes);
     const standing = await getFastestLapStanding();
     setFastestLap(standing.standings[0]);
+
+    const Id = await getMeetingId(2);
+    console.log(Id);
   }, []);
 
   useEffect(() => {

@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={myFont.className}>
         <Navbar />
-        <main id="main-content" className="min-h-screen transition-all duration-300 ml-16">{children}</main>
+        <main id="main-content" className="min-h-screen transition-all duration-300 ml-60">{children}</main>
         <Footer />
         <Analytics />
       </body>
