@@ -187,6 +187,7 @@ export default function Home() {
                       keys={["avgDuration"]}
                       layout="horizontal"
                       margin={{ top: 30, right: 70, bottom: 20, left: 70 }}
+                      showAxisLeft={true}
                     />
                   )}
                 </div>
@@ -201,6 +202,7 @@ export default function Home() {
                       keys={["points"]}
                       layout="horizontal"
                       margin={{ top: 20, right: 70, bottom: 20, left: 70 }}
+                      showAxisLeft={true}
                     />
                   )}
                 </div>
@@ -216,6 +218,7 @@ export default function Home() {
                       keys={["averageDuration"]}
                       layout="horizontal"
                       margin={{ top: 30, right: 70, bottom: 50, left: 80 }}
+                      showAxisLeft={true}
                     />
                   )}
                 </div>
@@ -230,6 +233,7 @@ export default function Home() {
                       keys={["points"]}
                       layout="horizontal"
                       margin={{ top: 30, right: 70, bottom: 50, left: 80 }}
+                      showAxisLeft={true}
                     />
                   )}
                 </div>

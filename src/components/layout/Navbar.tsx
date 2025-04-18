@@ -52,7 +52,7 @@ const navigationItems = [
 ];
 
 export default function Navbar() {
-  const [isSidebarExpanded, setSidebarExpanded] = useState(true);
+  const [isSidebarExpanded, setSidebarExpanded] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);

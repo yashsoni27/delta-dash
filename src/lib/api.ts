@@ -3,11 +3,13 @@ import { LapTiming, PaginationInfo } from "@/types";
 import {
   circuitIdToF1Adapter,
   fetchWithDelay,
+  getConstructorHex,
   transformResponse,
 } from "./utils";
 
 const JOLPICA_API_BASE = process.env.NEXT_PUBLIC_JOLPICA_API_BASE;
 const F1_MEDIA_BASE = process.env.NEXT_PUBLIC_F1_MEDIA_BASE;
+const OPEN_F1_BASE = process.env.NEXT_PUBLIC_OPEN_F1_API_BASE;
 const REVALIDATION_TIME = parseInt(process.env.REVALIDATION_TIME || "3600");
 
 export async function fetchFromApi<T>(
@@ -24,7 +26,6 @@ export async function fetchFromApi<T>(
 
   const response = await fetch(url, {
     headers: {
-      // 'Authorization': `Bearer ${API_KEY}`,
       "Content-Type": "application/json",
     },
   });
@@ -41,10 +42,9 @@ export async function fetchFromDHL(
   endpoint: DHLEndpoint | string
 ): Promise<any> {
   try {
-    // const url = endpoint.includes('?') ?
     const response = await fetch(`dhl/${endpoint}`, {
       headers: { "Content-Type": "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: REVALIDATION_TIME },
     });
 
     if (!response.ok) throw new Error(`DHL error: ${response.status}`);
@@ -56,8 +56,23 @@ export async function fetchFromDHL(
   }
 }
 
+export async function fetchFromOpenF1<T>(endpoint: string): Promise<any> {
+  try {
+    const response = await fetch(`${OPEN_F1_BASE}${endpoint}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) throw new Error(`OpenF1 error: ${response.status}`);
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch from OpenF1");
+    return null;
+  }
+}
+
 /* -------------------------------------------------------------------------- */
-/*                                API Endpoints                               */
+/*                             Jolpica API Endpoints                          */
 /* -------------------------------------------------------------------------- */
 
 // Race calendar
@@ -77,6 +92,16 @@ export async function getRoundDetails(
 ) {
   const result = await fetchFromApi(`${season}/${round}/races`, "Race");
   return result;
+}
+
+// Get Driver details -- unused
+export async function getDrivers(season: string = "current") {
+  try {
+    const response = await fetchFromApi(`${season}/drivers`, "Driver");
+    return response;
+  } catch (e) {
+    console.log("Error in fetching drivers: ", e);
+  }
 }
 
 // Get rounds having sprint races
@@ -656,7 +681,7 @@ export async function getConstructorEvolution(
   }
 }
 
-// Driver stats -- for Stats and Pt Distribution
+// Finishing stats -- for Stats and Pt Distribution
 export async function getFinishingStats(season: string = "current") {
   try {
     const driverStats: Record<string, any> = {};
@@ -935,6 +960,237 @@ export async function getFinishingStats(season: string = "current") {
   }
 }
 
+// Driver stats
+export async function getDriverStats(
+  season: string = "current",
+  driverId: string,
+  limit: number = 50,
+  offset: number = 0
+) {
+  interface DriverStats {
+    familyName: string;
+    constructorId: string;
+    seasonAchievements: {
+      Wins: number;
+      Podiums: number;
+      PointsFinish: number;
+      DNF: number;
+      DSQ: number;
+      TotalRounds: number;
+    };
+    pointsThisSeason: number;
+    averagePointsPerGP: number;
+    totalLapsLed: number;
+    finishPositions: {
+      distribution: Array<{
+        id: string;
+        value: number | null | string;
+        color: string;
+      }>;
+      inPoints: Record<string, number>;
+    };
+    startToFinishFlow: Array<{
+      start: number;
+      finish: number;
+    }>;
+    lapsLed: Array<{
+      round: number;
+      gp: string;
+      lapsLed: number;
+      color: string;
+    }>;
+  }
+
+  try {
+    const response = await fetchFromApi(
+      `${season}/drivers/${driverId}/results`,
+      "Race",
+      limit,
+      offset
+    );
+
+    const initialResult = await getRaceCalendar();
+    const totalRaces = initialResult.total;
+
+    const constructors = await getConstructors(season);
+    const totalDrivers = constructors.total * 2;
+
+    // console.log(response);
+    const races = (response?.data as { Races: any[] })?.Races || [];
+
+    // Initialize stats object
+    const stats: DriverStats = {
+      familyName: "",
+      constructorId: "",
+      seasonAchievements: {
+        Wins: 0,
+        Podiums: 0,
+        PointsFinish: 0,
+        DNF: 0,
+        DSQ: 0,
+        TotalRounds: 0,
+      },
+      pointsThisSeason: 0,
+      averagePointsPerGP: 0,
+      totalLapsLed: 0,
+      finishPositions: {
+        distribution: Array.from({ length: totalDrivers }, (_, i) => ({
+          id: `P${i + 1}`,
+          value: "",
+          color: "",
+        })),
+        inPoints: {
+          withPoints: 0,
+          withoutPoints: 0,
+        },
+      },
+      startToFinishFlow: [],
+      lapsLed: [],
+    };
+
+    races.forEach((race: any) => {
+      const result = race.Results[0];
+      const position = parseInt(result.position);
+      const grid = parseInt(result.grid);
+      const points = parseFloat(result.points);
+
+      stats.familyName = result.Driver.familyName;
+      stats.constructorId = result.Constructor.constructorId;
+
+      stats.seasonAchievements.TotalRounds = totalRaces;
+
+      // Season Achievements - count wins
+      if (position === 1) {
+        stats.seasonAchievements.Wins++;
+      }
+      if (position <= 3) {
+        stats.seasonAchievements.Podiums++;
+      }
+      if (position <= 10) {
+        stats.seasonAchievements.PointsFinish++;
+      }
+      if (result.status === "Retired") {
+        stats.seasonAchievements.DNF++;
+      }
+      if (result.status === "Disqualified") {
+        stats.seasonAchievements.DSQ++;
+      }
+
+      // Points this Season
+      stats.pointsThisSeason += points;
+
+      // Finish Positions Distribution
+      const positionIndex = position - 1;
+      if (positionIndex >= 0 && positionIndex < totalDrivers) {
+        const currentValue =
+          stats.finishPositions.distribution[positionIndex].value;
+        stats.finishPositions.distribution[positionIndex].value =
+          currentValue === "" ? 1 : Number(currentValue) + 1;
+        stats.finishPositions.distribution[positionIndex].color =
+          getConstructorHex(result.Constructor.constructorId);
+      }
+
+      // Finish Positions in Points
+      if (points > 0) {
+        stats.finishPositions.inPoints.withPoints++;
+      } else {
+        stats.finishPositions.inPoints.withoutPoints++;
+      }
+
+      // Start to Finish Position Flow
+      stats.startToFinishFlow.push({
+        start: grid,
+        finish: position,
+      });
+    });
+
+    // Average points per GP
+    stats.averagePointsPerGP = parseFloat(
+      (stats.pointsThisSeason / races.length).toFixed(1)
+    );
+
+    // Get laps led data
+    const lapsLedData = await getLapsLedByDriver(season, driverId);
+    if (lapsLedData) {
+      stats.lapsLed = lapsLedData.map(lap => ({
+        ...lap,
+        color: getConstructorHex(stats.constructorId)
+      }));
+    }
+
+    // Total laps led
+    stats.totalLapsLed = (lapsLedData ?? []).reduce(
+      (total, lap) => total + lap.lapsLed, 
+      0
+    );
+
+    return stats;
+  } catch (e) {
+    console.log("Error in fetching driver stats: ", e);
+  }
+}
+
+// Get laps led by a driver
+export async function getLapsLedByDriver(
+  season: string = "current",
+  driverId: string
+) {
+  try {
+    const initialResult = await getPreviousRaces();
+    const gpNames = initialResult.reduce(
+      (acc: Record<string, string>, race: any) => {
+        const gpName = race.raceName.replace("Grand Prix", "").trim();
+        const abbreviation = gpName.includes(" ")
+          ? gpName
+              .split(" ")
+              .map((word: any) => word[0])
+              .join("")
+          : gpName.slice(0, 3).toUpperCase();
+        acc[race.round] = abbreviation;
+        return acc;
+      },
+      {}
+    );
+
+    const totalRaces = parseInt(initialResult[0].round);
+
+    const lapsLedPerRound: Array<{
+      round: number;
+      gp: string;
+      lapsLed: number;
+    }> = [];
+
+    for (let roundNum = 1; roundNum <= totalRaces; roundNum++) {
+      const roundResponse = await fetchWithDelay<any>(
+        `/${season}/${roundNum}/drivers/${driverId}/laps`,
+        "Race",
+        100,
+        100,
+        0
+      );
+      const laps = roundResponse?.data?.Races?.[0]?.Laps || [];
+      let lapsLed = 0;
+
+      laps.forEach((lap: any) => {
+        const timing = lap.Timings?.[0];
+        if (timing?.position === "1") {
+          lapsLed++;
+        }
+      });
+
+      lapsLedPerRound.push({
+        round: roundNum,
+        gp: gpNames[roundNum],
+        lapsLed,
+      });
+    }
+
+    return lapsLedPerRound;
+  } catch (e) {
+    console.log("Error in fetching LapsLed: ", e);
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                  DHL APIs                                  */
 /* -------------------------------------------------------------------------- */
@@ -1068,6 +1324,60 @@ export async function getFastestLapStanding() {
     return response.chart;
   } catch (e) {
     console.log("Error in DHL API", e);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 OpenF1 APIs                                */
+/* -------------------------------------------------------------------------- */
+// Get meeting ids
+async function getAllMeetingIds(season?: string | number) {
+  try {
+    if (!season) {
+      const year = new Date().getFullYear();
+      season = year;
+    }
+    const meetings = await fetchFromOpenF1(`meetings?year=${season}`);
+
+    // Filter out pre-season testing events and sort by date
+    const raceMeetings = meetings
+      .filter(
+        (meeting: any) =>
+          !meeting.meeting_name.toLowerCase().includes("testing")
+      )
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.date_start).getTime() - new Date(b.date_start).getTime()
+      );
+
+    // Map to simplified format with just the essential info
+    const meetingIds = raceMeetings.map((meeting: any, index: number) => ({
+      meetingKey: meeting.meeting_key,
+      meetingCode: meeting.meeting_code,
+      meetingName: meeting.meeting_name,
+      circuitName: meeting.circuit_short_name,
+      dateStart: meeting.date_start,
+      round: index + 1,
+    }));
+
+    return {
+      season,
+      meetings: meetingIds,
+    };
+  } catch (e) {
+    console.log("Error in fetching MeetingIds: ", e);
+  }
+}
+
+// Get meeting id for round and season
+export async function getMeetingId(round: number, season?: string | number) {
+  try {
+    const meetingIds = await getAllMeetingIds();
+    const meeting = meetingIds?.meetings?.filter((m: any) => m.round === round);
+
+    return meeting[0].meetingKey;
+  } catch (e) {
+    console.log("Error in fetching meeting Id: ", e);
   }
 }
 
