@@ -9,13 +9,13 @@ interface BarChartProps {
   driver?: string;
   keys?: string[];
   indexBy?: string;
-  enableGridX?: boolean
-  enableGridY?: boolean
-  enableLabel?: boolean
-  enableTotals?: boolean
-  isInteractive?: boolean
-  showAxisBottom?: boolean
-  showAxisLeft?: boolean
+  enableGridX?: boolean;
+  enableGridY?: boolean;
+  enableLabel?: boolean;
+  enableTotals?: boolean;
+  isInteractive?: boolean;
+  showAxisBottom?: boolean;
+  showAxisLeft?: boolean;
   layout?: "vertical" | "horizontal";
   groupMode?: "grouped" | "stacked";
   margin?: { top: number; right: number; bottom: number; left: number };
@@ -41,25 +41,24 @@ export default function BarChart({
   margin = { top: 20, right: 60, bottom: 30, left: 60 },
 }: BarChartProps) {
   if (data == undefined) {
-    return null
+    return null;
   }
 
-  const CustomTooltip = ({
-    id,
-    value,
-    color,
-    indexValue,
-  }: BarTooltipProps) => {
+  const CustomTooltip = ({ value, indexValue, data }: BarTooltipProps) => {
     return (
-    <div className="bg-slate-800 text-xs rounded-md w-32 flex flex-col opacity-95">
-      <div className="p-2 border-1 border-b border-slate-600">{driver}</div>
-  
-      <div className="p-2 text-xs flex justify-between">
-        <div>{indexValue}</div>
-        <div>{value}</div>
+      <div className="bg-slate-800 text-xs rounded-md min-w-32 max-w-48 flex flex-col opacity-95">
+        <div className="p-2 border-1 border-b border-slate-600">{driver}</div>
+
+        <div className="p-2 text-xs flex justify-between gap-3">
+          <div>{data.locality || indexValue}</div>
+          <div className="font-bold">
+            {value}{" "}
+            {data.locality ? (value == "1" ? "lap led" : "laps led") : ""}
+          </div>
+        </div>
       </div>
-    </div>
-  )};
+    );
+  };
 
   return (
     <>

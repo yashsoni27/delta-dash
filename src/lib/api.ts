@@ -1112,15 +1112,15 @@ export async function getDriverStats(
     // Get laps led data
     const lapsLedData = await getLapsLedByDriver(season, driverId);
     if (lapsLedData) {
-      stats.lapsLed = lapsLedData.map(lap => ({
+      stats.lapsLed = lapsLedData.map((lap) => ({
         ...lap,
-        color: getConstructorHex(stats.constructorId)
+        color: getConstructorHex(stats.constructorId),
       }));
     }
 
     // Total laps led
     stats.totalLapsLed = (lapsLedData ?? []).reduce(
-      (total, lap) => total + lap.lapsLed, 
+      (total, lap) => total + lap.lapsLed,
       0
     );
 
@@ -1136,16 +1136,35 @@ export async function getLapsLedByDriver(
   driverId: string
 ) {
   try {
-    const initialResult = await getPreviousRaces();
+    const initialResult = await getPreviousRaces(season);
     const gpNames = initialResult.reduce(
       (acc: Record<string, string>, race: any) => {
         const gpName = race.raceName.replace("Grand Prix", "").trim();
-        const abbreviation = gpName.includes(" ")
+        const usedAbbreviations = new Set(Object.values(acc));
+
+        let abbreviation = gpName.includes(" ")
           ? gpName
               .split(" ")
               .map((word: any) => word[0])
               .join("")
           : gpName.slice(0, 3).toUpperCase();
+        
+          // If abbreviation already exists, try alternative
+        if (usedAbbreviations.has(abbreviation)) {
+          // For single word names, use first 2 chars + last char
+          if (!gpName.includes(" ")) {
+            abbreviation = gpName.slice(0, 2) + gpName.slice(-1);
+          } else {
+            // For multi-word names, use first char + first char of last word + last char
+            const words = gpName.split(" ");
+            abbreviation =
+              words[0][0] +
+              words[words.length - 1][0] +
+              words[words.length - 1].slice(-1);
+          }
+          abbreviation = abbreviation.toUpperCase();
+        }
+        
         acc[race.round] = abbreviation;
         return acc;
       },
@@ -1157,6 +1176,7 @@ export async function getLapsLedByDriver(
     const lapsLedPerRound: Array<{
       round: number;
       gp: string;
+      locality: string;
       lapsLed: number;
     }> = [];
 
@@ -1168,6 +1188,10 @@ export async function getLapsLedByDriver(
         100,
         0
       );
+
+      const locality =
+        roundResponse?.data?.Races?.[0]?.Circuit?.Location?.locality;
+
       const laps = roundResponse?.data?.Races?.[0]?.Laps || [];
       let lapsLed = 0;
 
@@ -1181,6 +1205,7 @@ export async function getLapsLedByDriver(
       lapsLedPerRound.push({
         round: roundNum,
         gp: gpNames[roundNum],
+        locality: locality,
         lapsLed,
       });
     }

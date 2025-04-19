@@ -1,5 +1,7 @@
 "use client";
 import CardSkeleton from "@/components/loading/CardSkeleton";
+import ChartSkeleton from "@/components/loading/ChartSkeleton";
+import PieChartSkeleton from "@/components/loading/PieChartSkeleton";
 import BarChart from "@/components/ui/BarChart";
 import Card from "@/components/ui/Card";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -52,7 +54,7 @@ export default function Home() {
       try {
         setIsLoading(true);
         const driverData = await getDriverStats(year.toString(), driverId);
-        console.log("data: ", driverData);
+        // console.log("data: ", driverData);
         setDriverStat(driverData);
       } catch (e) {
         console.log("Error in fetching driver data: ", e);
@@ -60,7 +62,7 @@ export default function Home() {
         setIsLoading(false);
       }
     },
-    [selectedDriver]
+    []
   );
 
   useEffect(() => {
@@ -69,14 +71,10 @@ export default function Home() {
   }, [selectedYear, loadDrivers]);
 
   useEffect(() => {
-    if (selectedDriver) {
+    if (selectedDriver && selectedYear) {
       fetchDriverData(selectedYear.toString(), selectedDriver);
     }
   }, [selectedDriver, selectedYear, fetchDriverData]);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
 
   return (
     <>
@@ -117,9 +115,7 @@ export default function Home() {
                 msOverflowStyle: "none",
               }}
             >
-              {isLoading ? (
-                <option className="bg-slate-800">Loading...</option>
-              ) : drivers.length === 0 ? (
+              {drivers.length === 0 ? (
                 <option className="bg-slate-800">No data</option>
               ) : (
                 drivers.map((driver) => (
@@ -135,6 +131,7 @@ export default function Home() {
             </select>
           </div>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-4 sm:pt-0 items-start">
           <div className="grid grid-cols-subgrid md:col-span-2 lg:col-span-4 mb-3 sm:mb-0 gap-4 items-stretch">
             {isLoading ? (
@@ -168,79 +165,93 @@ export default function Home() {
                   title="Laps Led"
                   subtitle="Total laps in P1"
                   stat={driverStat?.totalLapsLed}
-                  icon={<Medal size={18} />}
+                  icon={<Flag size={18} />}
                 />
               </>
             )}
           </div>
+
           <div className="grid grid-cols-subgrid lg:col-span-2 gap-1 sm:gap-4 mb-8">
             <div className="grid grid-cols-subgrid lg:col-span-2 gap-1 sm:gap-4">
-              <div className="sm:rounded-lg bg-slate-900 p-4">
-                {/* {!driverStat?.seasonAchievements ? null : ( */}
-                <RadialBarChart
-                  heading="Season Performance"
-                  data={driverStat.seasonAchievements}
-                />
-                {/* )} */}
-              </div>
-              <div className="sm:rounded-lg bg-slate-900 p-4">
-                <PieChart
-                  heading="Finish in Points"
-                  data={driverStat?.finishPositions?.inPoints}
-                  color={driverStat.constructorId}
-                  driver={driverStat.familyName}
-                />
-              </div>
-              <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
-                <SankeyChart
-                  heading="Start to Finish Flow"
-                  data={driverStat.startToFinishFlow}
-                  driver={driverStat.familyName}
-                />
-              </div>
+              {isLoading ? (
+                <>
+                  <PieChartSkeleton />
+                  <PieChartSkeleton />
+                  <ChartSkeleton />
+                </>
+              ) : (
+                <>
+                  <div className="sm:rounded-lg bg-slate-900 p-4">
+                    <RadialBarChart
+                      heading="Season Performance"
+                      data={driverStat.seasonAchievements}
+                    />
+                  </div>
+                  <div className="sm:rounded-lg bg-slate-900 p-4">
+                    <PieChart
+                      heading="Finish in Points"
+                      data={driverStat?.finishPositions?.inPoints}
+                      color={driverStat.constructorId}
+                      driver={driverStat.familyName}
+                    />
+                  </div>
+                  <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
+                    <SankeyChart
+                      heading="Start to Finish Flow"
+                      data={driverStat.startToFinishFlow}
+                      driver={driverStat.familyName}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-subgrid lg:col-span-2 gap-1 sm:gap-4 items-start mb-8">
-            <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
-              {/* {driverStat?.finishPositions?.distributions === undefined ? (
-                <LoadingSpinner />
-              ) : ( */}
-              <BarChart
-                heading="Finish Positions Distribution"
-                height={400}
-                width={800}
-                data={driverStat?.finishPositions?.distribution}
-                driver={driverStat.familyName}
-                layout="vertical"
-                groupMode="grouped"
-                enableGridY={true}
-                enableTotals={false}
-                enableLabel={true}
-                margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
-                isInteractive={true}
-                showAxisBottom={true}
-              />
-              {/* )} */}
-            </div>
-            <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
-              <BarChart
-                heading="Laps Led per Race"
-                height={400}
-                width={800}
-                data={driverStat?.lapsLed}
-                driver={driverStat.familyName}
-                keys={["lapsLed"]}
-                indexBy="gp"
-                layout="vertical"
-                groupMode="grouped"
-                enableGridY={true}
-                enableTotals={false}
-                enableLabel={true}
-                margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
-                isInteractive={true}
-                showAxisBottom={true}
-              />
-            </div>
+            {isLoading ? (
+              <>
+                <ChartSkeleton />
+                <ChartSkeleton />
+              </>
+            ) : (
+              <>
+                <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
+                  <BarChart
+                    heading="Finish Positions Distribution"
+                    height={400}
+                    width={800}
+                    data={driverStat?.finishPositions?.distribution}
+                    driver={driverStat.familyName}
+                    layout="vertical"
+                    groupMode="grouped"
+                    enableGridY={true}
+                    enableTotals={false}
+                    enableLabel={true}
+                    margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
+                    isInteractive={true}
+                    showAxisBottom={true}
+                  />
+                </div>
+                <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
+                  <BarChart
+                    heading="Laps Led per Race"
+                    height={400}
+                    width={800}
+                    data={driverStat?.lapsLed}
+                    driver={driverStat.familyName}
+                    keys={["lapsLed"]}
+                    indexBy="gp"
+                    layout="vertical"
+                    groupMode="grouped"
+                    enableGridY={true}
+                    enableTotals={false}
+                    enableLabel={true}
+                    margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
+                    isInteractive={true}
+                    showAxisBottom={true}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
