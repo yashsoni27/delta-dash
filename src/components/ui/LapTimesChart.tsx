@@ -5,43 +5,56 @@ import { getConstructorHex } from "@/lib/utils";
 function transformData(lapData: any) {
   const transformedData: any = [];
   const driverLaps: { [key: string]: any[] } = {};
+  const allTimes: number[] = [];
 
   // Grouping laps by drivers
   Object.values(lapData).forEach((lap: any) => {
+    allTimes.push(lap.time);
     if (!driverLaps[lap.driverId]) {
       driverLaps[lap.driverId] = [];
     }
     driverLaps[lap.driverId].push(lap);
   });
 
+  // Calculate global quartiles for all lap times
+  const sorted = [...allTimes].sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length * 0.25)];
+  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const iqr = q3 - q1;
+
+  // Define global outlier thresholds
+  const lowerThreshold = q1 - 1.5 * iqr;
+  const upperThreshold = q3 + 1.5 * iqr;
+
   // Transforming the data for each driver
   Object.entries(driverLaps).forEach(([driverId, laps]) => {
-    // Calculate quartiles for this driver's lap times
-    const times = laps.map(lap => lap.time);
-    const sorted = [...times].sort((a, b) => a - b);
-    const q1 = sorted[Math.floor(sorted.length * 0.25)];
-    const q3 = sorted[Math.floor(sorted.length * 0.75)];
-    const iqr = q3 - q1;
+    // // Calculate quartiles for this driver's lap times
+    // const times = laps.map((lap) => lap.time);
+    // const sorted = [...times].sort((a, b) => a - b);
+    // const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    // const q3 = sorted[Math.floor(sorted.length * 0.75)];
+    // const iqr = q3 - q1;
 
-    // Define outlier thresholds
-    const lowerThreshold = q1 - 1.5 * iqr;
-    const upperThreshold = q3 + 1.5 * iqr;
+    // // Define outlier thresholds
+    // const lowerThreshold = q1 - 1.5 * iqr;
+    // const upperThreshold = q3 + 1.5 * iqr;
 
     // Filter out outliers
-    const filteredLaps = laps.filter(lap => 
-      lap.time >= lowerThreshold && lap.time <= upperThreshold
+    const filteredLaps = laps.filter(
+      (lap) => lap.time >= lowerThreshold && lap.time <= upperThreshold
     );
 
-    const driverSeries = {
-      id: filteredLaps[0].familyName,
-      data: filteredLaps.map((lap: any) => ({
-        x: lap.lapNumber,
-        y: lap.time,
-      })),
-      color: getConstructorHex(filteredLaps[0].constructorId),
-    };
-
-    transformedData.push(driverSeries);
+    if (filteredLaps.length > 0) {
+      const driverSeries = {
+        id: filteredLaps[0].familyName,
+        data: filteredLaps.map((lap: any) => ({
+          x: lap.lapNumber,
+          y: lap.time,
+        })),
+        color: getConstructorHex(filteredLaps[0].constructorId),
+      };
+      transformedData.push(driverSeries);
+    }
   });
 
   return transformedData;
@@ -67,7 +80,7 @@ export default function LapTimesChart({ data, heading }: any) {
   const CustomTooltip = ({ slice }: { slice: any }) => {
     if (!slice?.points?.length) return null;
 
-    const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
+    const sortedPoints = [...slice.points].sort((a, b) => a.data.y - b.data.y);
     const round = sortedPoints[0].data.x;
 
     return (
@@ -101,7 +114,7 @@ export default function LapTimesChart({ data, heading }: any) {
       <div className="scroll-m-20 mb-3">{heading}</div>
       <ResponsiveLine
         data={formattedData}
-        margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
+        margin={{ top: 10, right: 20, bottom: 20, left: 40 }}
         axisTop={null}
         axisRight={null}
         theme={chartTheme}

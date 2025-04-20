@@ -4,7 +4,6 @@ import ChartSkeleton from "@/components/loading/ChartSkeleton";
 import PieChartSkeleton from "@/components/loading/PieChartSkeleton";
 import BarChart from "@/components/ui/BarChart";
 import Card from "@/components/ui/Card";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import PieChart from "@/components/ui/PieChart";
 import RadialBarChart from "@/components/ui/RadialBarChart";
 import SankeyChart from "@/components/ui/SankeyChart";
