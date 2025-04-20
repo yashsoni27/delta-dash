@@ -41,7 +41,7 @@ export default function Home() {
             }}
           >
             <Card
-              title="Fastest Pit Stop"
+              title="DHL Fastest Pit Stop"
               icon={<Timer size={18} />}
               stat={`${pitStopInfo.duration} s`}
               subtitle={`${pitStopInfo.lastName} at ${pitStopInfo.abbreviation}`}
@@ -52,11 +52,6 @@ export default function Home() {
         {fastestLap == null ? (
           <CardSkeleton />
         ) : (
-          // <Link
-          //   href={{
-          //     pathname: "/races",
-          //   }}
-          // >
             <Card
               title="DHL Fastest Laps"
               icon={<Timer size={18} />}
@@ -64,7 +59,6 @@ export default function Home() {
               subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
               className="h-full"
             />
-          // </Link>
         )}
         <CardSkeleton />
 

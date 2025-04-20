@@ -689,25 +689,32 @@ export async function getFinishingStats(season: string = "current") {
     const driverPointsByRound: Record<string, any> = {};
     const constructorPointsByRound: Record<string, any> = {};
 
-    const initialResult = await getPreviousRaces();
-    const gpNames = initialResult.reduce(
+    const previousRaceResponse = await getPreviousRaces();
+    const gpNames = previousRaceResponse.reduce(
       (acc: Record<string, string>, race: any) => {
         const gpName = race.raceName.replace("Grand Prix", "").trim();
         const abbreviation = gpName.includes(" ")
-          ? gpName
-              .split(" ")
-              .map((word: any) => word[0])
-              .join("")
-          : gpName.slice(0, 3).toUpperCase();
+        ? gpName
+        .split(" ")
+        .map((word: any) => word[0])
+        .join("")
+        : gpName.slice(0, 3).toUpperCase();
         acc[race.round] = abbreviation;
         return acc;
       },
       {}
     );
+    const initialResult = await fetchFromApi(
+      `${season}/results`,
+      "Race",
+      1,
+      0
+    );
+    const totalRaces = parseInt(previousRaceResponse[0].round);
 
-    const totalRaces = parseInt(initialResult[0].round);
+    const totalResults = initialResult?.total;
     const batchSize = 80;
-    const requiredRequests = Math.ceil(totalRaces / batchSize);
+    const requiredRequests = Math.ceil(totalResults / batchSize);
     const offsets = Array.from(
       { length: requiredRequests },
       (_, i) => i * batchSize
@@ -723,13 +730,12 @@ export async function getFinishingStats(season: string = "current") {
           fetchWithDelay<any>(
             `${season}/results`,
             "Race",
-            index * 100,
+            batchSize,
             batchSize,
             offset
           )
         )
       );
-
       // Process each batch of results
       for (const batchResult of batchResults) {
         if (batchResult?.data?.Races) {
@@ -837,7 +843,7 @@ export async function getFinishingStats(season: string = "current") {
         }
       }
     }
-
+    
     // For including Sprint weekend points
     const sprintRoundsData = await getSprintRounds(season);
 
@@ -874,6 +880,7 @@ export async function getFinishingStats(season: string = "current") {
 
     // Sort by total points
     const sortByPoints = (a: any, b: any) => b.totalPoints - a.totalPoints;
+
 
     // Transform data for stacked bar chart
     const driverRoundData = Object.entries(driverPointsByRound)

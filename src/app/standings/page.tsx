@@ -28,6 +28,7 @@ function StandingsContent() {
       setIsLoading(true);
       try {
         const finishingStat = await getFinishingStats(selectedYear.toString());
+        console.log("finish stat: ", finishingStat);
         if (title === "Drivers") {
           const evolution = await getDriverEvolution(selectedYear.toString());
           setDriverEvolution(evolution);

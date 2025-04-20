@@ -44,6 +44,12 @@ export default function BarChart({
     return null;
   }
 
+  interface BarTooltipProps {
+    value: string | number;
+    indexValue: string | number;
+    data: any;
+  }
+
   const CustomTooltip = ({ value, indexValue, data }: BarTooltipProps) => {
     return (
       <div className="bg-slate-800 text-xs rounded-md min-w-32 max-w-48 flex flex-col opacity-95">
