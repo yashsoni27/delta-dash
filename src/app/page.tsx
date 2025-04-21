@@ -53,7 +53,7 @@ export default function Home() {
           <CardSkeleton />
         ) : (
             <Card
-              title="DHL Fastest Laps"
+              title="DHL Fastest Lap Awards"
               icon={<Timer size={18} />}
               stat={`${fastestLap.flCount} Fastest Laps`}
               subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}

@@ -240,7 +240,7 @@ export async function getSprintResults(
   return result;
 }
 
-// Race results - unused
+// Race results
 export async function getRaceResults(
   season: string,
   round: number | string,
@@ -1374,6 +1374,26 @@ export async function getFastestLapStanding() {
     return response.chart;
   } catch (e) {
     console.log("Error in DHL API", e);
+  }
+}
+
+export async function getFastestLapVideo(eventId?: string) {
+  try {
+    const response = await fetchFromDHL(
+      eventId ? `fastestLapVideo?event=${eventId}` : "fastestLapVideo"
+    );
+
+    const videoUrls = {
+      desktopVideo: response?.htmlList?.video.match(/data-src-desktop="([^"]*)"/)?.[ 1] || '',
+      mobileVideo: response?.htmlList?.video.match(/data-src-mobile="([^"]*)"/)?.[ 1] || '',
+      desktopPoster: response?.htmlList?.video.match(/data-poster-desktop="([^"]*)"/)?.[ 1] || '',
+      mobilePoster: response?.htmlList?.video.match(/data-poster-mobile="([^"]*)"/)?.[ 1] || ''
+    };
+    
+    return videoUrls;
+    
+  } catch (e) {
+    console.log('Error in fetching video from DHL: ', e);
   }
 }
 

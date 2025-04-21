@@ -109,6 +109,7 @@ export default function LapTimesChart({ data, heading }: any) {
         enablePoints={true}
         lineWidth={2}
         pointSize={4}
+        // pointSymbol={function noRefCheck() {}}
         yScale={{
           type: "linear",
           stacked: false,
@@ -117,7 +118,7 @@ export default function LapTimesChart({ data, heading }: any) {
         }}
         xScale={{
           type: "linear",
-          min: "auto",
+          min: 1,
           max: "auto",
         }}
         enableSlices="x"

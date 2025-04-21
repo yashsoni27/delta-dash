@@ -1,12 +1,20 @@
 "use client";
+import ChartSkeleton from "@/components/loading/ChartSkeleton";
 import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Table from "@/components/ui/Table";
 import TrackImg from "@/components/ui/TrackImg";
-import { getFastestLaps, getPreviousRaces } from "@/lib/api";
+import {
+  getAvgPitStopAndEvtId,
+  getFastestLaps,
+  getFastestLapVideo,
+  getPreviousRaces,
+  getRaceResults,
+} from "@/lib/api";
 import { Column } from "@/types";
 import { Calendar, Flag } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
@@ -26,6 +34,7 @@ export default function Home() {
   const [columns, setColumns] = useState<any | null>(null);
   const [tableData, setTableData] = useState<any | null>(null);
   const [lapData, setLapData] = useState<any | null>(null);
+  const [vidData, setVidData] = useState<any>(null);
 
   useEffect(() => {
     const column: Column[] = [
@@ -62,7 +71,42 @@ export default function Home() {
         align: "center",
       },
     ];
-    setColumns(column);
+    const raceResultColumn: Column[] = [
+      { key: "position", header: "#", width: "w-2/8", align: "center" },
+      {
+        key: "driver",
+        header: "Driver",
+        width: "w-3/8",
+        align: "left",
+        render: (value, item) => (
+          <div className="flex item-center gap-2">
+            {item.constructorId && (
+              <img
+                src={`/teams/${item.constructorId}.svg`}
+                alt={item.constructorId}
+                className="w-6 h-6"
+                onError={(e) => (e.currentTarget.src = "/vercel.svg")}
+              />
+            )}
+            {value || item.constructorId}
+          </div>
+        ),
+      },
+      {
+        key: "points",
+        header: "Pts",
+        width: "w-1/8",
+        align: "right",
+      },
+      {
+        key: "time",
+        header: "Time (sec)",
+        width: "w-2/8",
+        align: "center",
+      },
+    ];
+    // setColumns(column);
+    setColumns(raceResultColumn);
   }, []);
 
   // Fetch for races data
@@ -71,7 +115,6 @@ export default function Home() {
       try {
         setIsLoading(true);
         const previousRaces = await getPreviousRaces(year);
-        // console.log(previousRaces);
         const options = previousRaces.map((race: any) => ({
           name: race.Circuit.Location.country,
           value: parseInt(race.round, 10),
@@ -94,7 +137,7 @@ export default function Home() {
     [round]
   );
 
-  // Separate fetch for lap data
+  // Separate fetch for race and lap data
   const fetchLapData = useCallback(
     async (year: string, raceRound: string) => {
       try {
@@ -108,16 +151,33 @@ export default function Home() {
           setRaceName(selectedRace.raceName);
         }
 
+        const pitStopResponse = await getAvgPitStopAndEvtId();
+        if (pitStopResponse) {
+          const eventId = pitStopResponse?.events[Number(round) - 1]?.id;
+          const vid = await getFastestLapVideo(eventId);
+          // if (vid?.desktopVideo != "") {
+          setVidData(vid);
+          // }
+        }
         const response = await getFastestLaps(year, raceRound);
-
+        const resultsResponse = await getRaceResults(year, raceRound);
         if (response) {
-          // const drivers = response.drivers.map((item, index) => ({
-          const drivers = response.fastest20Laps.map((item, index) => ({
+          const fastestDrivers = response.fastest20Laps.map((item, index) => ({
             ...item,
             pos: index + 1,
           }));
           setLapData(response.allLaps);
-          setTableData(drivers);
+          // setTableData(fastestDrivers);
+
+          const raceResults = resultsResponse.map((item: any, index: any) => ({
+            driver: item.Driver.familyName,
+            constructorId: item.Constructor.constructorId,
+            position: item.position,
+            points: item.points,
+            time: item?.Time?.time,
+            pos: index + 1,
+          }));
+          setTableData(raceResults);
         }
       } catch (e) {
         console.log("Error fetching lap data: ", e);
@@ -162,10 +222,12 @@ export default function Home() {
         <div className="top-16 z-10 w-full ml-auto sm:pr-0 flex gap-2 justify-between">
           <div className="p-4 text-xl">{raceName}</div>
           <div className="flex gap-5 p-4">
-
             {/* Season selector */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-thin flex items-center"><Calendar size={16} />&nbsp;Season</span>
+              <span className="text-xs font-thin flex items-center">
+                <Calendar size={16} />
+                &nbsp;Season
+              </span>
               <select
                 className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800"
                 value={selectedYear}
@@ -181,7 +243,10 @@ export default function Home() {
 
             {/* Race Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-thin flex items-center"><Flag size={16}/>&nbsp;Race</span>
+              <span className="text-xs font-thin flex items-center">
+                <Flag size={16} />
+                &nbsp;Race
+              </span>
               <select
                 className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-40 px-4 py-2 bg-transparent bg-slate-800"
                 value={round !== null ? round : ""}
@@ -212,7 +277,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
               <div className="mb-4 sm:mb-0 min-h-80">
                 <Table
-                  heading="Fastest Laps"
+                  heading="Race Result"
                   columns={columns}
                   data={tableData}
                   onRowClick={(item) => console.log(item)}
@@ -226,7 +291,46 @@ export default function Home() {
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
                   <BoxPlotChart data={lapData} heading="Race Pace" />
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900"></div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                  {vidData == null ? (
+                    <ChartSkeleton />
+                  ) : vidData.desktopVideo == "" ? (
+                    <>
+                      <div className="pb-2 flex flex-row gap-2">
+                        <Image
+                          src={`dhl-logo.svg`}
+                          alt='DHL logo'
+                          width={100}
+                          height={20}
+                          style={{backgroundColor: "#ffcc01"}}
+                        />
+                        Fastest Lap Award
+                      </div>
+                      <div className="h-full flex justify-center items-center text-gray-500">Not Available</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="pb-2 flex flex-row gap-2">
+                        <Image
+                          src={`dhl-logo.svg`}
+                          alt='DHL logo'
+                          width={100}
+                          height={20}
+                          style={{backgroundColor: "#ffcc01"}}
+                        />
+                        Fastest Lap Award
+                      </div>
+                      <video
+                        className="w-full h-full"
+                        controls
+                        playsInline
+                        poster={vidData?.desktopPoster}
+                      >
+                        <source src={vidData?.desktopVideo} type="video/mp4" />
+                      </video>
+                    </>
+                  )}
+                </div>
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
                   {selectedRace && (
                     <TrackImg

@@ -4,7 +4,8 @@ export const DHL_ENDPOINTS = {
   pitStopByEvent: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_PITSTOP_EVENT_ID}`,
   avgPitStopAndEventId: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_AVG_PITSTOP_ID}`,
   fastestPitStopAndStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_PITSTOP_ID}`,
-  fastestLapStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_LAP_ID}`
+  fastestLapStanding: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_LAP_ID}`,
+  fastestLapVideo: `${process.env.NEXT_PUBLIC_DHL_API_BASE}/${process.env.DHL_FASTEST_LAP_VID}`,
 } as const;
 
 export type DHLEndpoint = keyof typeof DHL_ENDPOINTS;
@@ -31,7 +32,7 @@ export async function GET(
       headers: {
         "Content-Type": "application/json",
       },
-      next: { revalidate: parseInt(process.env.REVALIDATION_TIME || '3600') },
+      next: { revalidate: parseInt(process.env.REVALIDATION_TIME || "3600") },
     });
 
     if (!response.ok) {
@@ -39,6 +40,9 @@ export async function GET(
     }
 
     const data = await response.json();
+    if (endpoint == "fastestLapVideo") {
+      return NextResponse.json(data);
+    }
     return NextResponse.json(data.data);
   } catch (error) {
     console.error("Failed to fetch DHL data:", error);

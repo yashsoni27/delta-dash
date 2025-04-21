@@ -44,7 +44,6 @@ export default function BoxPlotChart({ data, heading }: any) {
     );
   }
   const formattedData = transformData(data);
-  // console.log("boxPlot", formattedData);
 
   const getColor = (series: { group: string }) => {
     const entry = formattedData.find((d: any) => d.group === series.group);
