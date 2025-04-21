@@ -1,6 +1,6 @@
 import { TableProps } from "@/types";
 
-export default function Table({
+export default function   Table({
   heading,
   columns,
   data,
@@ -18,7 +18,6 @@ export default function Table({
     }
   };
 
-  // Early return if no data or columns
   if (!data || !columns) {
     return (
       <div className={`md:row-start-4 lg:row-start-3 rounded-lg border border-gray-700 pt-2 ${className}`}>

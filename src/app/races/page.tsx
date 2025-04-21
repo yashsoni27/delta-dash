@@ -212,7 +212,6 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-5 gap-1 sm:gap-4 sm:mt-0">
               <div className="mb-4 sm:mb-0 min-h-80">
                 <Table
-                  // className="tracking-tight"
                   heading="Fastest Laps"
                   columns={columns}
                   data={tableData}

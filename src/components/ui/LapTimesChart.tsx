@@ -28,18 +28,6 @@ function transformData(lapData: any) {
 
   // Transforming the data for each driver
   Object.entries(driverLaps).forEach(([driverId, laps]) => {
-    // // Calculate quartiles for this driver's lap times
-    // const times = laps.map((lap) => lap.time);
-    // const sorted = [...times].sort((a, b) => a - b);
-    // const q1 = sorted[Math.floor(sorted.length * 0.25)];
-    // const q3 = sorted[Math.floor(sorted.length * 0.75)];
-    // const iqr = q3 - q1;
-
-    // // Define outlier thresholds
-    // const lowerThreshold = q1 - 1.5 * iqr;
-    // const upperThreshold = q3 + 1.5 * iqr;
-
-    // Filter out outliers
     const filteredLaps = laps.filter(
       (lap) => lap.time >= lowerThreshold && lap.time <= upperThreshold
     );

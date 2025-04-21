@@ -543,6 +543,8 @@ export async function getDriverEvolution(
       const standingsList = roundData.StandingsLists[0];
       const currentRound = standingsList.round;
 
+      console.log(roundResponse);
+
       let nextAvailablePosition = 1;
 
       for (const standing of standingsList.DriverStandings) {
@@ -578,8 +580,23 @@ export async function getDriverEvolution(
             name: `${driver.familyName}`,
             nationality: driver.nationality,
             constructorId: standing.Constructors[0]?.constructorId,
+            constructors: [{
+              round: parseInt(currentRound),
+              constructorId: standing.Constructors[0]?.constructorId
+            }],
             rounds: [],
           };
+        } else {
+          const currentConstructor = standing.Constructors[standing.Constructors.length - 1]?.constructorId;
+          const lastConstructor = driverMapping[driverId].constructors[driverMapping[driverId].constructors.length - 1];
+          
+          if (currentConstructor !== lastConstructor.constructorId) {
+            driverMapping[driverId].constructors.push({
+              round: parseInt(currentRound),
+              constructorId: currentConstructor
+            });
+            driverMapping[driverId].constructorId = currentConstructor;
+          }
         }
 
         // Add this round's data
@@ -594,6 +611,7 @@ export async function getDriverEvolution(
 
     // Convert mapping to array
     const driverEvolution = Object.values(driverMapping);
+    console.log(driverEvolution);
 
     return {
       season: fullSeasonData.season,
