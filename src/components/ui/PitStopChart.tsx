@@ -45,7 +45,7 @@ export default function PitStopChart({
   const CustomTooltip = ({ slice }: { slice: any }) => {
     if (!slice?.points?.length) return null;
 
-    const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
+    const sortedPoints = [...slice.points].sort((a, b) => a.data.y - b.data.y);
     const num = sortedPoints[0].id.split(".")[1];
     const lapNumber = parseInt(num) + 1;
     const country = sortedPoints[0].data.country;

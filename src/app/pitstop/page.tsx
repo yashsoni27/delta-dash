@@ -1,4 +1,5 @@
 "use client";
+import ChartSkeleton from "@/components/loading/ChartSkeleton";
 import StandingsTableSkeleton from "@/components/loading/StandingsTableSkeleton";
 import BarChart from "@/components/ui/BarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -164,7 +165,6 @@ export default function Home() {
                     className="tracking-tight"
                     columns={columns}
                     data={tableData}
-                    // onRowClick={(item) => console.log(item)}
                   />
                 )}
               </div>
@@ -177,7 +177,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
-                  {driverAvg == null ? null : (
+                  {driverAvg == null ? (<ChartSkeleton />) : (
                     <BarChart
                       heading="Driver Avg Pit Stop Time"
                       height={400}
@@ -192,7 +192,7 @@ export default function Home() {
                   )}
                 </div>
                 <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
-                  {driverStanding == null ? null : (
+                  {driverStanding == null ? (<ChartSkeleton />) : (
                     <BarChart
                       heading="Driver DHL Points"
                       height={400}
@@ -206,9 +206,8 @@ export default function Home() {
                     />
                   )}
                 </div>
-                {/* <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900"></div> */}
                 <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
-                  {constAvg == null ? null : (
+                  {constAvg == null ? (<ChartSkeleton />) : (
                     <BarChart
                       heading="Constructor Avg Pit Stop Time"
                       height={400}
@@ -223,7 +222,7 @@ export default function Home() {
                   )}
                 </div>
                 <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
-                  {constStanding == null ? null : (
+                  {constStanding == null ? (<ChartSkeleton />) : (
                     <BarChart
                       heading="Constructor DHL Points"
                       height={400}
