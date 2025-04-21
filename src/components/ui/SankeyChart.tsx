@@ -64,7 +64,6 @@ export default function SankeyChart({
   const nodeCount = chartData.nodes.length;
   const linkCount = chartData.links.length;
 
-  // You can tweak these multipliers to match your visual needs
   const height = Math.max(300, nodeCount * 60);
 
   const CustomNodeTooltip = ({ node }: { node: any }) => {

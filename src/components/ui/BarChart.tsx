@@ -1,10 +1,11 @@
 import { Bar } from "@nivo/bar";
 import { chartTheme } from "./StandingEvolution";
+import { useEffect, useRef, useState } from "react";
 
 interface BarChartProps {
   heading?: string;
-  height: number;
-  width: number;
+  height?: number;
+  width?: number;
   data: any;
   driver?: string;
   keys?: string[];
@@ -44,6 +45,33 @@ export default function BarChart({
     return null;
   }
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+
+    resizeObserver.observe(container);
+    setContainerDimensions({
+      width: container.offsetWidth,
+      height: container.offsetHeight,
+    });
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   interface BarTooltipProps {
     value: string | number;
     indexValue: string | number;
@@ -69,34 +97,36 @@ export default function BarChart({
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
-      <Bar
-        data={data}
-        height={height}
-        width={width}
-        theme={chartTheme}
-        colors={(bar) => String(bar.data["color"] || "#1f2941")}
-        tooltip={CustomTooltip}
-        keys={keys}
-        indexBy={indexBy}
-        margin={margin}
-        padding={0.05}
-        enableLabel={enableLabel}
-        labelSkipHeight={20}
-        labelPosition="end"
-        labelOffset={-15}
-        enableTotals={enableTotals}
-        layout={layout}
-        groupMode={groupMode}
-        axisTop={null}
-        axisRight={null}
-        axisBottom={showAxisBottom ? {} : null}
-        axisLeft={showAxisLeft ? {} : null}
-        indexScale={{ type: "band", round: true }}
-        enableGridX={enableGridX}
-        enableGridY={enableGridY}
-        isInteractive={isInteractive}
-        animate={true}
-      />
+      <div ref={containerRef} className="w-full h-[400px]">
+        <Bar
+          data={data}
+          height={height || containerDimensions.height}
+          width={width || containerDimensions.width}
+          theme={chartTheme}
+          colors={(bar) => String(bar.data["color"] || "#1f2941")}
+          tooltip={CustomTooltip}
+          keys={keys}
+          indexBy={indexBy}
+          margin={margin}
+          padding={0.05}
+          enableLabel={enableLabel}
+          labelSkipHeight={20}
+          labelPosition="end"
+          labelOffset={-15}
+          enableTotals={enableTotals}
+          layout={layout}
+          groupMode={groupMode}
+          axisTop={null}
+          axisRight={null}
+          axisBottom={showAxisBottom ? {} : null}
+          axisLeft={showAxisLeft ? {} : null}
+          indexScale={{ type: "band", round: true }}
+          enableGridX={enableGridX}
+          enableGridY={enableGridY}
+          isInteractive={isInteractive}
+          animate={true}
+        />
+      </div>
     </>
   );
 }

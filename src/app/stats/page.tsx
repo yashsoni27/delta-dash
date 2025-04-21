@@ -216,8 +216,8 @@ export default function Home() {
                 <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
                   <BarChart
                     heading="Finish Positions Distribution"
-                    height={400}
-                    width={800}
+                    // height={400}
+                    // width={800}
                     data={driverStat?.finishPositions?.distribution}
                     driver={driverStat.familyName}
                     layout="vertical"
@@ -225,7 +225,7 @@ export default function Home() {
                     enableGridY={true}
                     enableTotals={false}
                     enableLabel={true}
-                    margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
+                    margin={{ top: 10, right: 0, bottom: 30, left: 10 }}
                     isInteractive={true}
                     showAxisBottom={true}
                   />
@@ -233,8 +233,8 @@ export default function Home() {
                 <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
                   <BarChart
                     heading="Laps Led per Race"
-                    height={400}
-                    width={800}
+                    // height={400}
+                    // width={800}
                     data={driverStat?.lapsLed}
                     driver={driverStat.familyName}
                     keys={["lapsLed"]}
@@ -244,7 +244,7 @@ export default function Home() {
                     enableGridY={true}
                     enableTotals={false}
                     enableLabel={true}
-                    margin={{ top: 30, right: 0, bottom: 30, left: 40 }}
+                    margin={{ top: 10, right: 0, bottom: 30, left: 10 }}
                     isInteractive={true}
                     showAxisBottom={true}
                   />
