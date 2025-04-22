@@ -3,7 +3,9 @@ import { LapTiming, PaginationInfo } from "@/types";
 import {
   circuitIdToF1Adapter,
   fetchWithDelay,
+  formatTime,
   getConstructorHex,
+  minuteStrToSeconds,
   transformResponse,
 } from "./utils";
 
@@ -208,7 +210,7 @@ export async function getDriverConstructorPairing(season: string = "current") {
   }
 }
 
-// Qualifying results - unused
+// Qualifying results
 export async function getQualificationResults(
   season: string = "current",
   round: string,
@@ -221,7 +223,49 @@ export async function getQualificationResults(
     limit,
     offset
   );
-  return result;
+  const races = (result?.data as { Races: any[] })?.Races || [];
+  const qualifications = races[0]?.QualifyingResults;
+
+  let overallMin = Infinity,
+    overallMax = -Infinity;
+
+  const formattedResult = qualifications.map((item: any) => {
+    const q1Time = minuteStrToSeconds(item?.Q1) || 0;
+    const q2Time = minuteStrToSeconds(item?.Q2) || 0;
+    const q3Time = minuteStrToSeconds(item?.Q3) || 0;
+
+    // Update min/max values
+    if (q1Time) {
+      overallMin = Math.min(overallMin, q1Time);
+      overallMax = Math.max(overallMax, q1Time);
+    }
+    if (q2Time) {
+      overallMin = Math.min(overallMin, q2Time);
+      overallMax = Math.max(overallMax, q2Time);
+    }
+    if (q3Time) {
+      overallMin = Math.min(overallMin, q3Time);
+      overallMax = Math.max(overallMax, q3Time);
+    }
+
+    return {
+      name: item.Driver.familyName,
+      driverCode: item.Driver.code,
+      color: getConstructorHex(item.Constructor.constructorId),
+      Q1: q1Time,
+      Q2: q2Time,
+      Q3: q3Time,
+      position: item?.position || null,
+    };
+  });
+
+  return {
+    result: formattedResult,
+    range: {
+      min: overallMin !== Infinity ? overallMin : 0,
+      max: overallMax !== -Infinity ? overallMax : 0,
+    },
+  };
 }
 
 // Sprint results
@@ -543,8 +587,6 @@ export async function getDriverEvolution(
       const standingsList = roundData.StandingsLists[0];
       const currentRound = standingsList.round;
 
-      console.log(roundResponse);
-
       let nextAvailablePosition = 1;
 
       for (const standing of standingsList.DriverStandings) {
@@ -580,20 +622,27 @@ export async function getDriverEvolution(
             name: `${driver.familyName}`,
             nationality: driver.nationality,
             constructorId: standing.Constructors[0]?.constructorId,
-            constructors: [{
-              round: parseInt(currentRound),
-              constructorId: standing.Constructors[0]?.constructorId
-            }],
+            constructors: [
+              {
+                round: parseInt(currentRound),
+                constructorId: standing.Constructors[0]?.constructorId,
+              },
+            ],
             rounds: [],
           };
         } else {
-          const currentConstructor = standing.Constructors[standing.Constructors.length - 1]?.constructorId;
-          const lastConstructor = driverMapping[driverId].constructors[driverMapping[driverId].constructors.length - 1];
-          
+          const currentConstructor =
+            standing.Constructors[standing.Constructors.length - 1]
+              ?.constructorId;
+          const lastConstructor =
+            driverMapping[driverId].constructors[
+              driverMapping[driverId].constructors.length - 1
+            ];
+
           if (currentConstructor !== lastConstructor.constructorId) {
             driverMapping[driverId].constructors.push({
               round: parseInt(currentRound),
-              constructorId: currentConstructor
+              constructorId: currentConstructor,
             });
             driverMapping[driverId].constructorId = currentConstructor;
           }
@@ -611,7 +660,6 @@ export async function getDriverEvolution(
 
     // Convert mapping to array
     const driverEvolution = Object.values(driverMapping);
-    console.log(driverEvolution);
 
     return {
       season: fullSeasonData.season,
@@ -712,22 +760,17 @@ export async function getFinishingStats(season: string = "current") {
       (acc: Record<string, string>, race: any) => {
         const gpName = race.raceName.replace("Grand Prix", "").trim();
         const abbreviation = gpName.includes(" ")
-        ? gpName
-        .split(" ")
-        .map((word: any) => word[0])
-        .join("")
-        : gpName.slice(0, 3).toUpperCase();
+          ? gpName
+              .split(" ")
+              .map((word: any) => word[0])
+              .join("")
+          : gpName.slice(0, 3).toUpperCase();
         acc[race.round] = abbreviation;
         return acc;
       },
       {}
     );
-    const initialResult = await fetchFromApi(
-      `${season}/results`,
-      "Race",
-      1,
-      0
-    );
+    const initialResult = await fetchFromApi(`${season}/results`, "Race", 1, 0);
     const totalRaces = parseInt(previousRaceResponse[0].round);
 
     const totalResults = initialResult?.total;
@@ -861,7 +904,7 @@ export async function getFinishingStats(season: string = "current") {
         }
       }
     }
-    
+
     // For including Sprint weekend points
     const sprintRoundsData = await getSprintRounds(season);
 
@@ -898,7 +941,6 @@ export async function getFinishingStats(season: string = "current") {
 
     // Sort by total points
     const sortByPoints = (a: any, b: any) => b.totalPoints - a.totalPoints;
-
 
     // Transform data for stacked bar chart
     const driverRoundData = Object.entries(driverPointsByRound)
@@ -1173,8 +1215,8 @@ export async function getLapsLedByDriver(
               .map((word: any) => word[0])
               .join("")
           : gpName.slice(0, 3).toUpperCase();
-        
-          // If abbreviation already exists, try alternative
+
+        // If abbreviation already exists, try alternative
         if (usedAbbreviations.has(abbreviation)) {
           // For single word names, use first 2 chars + last char
           if (!gpName.includes(" ")) {
@@ -1189,7 +1231,7 @@ export async function getLapsLedByDriver(
           }
           abbreviation = abbreviation.toUpperCase();
         }
-        
+
         acc[race.round] = abbreviation;
         return acc;
       },
@@ -1384,16 +1426,22 @@ export async function getFastestLapVideo(eventId?: string) {
     );
 
     const videoUrls = {
-      desktopVideo: response?.htmlList?.video.match(/data-src-desktop="([^"]*)"/)?.[ 1] || '',
-      mobileVideo: response?.htmlList?.video.match(/data-src-mobile="([^"]*)"/)?.[ 1] || '',
-      desktopPoster: response?.htmlList?.video.match(/data-poster-desktop="([^"]*)"/)?.[ 1] || '',
-      mobilePoster: response?.htmlList?.video.match(/data-poster-mobile="([^"]*)"/)?.[ 1] || ''
+      desktopVideo:
+        response?.htmlList?.video.match(/data-src-desktop="([^"]*)"/)?.[1] ||
+        "",
+      mobileVideo:
+        response?.htmlList?.video.match(/data-src-mobile="([^"]*)"/)?.[1] || "",
+      desktopPoster:
+        response?.htmlList?.video.match(/data-poster-desktop="([^"]*)"/)?.[1] ||
+        "",
+      mobilePoster:
+        response?.htmlList?.video.match(/data-poster-mobile="([^"]*)"/)?.[1] ||
+        "",
     };
-    
+
     return videoUrls;
-    
   } catch (e) {
-    console.log('Error in fetching video from DHL: ', e);
+    console.log("Error in fetching video from DHL: ", e);
   }
 }
 

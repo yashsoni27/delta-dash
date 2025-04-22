@@ -1,7 +1,6 @@
 import { PaginationInfo } from "@/types";
 import { fetchFromApi } from "./api";
 
-
 /* -------------------------------------------------------------------------- */
 /*                     Transform Response for Jolpica API                     */
 /* -------------------------------------------------------------------------- */
@@ -31,35 +30,53 @@ export async function fetchWithDelay<T>(
   return fetchFromApi<T>(url, dataKey, limit, offset);
 }
 
+/* -------------------------------------------------------------------------- */
+/*                    Formats seconds into a minute format                    */
+/* -------------------------------------------------------------------------- */
+export function formatTime(timeString: string | number): string {
+  if (typeof timeString === "string" && !timeString) return "";
 
- /* -------------------------------------------------------------------------- */
- /*                Formats a timestamp into a human-readable time              */
- /* -------------------------------------------------------------------------- */
-export function formatTime(timeString: string): string {
-  if (!timeString) return '';
-  
-  // Handle different time formats
-  if (timeString.includes(':')) {
-    const [minutes, seconds, milliseconds] = timeString.split(/[:\.]/);
-    return `${minutes}:${seconds}.${milliseconds}`;
-  }
-  
-  return timeString;
+  const seconds = Number(timeString);
+  if (isNaN(seconds)) return "";
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  const milliseconds = Math.round((seconds % 1) * 1000);
+
+  return `${minutes}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                   Converts minute format to total seconds                  */
+/* -------------------------------------------------------------------------- */
+export function minuteStrToSeconds (timeString: string): number {
+  if (!timeString) return 0;
+
+  const [minutePart, secondPart] = timeString.split(':');
+  if (!minutePart || !secondPart) return 0;
+
+  const minutes = parseInt(minutePart);
+  const seconds = parseFloat(secondPart);
+
+  if (isNaN(minutes) || isNaN(seconds)) return 0;
+
+  return Number((minutes * 60 + seconds).toFixed(3));
+}
 
 /* -------------------------------------------------------------------------- */
 /*              Formats a date string into a human-readable date              */
 /* -------------------------------------------------------------------------- */
 export function formatDate(dateString: string): string {
-  if (!dateString) return '';
-  
+  if (!dateString) return "";
+
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }
 
@@ -69,9 +86,11 @@ export function formatDate(dateString: string): string {
 export function getTimeDifference(date1: Date, date2: Date): string {
   const diffTime = Math.abs(date2.getTime() - date1.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const diffHours = Math.floor(
+    (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-  
+
   if (diffDays > 0) {
     return `${diffDays}d ${diffHours}h ${diffMinutes}m`;
   } else if (diffHours > 0) {
@@ -81,25 +100,24 @@ export function getTimeDifference(date1: Date, date2: Date): string {
   }
 }
 
-
 /* -------------------------------------------------------------------------- */
 /*                  Gets a color in hex code for a constructor                */
 /* -------------------------------------------------------------------------- */
 export function getConstructorHex(constructorName: string): string {
   const colors: Record<string, string> = {
-    'mercedes': '#27F4D2',
-    'red_bull': '#3671C6',
-    'ferrari': '#E80020',
-    'mclaren': '#FF8000',
-    'alpine': '#00A1E8',
-    'rb': '#6692FF',
-    'aston_martin': '#229971',
-    'williams': '#1868DB',
-    'sauber': '#52E252',
-    'haas': '#B6BABD'
-  }
+    mercedes: "#27F4D2",
+    red_bull: "#3671C6",
+    ferrari: "#E80020",
+    mclaren: "#FF8000",
+    alpine: "#00A1E8",
+    rb: "#6692FF",
+    aston_martin: "#229971",
+    williams: "#1868DB",
+    sauber: "#52E252",
+    haas: "#B6BABD",
+  };
 
-  return colors[constructorName] || '#333333';
+  return colors[constructorName] || "#333333";
 }
 
 /* -------------------------------------------------------------------------- */
@@ -107,21 +125,20 @@ export function getConstructorHex(constructorName: string): string {
 /* -------------------------------------------------------------------------- */
 export function getConstructorColor(constructorName: string): string {
   const colors: Record<string, string> = {
-    'mercedes': 'rgb(39,244,210,.25)',
-    'red_bull': 'rgb(54,113,198,.25)',
-    'ferrari': 'rgb(232,0,32,.25)',
-    'mclaren': 'rgb(255,128,0,.25)',
-    'alpine': 'rgb(0,161,232,.25)',
-    'rb': 'rgb(102,146,255,.25)',
-    'aston_martin': 'rgb(34,153,113,.25)',
-    'williams': 'rgb(24,104,219,.25)',
-    'sauber': 'rgb(82,226,82,.25)',
-    'haas': 'rgb(182,186,189,.25)'
+    mercedes: "rgb(39,244,210,.25)",
+    red_bull: "rgb(54,113,198,.25)",
+    ferrari: "rgb(232,0,32,.25)",
+    mclaren: "rgb(255,128,0,.25)",
+    alpine: "rgb(0,161,232,.25)",
+    rb: "rgb(102,146,255,.25)",
+    aston_martin: "rgb(34,153,113,.25)",
+    williams: "rgb(24,104,219,.25)",
+    sauber: "rgb(82,226,82,.25)",
+    haas: "rgb(182,186,189,.25)",
   };
-  
-  return colors[constructorName] || '#333333';
-}
 
+  return colors[constructorName] || "#333333";
+}
 
 /* -------------------------------------------------------------------------- */
 /*                   Gets color in gradient for constructors                  */
@@ -130,78 +147,74 @@ export function getConstructorGradient(constructorName: string): string {
   const baseColor = getConstructorColor(constructorName);
   // Extract RGB values to create a darker shade for the gradient
   const rgbMatch = baseColor.match(/rgb\((\d+),(\d+),(\d+),([.\d]+)\)/);
-  
+
   if (rgbMatch) {
     const [_, r, g, b, a] = rgbMatch;
     // Create a darker variant for the gradient (reducing brightness by ~30%)
     const darkerR = Math.max(0, parseInt(r) * 0.5);
     const darkerG = Math.max(0, parseInt(g) * 0.5);
     const darkerB = Math.max(0, parseInt(b) * 0.5);
-    
+
     return `linear-gradient(180deg, ${baseColor} 0%, rgb(${darkerR},${darkerG},${darkerB},${a}) 100%)`;
   }
-  
+
   return baseColor;
 }
-
 
 /* -------------------------------------------------------------------------- */
 /*                        Get jolpica DHL constructorId                       */
 /* -------------------------------------------------------------------------- */
-export function DHLtoJolpicaConstructor(constructorName: string):string {
-
+export function DHLtoJolpicaConstructor(constructorName: string): string {
   const constructors: Record<string, string> = {
-    'Mercedes': 'mercedes',
-    'Red Bull': 'red_bull',
-    'Ferrari': 'ferrari',
-    'McLaren': 'mclaren',
-    'Alpine': 'alpine' ,
-    'Racing Bulls': 'rb',
-    'Aston Martin': 'aston_martin',
-    'Williams': 'williams',
-    'Sauber': 'sauber',
-    'Haas': 'haas'
+    Mercedes: "mercedes",
+    "Red Bull": "red_bull",
+    Ferrari: "ferrari",
+    McLaren: "mclaren",
+    Alpine: "alpine",
+    "Racing Bulls": "rb",
+    "Aston Martin": "aston_martin",
+    Williams: "williams",
+    Sauber: "sauber",
+    Haas: "haas",
   };
-  
-  return constructors[constructorName] || 'Unknown';
-}
 
+  return constructors[constructorName] || "Unknown";
+}
 
 export const capitalizeWords = (str: string): string => {
   return str
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 };
 
-
-export function circuitIdToF1Adapter(circuitId: string): string|null {
+export function circuitIdToF1Adapter(circuitId: string): string | null {
   const circuit: Record<string, string> = {
-    'albert_park': 'Australia',
-    'shanghai': 'China',
-    'suzuka': 'Japan',
-    'bahrain': 'Bahrain',
-    'jeddah': 'Saudi_Arabia',
-    'miami': 'Miami',
-    'imola': 'Emilia_Romagna',
-    'monaco': 'Monaco',
-    'catalunya': 'Spain',
-    'villeneuve': 'Canada',
-    'red_bull_ring': 'Austria',
-    'silverstone': 'Great_Britain',
-    'spa': 'Belgium',
-    'hungaroring': 'Hungary',
-    'zandvoort': 'Netherlands',
-    'monza': 'Italy',
-    'baku': 'Azerbaijan',
-    'marina_bay': 'Singapore',
-    'americas': 'USA',
-    'rodriguez': 'Mexico',
-    'interlagos': 'Brazil',
-    'vegas': 'Las_Vegas',
-    'losail': 'Qatar',
-    'yas_marina': 'Abu_Dhabi',
-  }
+    albert_park: "Australia",
+    shanghai: "China",
+    suzuka: "Japan",
+    bahrain: "Bahrain",
+    jeddah: "Saudi_Arabia",
+    miami: "Miami",
+    imola: "Emilia_Romagna",
+    monaco: "Monaco",
+    catalunya: "Spain",
+    villeneuve: "Canada",
+    red_bull_ring: "Austria",
+    silverstone: "Great_Britain",
+    spa: "Belgium",
+    hungaroring: "Hungary",
+    zandvoort: "Netherlands",
+    monza: "Italy",
+    baku: "Azerbaijan",
+    marina_bay: "Singapore",
+    americas: "USA",
+    rodriguez: "Mexico",
+    interlagos: "Brazil",
+    vegas: "Las_Vegas",
+    losail: "Qatar",
+    yas_marina: "Abu_Dhabi",
+  };
 
   return circuit[circuitId] || null;
 }

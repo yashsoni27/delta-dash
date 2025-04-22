@@ -3,6 +3,7 @@ import ChartSkeleton from "@/components/loading/ChartSkeleton";
 import BoxPlotChart from "@/components/ui/BoxPlotChart";
 import LapTimesChart from "@/components/ui/LapTimesChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import StackedBarChart from "@/components/ui/StackedBarChart";
 import Table from "@/components/ui/Table";
 import TrackImg from "@/components/ui/TrackImg";
 import {
@@ -10,10 +11,12 @@ import {
   getFastestLaps,
   getFastestLapVideo,
   getPreviousRaces,
+  getQualificationResults,
   getRaceResults,
 } from "@/lib/api";
+import { formatTime } from "@/lib/utils";
 import { Column } from "@/types";
-import { Calendar, Flag } from "lucide-react";
+import { Calendar, CircleAlert, Flag } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
@@ -32,8 +35,11 @@ export default function Home() {
     }[]
   >([]);
   const [columns, setColumns] = useState<any | null>(null);
+  const [smColumns, setSmColumns] = useState<any | null>(null);
   const [tableData, setTableData] = useState<any | null>(null);
+  const [smTableData, setSmTableData] = useState<any | null>(null);
   const [lapData, setLapData] = useState<any | null>(null);
+  const [qualificationData, setQualificationData] = useState<any>(null);
   const [vidData, setVidData] = useState<any>(null);
 
   useEffect(() => {
@@ -105,7 +111,7 @@ export default function Home() {
         align: "center",
       },
     ];
-    // setColumns(column);
+    setSmColumns(column);
     setColumns(raceResultColumn);
   }, []);
 
@@ -155,29 +161,45 @@ export default function Home() {
         if (pitStopResponse) {
           const eventId = pitStopResponse?.events[Number(round) - 1]?.id;
           const vid = await getFastestLapVideo(eventId);
-          // if (vid?.desktopVideo != "") {
           setVidData(vid);
-          // }
         }
-        const response = await getFastestLaps(year, raceRound);
-        const resultsResponse = await getRaceResults(year, raceRound);
-        if (response) {
-          const fastestDrivers = response.fastest20Laps.map((item, index) => ({
-            ...item,
-            pos: index + 1,
-          }));
-          setLapData(response.allLaps);
-          // setTableData(fastestDrivers);
 
+        const response = await getFastestLaps(year, raceRound);
+        if (response) {
+          const fastest6Laps = response.fastest20Laps
+            .map((item, index) => ({
+              ...item,
+              pos: index + 1,
+              time: formatTime(item.time),
+            }))
+            .slice(0, 6);
+          setLapData(response.allLaps);
+          setSmTableData(fastest6Laps);
+        }
+
+        const resultsResponse = await getRaceResults(year, raceRound);
+        if (resultsResponse) {
           const raceResults = resultsResponse.map((item: any, index: any) => ({
             driver: item.Driver.familyName,
             constructorId: item.Constructor.constructorId,
             position: item.position,
             points: item.points,
-            time: item?.Time?.time,
+            time:
+              item.status === "Lapped"
+                ? "Lapped"
+                : item.status === "Retired"
+                ? "DNF"
+                : item.status === "Disqualified"
+                ? "DSQ"
+                : item.Time?.time || "",
             pos: index + 1,
           }));
           setTableData(raceResults);
+        }
+
+        const qualificationResponse = await getQualificationResults(year, raceRound);
+        if (qualificationResponse) {
+          setQualificationData(qualificationResponse);
         }
       } catch (e) {
         console.log("Error fetching lap data: ", e);
@@ -219,9 +241,9 @@ export default function Home() {
   return (
     <>
       <div className="p-10 pt-0 md:pt-0 gap-4">
-        <div className="top-16 z-10 w-full ml-auto sm:pr-0 flex gap-2 justify-between">
+        <div className="top-16 z-10 w-full ml-auto sm:pr-0 gap-2 flex flex-col-reverse md:flex-row justify-between">
           <div className="p-4 text-xl">{raceName}</div>
-          <div className="flex gap-5 p-4">
+          <div className="flex flex-col sm:flex-row gap-5 p-4">
             {/* Season selector */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-thin flex items-center">
@@ -285,38 +307,75 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                   <LapTimesChart data={lapData} heading="Lap Times" />
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                   <BoxPlotChart data={lapData} heading="Race Pace" />
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                  <StackedBarChart
+                    heading="Qualification"
+                    data={qualificationData?.result}
+                    indexBy="driverCode"
+                    keys={["Q1", "Q2", "Q3"]}
+                    groupMode="grouped"
+                    margin={{
+                      top: 0,
+                      right: 20,
+                      bottom: 30,
+                      left: 40,
+                    }}
+                    minValue={qualificationData?.range.min - 0.1}
+                    maxValue={qualificationData?.range.max + 0.1}
+                    colors={["#d1d1d1", "#1a73e8", "#ffd54f"]}
+                  />
+                </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                  <Table
+                    heading="Top 6 Fastest Laps"
+                    columns={smColumns}
+                    data={smTableData}
+                  />
+                </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                  {selectedRace && (
+                    <TrackImg
+                      circuitId={selectedRace.circuitId}
+                      circuitName={selectedRace.circuitName}
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                   {vidData == null ? (
                     <ChartSkeleton />
-                  ) : vidData.desktopVideo == "" ? (
+                  ) : vidData.desktopVideo === "" ? (
                     <>
                       <div className="pb-2 flex flex-row gap-2">
                         <Image
                           src={`dhl-logo.svg`}
-                          alt='DHL logo'
+                          alt="DHL logo"
                           width={100}
                           height={20}
-                          style={{backgroundColor: "#ffcc01"}}
+                          style={{ backgroundColor: "#ffcc01" }}
                         />
                         Fastest Lap Award
                       </div>
-                      <div className="h-full flex justify-center items-center text-gray-500">Not Available</div>
+                      <div className="h-full flex justify-center items-center text-gray-500">
+                        <CircleAlert />
+                        &nbsp;&nbsp;Not Available
+                      </div>
                     </>
                   ) : (
                     <>
                       <div className="pb-2 flex flex-row gap-2">
                         <Image
                           src={`dhl-logo.svg`}
-                          alt='DHL logo'
+                          alt="DHL logo"
                           width={100}
                           height={20}
-                          style={{backgroundColor: "#ffcc01"}}
+                          style={{ backgroundColor: "#ffcc01" }}
                         />
                         Fastest Lap Award
                       </div>
@@ -329,15 +388,6 @@ export default function Home() {
                         <source src={vidData?.desktopVideo} type="video/mp4" />
                       </video>
                     </>
-                  )}
-                </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg bg-muted/50 p-4 bg-slate-900">
-                  {selectedRace && (
-                    <TrackImg
-                      circuitId={selectedRace.circuitId}
-                      circuitName={selectedRace.circuitName}
-                      className=" object-contain"
-                    />
                   )}
                 </div>
               </div>

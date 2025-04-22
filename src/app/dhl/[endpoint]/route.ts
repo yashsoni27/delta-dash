@@ -12,10 +12,11 @@ export type DHLEndpoint = keyof typeof DHL_ENDPOINTS;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { endpoint: string } }
+  context: { params: { endpoint: DHLEndpoint } }
 ) {
   try {
-    const { endpoint } = params;
+    const params = await context.params;
+    const endpoint = params.endpoint;
     const { searchParams } = new URL(request.url);
 
     // Type check the endpoint

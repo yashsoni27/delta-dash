@@ -41,10 +41,10 @@ export default function Home() {
             }}
           >
             <Card
-              title="DHL Fastest Pit Stop"
+              title="Fastest Pit Stop"
               icon={<Timer size={18} />}
               stat={`${pitStopInfo.duration} s`}
-              subtitle={`${pitStopInfo.lastName} at ${pitStopInfo.abbreviation}`}
+              subtitle={`${pitStopInfo.lastName} at ${pitStopInfo.abbreviation} (${pitStopInfo.shortTitle})`}
               className="h-full"
             />
           </Link>
@@ -53,7 +53,7 @@ export default function Home() {
           <CardSkeleton />
         ) : (
             <Card
-              title="DHL Fastest Lap Awards"
+              title="Fastest Lap Awards"
               icon={<Timer size={18} />}
               stat={`${fastestLap.flCount} Fastest Laps`}
               subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
