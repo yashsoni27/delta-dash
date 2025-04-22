@@ -1,6 +1,7 @@
 import { TableProps } from "@/types";
+import ChartSkeleton from "../loading/ChartSkeleton";
 
-export default function   Table({
+export default function Table({
   heading,
   columns,
   data,
@@ -19,16 +20,7 @@ export default function   Table({
   };
 
   if (!data || !columns) {
-    return (
-      <div className={`md:row-start-4 lg:row-start-3 rounded-lg border border-gray-700 pt-2 ${className}`}>
-        {heading && (
-          <h2 className="scroll-m-20 text-xl font-semibold tracking-tight p-4">
-            {heading}
-          </h2>
-        )}
-        <div className="p-4 text-sm text-gray-500">No data available</div>
-      </div>
-    );
+    return <ChartSkeleton />;
   }
 
   return (
@@ -70,7 +62,11 @@ export default function   Table({
                     className={`py-3 align-middle border-t border-gray-700 ${getAlignment(
                       column.align
                     )}`}
-                    title={column.tooltip ? column.tooltip(item[column.key], item) || undefined : undefined}
+                    title={
+                      column.tooltip
+                        ? column.tooltip(item[column.key], item) || undefined
+                        : undefined
+                    }
                   >
                     {column.render
                       ? column.render(item[column.key], item)
@@ -85,8 +81,6 @@ export default function   Table({
     </div>
   );
 }
-
-
 
 // // Example usage in another component
 // const columns: Column[] = [

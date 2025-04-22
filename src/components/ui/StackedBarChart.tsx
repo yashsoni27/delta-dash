@@ -21,7 +21,7 @@ const CustomTooltip = ({
   color,
   indexValue,
   data,
-}: BarTooltipProps) => (
+}: BarTooltipProps<any>) => (
   <div className="bg-slate-800 text-xs p-3 rounded-lg w-36 flex flex-col gap-2 opacity-95">
     <div>{data.name}</div>
 
@@ -81,7 +81,7 @@ export default function StackedBarChart({
             dataFrom: "keys",
             anchor: "top-right",
             direction: "column",
-            itemWidth: 100,
+            itemWidth: 80,
             itemHeight: 20,
             symbolSize: 12,
             toggleSerie: true,

@@ -318,7 +318,7 @@ export async function getSingleFastestPitStop() {
 export async function getFastestLaps(
   season: string = "current",
   round: string,
-  limit: number = 30,
+  limit: number = 100,
   offset: number = 0
 ) {
   // Get Driver constructor pairing, and family Name
@@ -369,9 +369,10 @@ export async function getFastestLaps(
     for (const lap of laps) {
       for (const timing of lap.Timings) {
         // Convert time to seconds
-        const [minutes, seconds] = timing.time.split(":");
-        const totalSeconds = parseInt(minutes) * 60 + parseFloat(seconds);
-        const formattedTime = Number(totalSeconds.toFixed(3));
+        // const [minutes, seconds] = timing.time.split(":");
+        // const totalSeconds = parseInt(minutes) * 60 + parseFloat(seconds);
+        // const formattedTime = Number(totalSeconds.toFixed(3));
+        const formattedTime = minuteStrToSeconds(timing.time);
 
         allLapTimes.push({
           driverId: timing.driverId,

@@ -108,7 +108,6 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
         axisTop={null}
         axisRight={null}
         theme={chartTheme}
-        // activeLineWidth={5}
         colors={getColor}
         useMesh={true}
         animate={true}

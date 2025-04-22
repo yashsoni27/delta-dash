@@ -175,6 +175,7 @@ export default function Home() {
             .slice(0, 6);
           setLapData(response.allLaps);
           setSmTableData(fastest6Laps);
+          console.log(fastest6Laps);
         }
 
         const resultsResponse = await getRaceResults(year, raceRound);
