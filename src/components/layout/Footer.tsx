@@ -5,9 +5,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center text-xs">
           <div className="mb-4 md:mb-0">
             <p className="text-gray-700">
-              &copy; {new Date().getFullYear()} F1 Dashboard. All rights reserved.
+              &copy; {new Date().getFullYear()} Delta Dash. All rights reserved.
             </p>
-            <p className="text-gray-700">Version 0.1</p>
+            <p className="text-gray-700">Version 0.3</p>
           </div>
           <div className="text-gray-700">
             <p>This project/website is unofficial and is not in any way associated with Formula 1.</p>

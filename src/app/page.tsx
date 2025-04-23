@@ -3,27 +3,44 @@ import Card from "@/components/ui/Card";
 import CardSkeleton from "@/components/loading/CardSkeleton";
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { getFastestLapStanding, getSingleFastestPitStop, getMeetingId } from "@/lib/api";
-import { Timer } from "lucide-react";
+import {
+  getFastestLapStanding,
+  getSingleFastestPitStop,
+  getMeetingId,
+  getPreviousRaces,
+  getRaceResults,
+} from "@/lib/api";
+import { Medal, Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
   const [fastestLap, setFastestLap] = useState<any | null>(null);
+  const [lastRace, setLastRace] = useState<any | null>(null);
+  const [lastWinner, setLastWinner] = useState<any | null>(null);
 
-  const fetchFastestPitstop = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     const pitstopRes = await getSingleFastestPitStop();
     setPitStopInfo(pitstopRes);
     const standing = await getFastestLapStanding();
     setFastestLap(standing.standings[0]);
 
-    const Id = await getMeetingId(2);
-    console.log(Id);
+    const response = await getPreviousRaces();
+    if (response) {
+      setLastRace(response[0]?.raceName);
+      const lastResult = await getRaceResults(
+        response[0]?.season,
+        response[0].round
+      );
+      setLastWinner(lastResult[0]?.Driver?.familyName);
+    }
+    // const Id = await getMeetingId(2);
+    // console.log(Id);
   }, []);
 
   useEffect(() => {
-    fetchFastestPitstop();
+    fetchData();
   }, []);
 
   return (
@@ -52,15 +69,25 @@ export default function Home() {
         {fastestLap == null ? (
           <CardSkeleton />
         ) : (
-            <Card
-              title="Fastest Lap Awards"
-              icon={<Timer size={18} />}
-              stat={`${fastestLap.flCount} Fastest Laps`}
-              subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
-              className="h-full"
-            />
+          <Card
+            title="Fastest Lap Awards"
+            icon={<Timer size={18} />}
+            stat={`${fastestLap.flCount} Fastest Laps`}
+            subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
+            className="h-full"
+          />
         )}
-        <CardSkeleton />
+        {lastWinner == null || lastRace == null ? (
+          <CardSkeleton />
+        ) : (
+          <Card
+            title="Last Race Winner"
+            icon={<Medal size={18} />}
+            stat={lastWinner}
+            subtitle={lastRace}
+            className="h-full"
+          />
+        )}
 
         {/* Table grid */}
         <StandingsTable name={"Drivers"} />
