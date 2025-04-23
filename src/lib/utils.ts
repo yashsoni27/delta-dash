@@ -121,6 +121,30 @@ export function getConstructorHex(constructorName: string): string {
 }
 
 /* -------------------------------------------------------------------------- */
+/*               Gets a lighter version of the color in hexCode               */
+/* -------------------------------------------------------------------------- */
+export function lightenColor(hexColor: string, factor: number = 0.3) {
+  hexColor = hexColor.replace('#', '');
+  
+  // Convert hex to RGB
+  let r = parseInt(hexColor.substring(0, 2), 16);
+  let g = parseInt(hexColor.substring(2, 4), 16);
+  let b = parseInt(hexColor.substring(4, 6), 16);
+  
+  // Lighten each component
+  r = Math.round(r + (255 - r) * factor);
+  g = Math.round(g + (255 - g) * factor);
+  b = Math.round(b + (255 - b) * factor);
+  
+  // Convert back to hex
+  const rHex = r.toString(16).padStart(2, '0');
+  const gHex = g.toString(16).padStart(2, '0');
+  const bHex = b.toString(16).padStart(2, '0');
+  
+  return `#${rHex}${gHex}${bHex}`;
+}
+
+/* -------------------------------------------------------------------------- */
 /*                   Gets a color in rgb for a constructor                    */
 /* -------------------------------------------------------------------------- */
 export function getConstructorColor(constructorName: string): string {
@@ -151,9 +175,9 @@ export function getConstructorGradient(constructorName: string): string {
   if (rgbMatch) {
     const [_, r, g, b, a] = rgbMatch;
     // Create a darker variant for the gradient (reducing brightness by ~30%)
-    const darkerR = Math.max(0, parseInt(r) * 0.5);
-    const darkerG = Math.max(0, parseInt(g) * 0.5);
-    const darkerB = Math.max(0, parseInt(b) * 0.5);
+    const darkerR = Math.max(0, parseInt(r) * 0.1);
+    const darkerG = Math.max(0, parseInt(g) * 0.1);
+    const darkerB = Math.max(0, parseInt(b) * 0.1);
 
     return `linear-gradient(180deg, ${baseColor} 0%, rgb(${darkerR},${darkerG},${darkerB},${a}) 100%)`;
   }

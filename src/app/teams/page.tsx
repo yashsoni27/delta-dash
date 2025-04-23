@@ -210,7 +210,7 @@ export default function Home() {
               ...teamInfo,
             };
           });
-          console.log(mergedTeams);
+          // console.log(mergedTeams);
           setTeams(mergedTeams);
         }
       } catch (e) {

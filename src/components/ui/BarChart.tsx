@@ -104,7 +104,7 @@ export default function BarChart({
 
   const PitStopToolTip = ({ id, value, indexValue, data }: BarTooltipProps) => {
     return (
-      <div className="bg-slate-800 text-xs rounded-md min-w-32 max-w-48 flex flex-col opacity-95">
+      <div className="bg-slate-800 text-xs rounded-md min-w-48 max-w-48 flex flex-col opacity-95">
         <div className="p-2 border-1 border-b border-slate-600">
           {indexValue}
         </div>

@@ -423,6 +423,211 @@ export async function getFastestLaps(
   };
 }
 
+// Get Head to Head data
+export async function getComparisonData(
+  season: string = "current",
+  constructorId: string
+) {
+  const raceResults = await fetchFromApi(
+    `${season}/constructors/${constructorId}/results`,
+    "Race",
+    100,
+    0
+  );
+  const sprintResults = await fetchFromApi(
+    `${season}/constructors/${constructorId}/sprint`,
+    "Race",
+    100,
+    0
+  );
+
+  // Track all drivers and their last appearance
+  const driversMap = new Map<
+    string,
+    {
+      driverId: string;
+      givenName: string;
+      familyName: string;
+      driverNo: string;
+      lastRound: number;
+      races: number;
+      raceWins: number;
+      sprintWins: number;
+      wins: number;
+      qualifying: number;
+      qualifyingWins: number;
+      poles: number;
+      points: number;
+      podiums: number;
+      bestFinish: number;
+      bestGrid: number;
+      dnf: number;
+    }
+  >();
+
+  // Process race results first to set driver identities
+  if ((raceResults?.data as any)?.Races) {
+    const races = (raceResults?.data as any)?.Races;
+
+    [...races].reverse().forEach((race: any) => {
+      const round = parseInt(race.round);
+
+      race.Results.forEach((result: any) => {
+        const driverId = result.Driver.driverId;
+
+        // Add or update driver info
+        if (!driversMap.has(driverId)) {
+          driversMap.set(driverId, {
+            driverId: result.Driver.driverId,
+            givenName: result.Driver.givenName,
+            familyName: result.Driver.familyName,
+            driverNo: result.Driver.permanentNumber,
+            lastRound: round,
+            races: 0,
+            raceWins: 0,
+            sprintWins: 0,
+            wins: 0,
+            qualifying: 0,
+            qualifyingWins: 0,
+            poles: 0,
+            points: 0,
+            podiums: 0,
+            bestFinish: Infinity,
+            bestGrid: Infinity,
+            dnf: 0,
+          });
+        }
+
+        const driver = driversMap.get(driverId)!;
+
+        // Update statistics
+        driver.races++;
+        driver.points += parseFloat(result.points);
+
+        const position = parseInt(result.position);
+        const gridPosition = parseInt(result.grid);
+
+        // Update best finish
+        if (position < driver.bestFinish) {
+          driver.bestFinish = position;
+        }
+
+        // Update best grid
+        if (gridPosition < driver.bestGrid) {
+          driver.bestGrid = gridPosition;
+        }
+
+        // Count poles
+        if (gridPosition === 1) {
+          driver.poles++;
+        }
+
+        // Count podiums
+        if (position <= 3) {
+          driver.podiums++;
+        }
+
+        // Count wins
+        if (position === 1) {
+          driver.wins++;
+        }
+
+        // Count DNFs
+        if (result.status !== "Finished" && !result.status.includes("Lap")) {
+          driver.dnf++;
+        }
+      });
+
+      // Process qualifying and race battles if we have two drivers
+      if (race.Results.length === 2) {
+        const [result1, result2] = race.Results;
+        const driver1 = driversMap.get(result1.Driver.driverId)!;
+        const driver2 = driversMap.get(result2.Driver.driverId)!;
+
+        // Qualifying battle
+        const grid1 = parseInt(result1.grid);
+        const grid2 = parseInt(result2.grid);
+
+        driver1.qualifying++;
+        driver2.qualifying++;
+
+        if (grid1 < grid2) {
+          driver1.qualifyingWins++;
+        } else if (grid2 < grid1) {
+          driver2.qualifyingWins++;
+        }
+
+        // Race battle
+        const pos1 = parseInt(result1.position);
+        const pos2 = parseInt(result2.position);
+
+        if (pos1 < pos2) {
+          driver1.raceWins++;
+        } else if (pos2 < pos1) {
+          driver2.raceWins++;
+        }
+      }
+    });
+  }
+
+  // Process sprint results
+  if ((sprintResults?.data as any)?.Races) {
+    const sprints = (sprintResults?.data as any)?.Races;
+
+    sprints.forEach((sprint: any) => {
+      if (!sprint.SprintResults) return;
+
+      // Process sprint battles if we have two drivers
+      if (sprint.SprintResults.length === 2) {
+        const [result1, result2] = sprint.SprintResults;
+        const driver1 = driversMap.get(result1.Driver.driverId)!;
+        const driver2 = driversMap.get(result2.Driver.driverId)!;
+
+        // Update points from sprint
+        driver1.points += parseFloat(result1.points);
+        driver2.points += parseFloat(result2.points);
+
+        // Compare sprint results between teammates
+        const pos1 = parseInt(result1.position);
+        const pos2 = parseInt(result2.position);
+
+        // Add sprint win to whoever finished ahead
+        if (pos1 < pos2) {
+          driver1.sprintWins++;
+        } else if (pos2 < pos1) {
+          driver2.sprintWins++;
+        }
+      } else {
+        // Handle case with just one driver or more than two
+        sprint.SprintResults.forEach((result: any) => {
+          const driverId = result.Driver.driverId;
+
+          // Make sure driver exists in our map
+          if (driversMap.has(driverId)) {
+            const driver = driversMap.get(driverId)!;
+
+            // Update points from sprint
+            driver.points += parseFloat(result.points);
+          }
+        });
+      }
+    });
+  }
+
+  // Get the two most recent drivers
+  const sortedDrivers = Array.from(driversMap.values())
+    .sort((a, b) => b.lastRound - a.lastRound)
+    .slice(0, 2);
+
+  return {
+    season,
+    constructorId,
+    color: getConstructorHex(constructorId),
+    driver1: sortedDrivers[0],
+    driver2: sortedDrivers[1],
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /*                         Driver and Constructor APIs                        */
 /* -------------------------------------------------------------------------- */
@@ -498,15 +703,28 @@ export async function getConstructorStandings(
   offset: number = 0
 ) {
   const nextRace = await getNextRace();
+  const year = new Date().getFullYear();
 
-  const evoResults = await fetchFromApi<any>(
-    `${season}/${nextRace?.round - 2}/constructorStandings`,
+  const result = await fetchFromApi<any>(
+    `${season}/constructorStandings`,
     "Standings",
     limit,
     offset
   );
-  const result = await fetchFromApi<any>(
-    `${season}/constructorStandings`,
+  if (year !== Number(nextRace.season)) {
+    return {
+      standings: result.data?.StandingsLists[0]?.ConstructorStandings,
+      season: result.data?.StandingsLists[0]?.season || "",
+      pagination: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+      },
+    };
+  }
+
+  const evoResults = await fetchFromApi<any>(
+    `${season}/${nextRace?.round - 2}/constructorStandings`,
     "Standings",
     limit,
     offset
@@ -1374,7 +1592,7 @@ export async function getDriverAvgAndPoints(eventId?: string) {
 
     const result = Object.values(driverPoints);
 
-    console.log("res: ", result);
+    // console.log("res: ", result);
 
     return result;
   } catch (e) {
@@ -1408,7 +1626,7 @@ export async function getAvgPitStopAndEvtId() {
       ),
     }));
 
-    console.log("trans", transformedValues);
+    // console.log("trans", transformedValues);
 
     return { events: events, values: transformedValues };
   } catch (e) {
