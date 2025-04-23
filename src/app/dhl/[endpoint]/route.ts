@@ -41,7 +41,7 @@ export async function GET(
     }
 
     const data = await response.json();
-    if (endpoint == "fastestLapVideo") {
+    if (endpoint == "fastestLapVideo" || endpoint == "pitStopByEvent") {
       return NextResponse.json(data);
     }
     return NextResponse.json(data.data);

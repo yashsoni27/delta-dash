@@ -14,6 +14,25 @@ import { DHLtoJolpicaConstructor, getConstructorHex } from "@/lib/utils";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
+
+function formatDriverData(data: any[]) {
+  const teamGroups = data.reduce((acc, driver) => {
+    if (!acc[driver.team]) {
+      acc[driver.team] = {
+        team: driver.team,
+        color: getConstructorHex(DHLtoJolpicaConstructor(driver.team)),
+      };
+    }
+    acc[driver.team][driver.lastName] = parseFloat(
+      driver.avgDuration.toFixed(2)
+    );
+    acc[driver.team][`${driver.lastName}Color`] = driver.color;
+    return acc;
+  }, {});
+
+  return Object.values(teamGroups);
+}
+
 export default function Home() {
   const [avgPitStop, setAvgPitStop] = useState<any>(null);
   const [columns, setColumns] = useState<any | null>(null);
@@ -22,6 +41,7 @@ export default function Home() {
   const [constAvg, setConstAvg] = useState<any | null>(null);
   const [driverStanding, setDriverStanding] = useState<any | null>(null);
   const [driverAvg, setDriverAvg] = useState<any | null>(null);
+  const [pitAvg, setPitAvg] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -92,11 +112,6 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchRaces();
-    fetchPitStopStanding();
-  }, []);
-
   const fetchPitStopStanding = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -115,7 +130,10 @@ export default function Home() {
         const driversByAvgTime = [...driversWithColors].sort(
           (a: any, b: any) => b.avgDuration - a.avgDuration
         );
+        
         setDriverAvg(driversByAvgTime);
+        const formattedData = formatDriverData(driversByAvgTime);
+        setPitAvg(formattedData);
       }
 
       const response = await getFastestPitstopAndStanding();
@@ -142,6 +160,32 @@ export default function Home() {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchRaces();
+    fetchPitStopStanding();
+  }, [fetchRaces, fetchPitStopStanding]);
+
+  const [chartKeys, setChartKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (pitAvg && pitAvg.length > 0) {
+      const allDrivers = new Set<string>();
+
+      pitAvg.forEach((team: any) => {
+        Object.keys(team).forEach((key) => {
+          if (!["team", "color"].includes(key) && !key.endsWith("Color")) {
+            allDrivers.add(key);
+          }
+        });
+      });
+
+      // Convert Set to Array
+      const driverKeys = Array.from(allDrivers);
+      // console.log("All driver keys:", driverKeys);
+      setChartKeys(driverKeys);
+    }
+  }, [pitAvg]);
 
   return (
     <>
@@ -171,13 +215,25 @@ export default function Home() {
 
               <div className="grid grid-cols-subgrid lg:col-span-2 2xl:col-span-4 content-start gap-1 sm:gap-4">
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10]  sm:rounded-lg p-4 bg-slate-900">
-                  <PitStopChart
-                    data={avgPitStop}
-                    heading="Average Pit Stop Times per GP"
+                  <BarChart
+                    heading="Avg Pit Stop Time By Constructor"
+                    data={pitAvg}
+                    indexBy="team"
+                    // keys={["avgDuration"]}
+                    keys={chartKeys}
+                    layout="vertical"
+                    padding={0.2}
+                    margin={{ top: 30, right: 10, bottom: 30, left: 30 }}
+                    showAxisLeft={true}
+                    showAxisBottom={true}
+                    isInteractive={true}
+                    pitStopTooltip={true}
                   />
                 </div>
                 <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
-                  {driverAvg == null ? (<ChartSkeleton />) : (
+                  {driverAvg == null ? (
+                    <ChartSkeleton />
+                  ) : (
                     <BarChart
                       heading="Driver Avg Pit Stop Time"
                       height={400}
@@ -188,11 +244,15 @@ export default function Home() {
                       layout="horizontal"
                       margin={{ top: 30, right: 70, bottom: 20, left: 70 }}
                       showAxisLeft={true}
+                      isInteractive={true}
+                      pitStopTooltip={true}
                     />
                   )}
                 </div>
                 <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
-                  {driverStanding == null ? (<ChartSkeleton />) : (
+                  {driverStanding == null ? (
+                    <ChartSkeleton />
+                  ) : (
                     <BarChart
                       heading="Driver DHL Points"
                       height={400}
@@ -206,8 +266,16 @@ export default function Home() {
                     />
                   )}
                 </div>
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10]  sm:rounded-lg p-4 bg-slate-900">
+                  <PitStopChart
+                    data={avgPitStop}
+                    heading="Average Pit Stop Times per GP"
+                  />
+                </div>
                 <div className="2xl:col-start-3 sm:rounded-lg p-4 bg-slate-900">
-                  {constAvg == null ? (<ChartSkeleton />) : (
+                  {constAvg == null ? (
+                    <ChartSkeleton />
+                  ) : (
                     <BarChart
                       heading="Constructor Avg Pit Stop Time"
                       height={400}
@@ -222,7 +290,9 @@ export default function Home() {
                   )}
                 </div>
                 <div className="2xl:col-start-4 sm:rounded-lg p-4 bg-slate-900">
-                  {constStanding == null ? (<ChartSkeleton />) : (
+                  {constStanding == null ? (
+                    <ChartSkeleton />
+                  ) : (
                     <BarChart
                       heading="Constructor DHL Points"
                       height={400}

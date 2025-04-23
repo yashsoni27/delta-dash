@@ -51,10 +51,10 @@ export function formatTime(timeString: string | number): string {
 /* -------------------------------------------------------------------------- */
 /*                   Converts minute format to total seconds                  */
 /* -------------------------------------------------------------------------- */
-export function minuteStrToSeconds (timeString: string): number {
+export function minuteStrToSeconds(timeString: string): number {
   if (!timeString) return 0;
 
-  const [minutePart, secondPart] = timeString.split(':');
+  const [minutePart, secondPart] = timeString.split(":");
   if (!minutePart || !secondPart) return 0;
 
   const minutes = parseInt(minutePart);
@@ -217,4 +217,55 @@ export function circuitIdToF1Adapter(circuitId: string): string | null {
   };
 
   return circuit[circuitId] || null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                     convert DHL table response to JSON                     */
+/* -------------------------------------------------------------------------- */
+export function convertPitStopTableToJson(htmlString: string) {
+  if (!htmlString) {
+    return null;
+  }
+  const cleanHtml = htmlString.replace(/\n/g, "").replace(/\s+/g, " ").trim();
+
+  const results: {
+    position: number;
+    team: string;
+    driver: string;
+    time: number;
+    lap: number;
+    points: number;
+  }[] = [];
+
+  // Extract all table rows using regex
+  const rowRegex = /<tr>.*?<\/tr>/g;
+  const rows = cleanHtml.match(rowRegex) || [];
+
+  const dataRows = rows.slice(1);
+
+  // Skip the header row and process data rows
+  dataRows.forEach((row) => {
+    const position = row?.match(/<td[^>]*><strong>(\d+)<\/strong>/)?.[1];
+    const team = row?.match(/<td>([^<]+)<\/td>/)?.[1]?.trim();
+    const driver = row
+      .match(/<td>([^<]+)<\/td>/g)?.[1]
+      ?.replace(/<td>|<\/td>/g, "")
+      .trim();
+    const time = row.match(/<td>(\d+\.\d+)<\/td>/)?.[1];
+    const lap = row.match(/<td>(\d+)<\/td>/)?.[1];
+    const points = row.match(/<td><strong>(\d*)<\/strong>/)?.[1];
+
+    if (position && team && driver && time && lap) {
+      results.push({
+        position: parseInt(position),
+        team,
+        driver,
+        time: parseFloat(time),
+        lap: parseInt(lap),
+        points: points ? parseInt(points) : 0,
+      });
+    }
+  });
+
+  return results;
 }

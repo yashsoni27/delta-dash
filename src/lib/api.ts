@@ -2,6 +2,7 @@ import { DHLEndpoint } from "@/app/dhl/[endpoint]/route";
 import { LapTiming, PaginationInfo } from "@/types";
 import {
   circuitIdToF1Adapter,
+  convertPitStopTableToJson,
   fetchWithDelay,
   formatTime,
   getConstructorHex,
@@ -1302,46 +1303,61 @@ export async function getDriverAvgAndPoints(eventId?: string) {
     const round = parseInt(roundRes.round);
 
     const response = await fetchFromDHL("avgPitStopAndEventId");
-    // const n = Object.keys(response.chart.events).length;
     const Id = response.chart.events[0].id;
     let eventIds = [];
     for (let i = Id; i < Id + round; i++) {
       eventIds.push(`${i}`);
     }
 
-    // console.log("response: ", response);
-
     const allResults = await Promise.all(
       eventIds.map(async (evtId: any) => {
         const response = await fetchFromDHL(`pitStopByEvent?event=${evtId}`);
         return {
           evtId,
-          chart: response?.chart ?? [],
+          chart: response?.data?.chart ?? [],
+          html: convertPitStopTableToJson(response?.htmlList?.table) ?? [],
         };
       })
     );
-    // console.log("all: ", allResults);
+
+    // Track latest constructor for each driver
+    const latestDriverTeam: Record<string, string> = {};
+
+    // First pass: Get latest team for each driver
+    allResults
+      .slice()
+      .reverse()
+      .forEach((event) => {
+        event.html.forEach((driver: any) => {
+          if (!latestDriverTeam[driver.driver]) {
+            latestDriverTeam[driver.driver] = driver.team;
+          }
+        });
+      });
 
     const driverPoints: any = {};
+
+    // Second pass: Calculate statistics using latest team
     allResults.forEach((event) => {
-      event.chart.forEach((driver: any) => {
-        const id = driver.driverNr;
-        if (!driverPoints[id]) {
-          driverPoints[id] = {
-            driverNr: id,
-            firstName: driver.firstName,
-            lastName: driver.lastName,
-            team: driver.team,
+      event.html.forEach((driver: any) => {
+        const driverName = driver.driver;
+        const latestTeam = latestDriverTeam[driverName];
+
+        if (!driverPoints[driverName]) {
+          driverPoints[driverName] = {
+            lastName: driverName,
+            team: latestTeam, // Use latest team
             points: 0,
             totalDuration: 0,
             pitStopCount: 0,
             avgDuration: 0,
           };
         }
-        driverPoints[id].points += driver.points;
-        if (driver.duration && !driver.irregular) {
-          driverPoints[id].totalDuration += driver.duration;
-          driverPoints[id].pitStopCount++;
+
+        driverPoints[driverName].points += driver.points;
+        if (driver.time > 0) {
+          driverPoints[driverName].totalDuration += driver.time;
+          driverPoints[driverName].pitStopCount++;
         }
       });
     });
@@ -1350,16 +1366,15 @@ export async function getDriverAvgAndPoints(eventId?: string) {
     Object.values(driverPoints).forEach((driver: any) => {
       driver.avgDuration =
         driver.pitStopCount > 0
-          ? Number((driver.totalDuration / driver.pitStopCount).toFixed(3))
+          ? Number((driver.totalDuration / driver.pitStopCount).toFixed(2))
           : 0;
 
-      delete driver.totalDuration; // Clean up helper properties
-      delete driver.pitStopCount;
+      delete driver.totalDuration;
     });
 
     const result = Object.values(driverPoints);
 
-    // console.log("res: ", result);
+    console.log("res: ", result);
 
     return result;
   } catch (e) {
@@ -1392,6 +1407,8 @@ export async function getAvgPitStopAndEvtId() {
         {}
       ),
     }));
+
+    console.log("trans", transformedValues);
 
     return { events: events, values: transformedValues };
   } catch (e) {

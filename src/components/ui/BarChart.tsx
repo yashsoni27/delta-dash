@@ -10,11 +10,13 @@ interface BarChartProps {
   driver?: string;
   keys?: string[];
   indexBy?: string;
+  padding?: number;
   enableGridX?: boolean;
   enableGridY?: boolean;
   enableLabel?: boolean;
   enableTotals?: boolean;
   isInteractive?: boolean;
+  pitStopTooltip?: boolean;
   showAxisBottom?: boolean;
   showAxisLeft?: boolean;
   layout?: "vertical" | "horizontal";
@@ -30,11 +32,13 @@ export default function BarChart({
   driver,
   keys,
   indexBy,
+  padding = 0.05,
   enableGridX = false,
   enableGridY = false,
   enableLabel = false,
   enableTotals = true,
   isInteractive = false,
+  pitStopTooltip = false,
   showAxisBottom = false,
   showAxisLeft = false,
   layout = "vertical",
@@ -46,7 +50,10 @@ export default function BarChart({
   }
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [containerDimensions, setContainerDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -73,6 +80,7 @@ export default function BarChart({
   }, []);
 
   interface BarTooltipProps {
+    id: string | number;
     value: string | number;
     indexValue: string | number;
     data: any;
@@ -94,6 +102,27 @@ export default function BarChart({
     );
   };
 
+  const PitStopToolTip = ({ id, value, indexValue, data }: BarTooltipProps) => {
+    return (
+      <div className="bg-slate-800 text-xs rounded-md min-w-32 max-w-48 flex flex-col opacity-95">
+        <div className="p-2 border-1 border-b border-slate-600">
+          {indexValue}
+        </div>
+
+        <div className="p-2 text-xs flex justify-between gap-3">
+          {data.pitStopCount ? (
+            <div>{data.pitStopCount} pit stops</div>
+          ) : (
+            <div>{id}</div>
+          )}
+          <div className="font-bold" style={{ color: data.color }}>
+            {value} s avg
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
@@ -104,11 +133,16 @@ export default function BarChart({
           width={width || containerDimensions.width}
           theme={chartTheme}
           colors={(bar) => String(bar.data["color"] || "#1f2941")}
-          tooltip={CustomTooltip}
+          tooltip={pitStopTooltip == true ? PitStopToolTip : CustomTooltip}
           keys={keys}
           indexBy={indexBy}
+          valueFormat={(value) => {
+            const num = Number(value);
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+          }}          
           margin={margin}
-          padding={0.05}
+          padding={padding}
+          innerPadding={1}
           enableLabel={enableLabel}
           labelSkipHeight={20}
           labelPosition="end"
