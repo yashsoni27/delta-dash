@@ -331,7 +331,7 @@ export default function Home() {
                     colors={["#d1d1d1", "#1a73e8", "#ffd54f"]}
                   />
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900 w-full h-full">
                   <Table
                     heading="Top 6 Fastest Laps"
                     columns={smColumns}
@@ -343,7 +343,7 @@ export default function Home() {
                     <TrackImg
                       circuitId={selectedRace.circuitId}
                       circuitName={selectedRace.circuitName}
-                      className="object-cover"
+                      className="object-cover w-full h-full"
                     />
                   )}
                 </div>

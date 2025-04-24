@@ -14,7 +14,7 @@ export default function TrackImg({
   circuitId,
   circuitName,
   className = "",
-  width = 800,
+  width = 700,
   height = 450,
 }: TrackImgProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);

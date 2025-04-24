@@ -28,7 +28,7 @@ export default function Table({
       className={`md:row-start-4 lg:row-start-3 rounded-lg border border-gray-700 pt-2 ${className}`}
     >
       {heading && (
-        <h2 className="scroll-m-20 text-xl font-semibold tracking-tight p-4">
+        <h2 className="scroll-m-20 text-xl font-semibold tracking-tight p-4 mb-2">
           {heading}
         </h2>
       )}
