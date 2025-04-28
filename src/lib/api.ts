@@ -1259,13 +1259,16 @@ export async function getDriverStats(
     constructorId: string;
     seasonAchievements: {
       Wins: number;
+      SprintWins: number;
       Podiums: number;
+      SprintPodiums: number;
       PointsFinish: number;
       DNF: number;
       DSQ: number;
       TotalRounds: number;
     };
     pointsThisSeason: number;
+    pointsWithoutSprint: number;
     averagePointsPerGP: number;
     totalLapsLed: number;
     finishPositions: {
@@ -1311,13 +1314,16 @@ export async function getDriverStats(
       constructorId: "",
       seasonAchievements: {
         Wins: 0,
+        SprintWins: 0,
         Podiums: 0,
+        SprintPodiums: 0,
         PointsFinish: 0,
         DNF: 0,
         DSQ: 0,
         TotalRounds: 0,
       },
       pointsThisSeason: 0,
+      pointsWithoutSprint: 0,
       averagePointsPerGP: 0,
       totalLapsLed: 0,
       finishPositions: {
@@ -1365,6 +1371,7 @@ export async function getDriverStats(
 
       // Points this Season
       stats.pointsThisSeason += points;
+      stats.pointsWithoutSprint += points;
 
       // Finish Positions Distribution
       const positionIndex = position - 1;
@@ -1391,9 +1398,47 @@ export async function getDriverStats(
       });
     });
 
+    // Adding sprint round details
+    const sprintRoundsData = await getSprintRounds(season);
+
+    for (const round of sprintRoundsData.sprintRounds) {
+      const sprintResponse = await fetchFromApi(
+        `${season}/${round}/drivers/${driverId}/sprint`,
+        "Race",
+        limit,
+        offset
+      );
+      // const sprintResult = await getSprintResults(season, round);
+
+      if ((sprintResponse?.data as { Races: any[] })?.Races?.[0]?.SprintResults) {
+        const data = sprintResponse.data as { Races: { SprintResults: any[] }[] };
+        const results = data.Races[0].SprintResults;
+
+        // Process sprint results similar to race results
+        for (const result of results) {
+          if (!result.Driver || !result.Constructor) continue;
+          const sprintPosition = parseInt(result.position);
+          const sprintPoints = parseFloat(result.points);
+
+          // Sprint points
+          stats.pointsThisSeason += sprintPoints; 
+          
+          // Sprint Wins
+          if (sprintPosition === 1) {
+            stats.seasonAchievements.SprintWins ++;
+          }
+
+          // Sprint Podiums 
+          if (sprintPosition <= 3) {
+            stats.seasonAchievements.SprintPodiums ++;
+          }
+        }
+      }
+    }
+
     // Average points per GP
     stats.averagePointsPerGP = parseFloat(
-      (stats.pointsThisSeason / races.length).toFixed(1)
+      (stats.pointsWithoutSprint / races.length).toFixed(1)
     );
 
     // Get laps led data
@@ -1410,6 +1455,7 @@ export async function getDriverStats(
       (total, lap) => total + lap.lapsLed,
       0
     );
+
 
     return stats;
   } catch (e) {

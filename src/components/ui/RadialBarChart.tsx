@@ -25,7 +25,7 @@ export default function RadialBarChart({
   }
 
   const chartData = Object.keys(data)
-    .filter((key) => key !== "TotalRounds")
+    .filter((key) => !['TotalRounds', 'SprintWins', 'SprintPodiums'].includes(key))
     .map((key) => ({
       id: key,
       data: [{ x: key, y: data[key] }],

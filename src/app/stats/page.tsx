@@ -143,14 +143,18 @@ export default function Home() {
             ) : (
               <>
                 <Card
-                  title="Season Achievements"
-                  subtitle="Wins this season"
+                  title="Wins"
+                  subtitle={`${
+                    driverStat.seasonAchievements.SprintWins === 0
+                      ? "No"
+                      : driverStat.seasonAchievements.SprintWins
+                  } Sprint Wins`}
                   stat={driverStat?.seasonAchievements?.Wins}
                   icon={<Medal size={18} />}
                 />
                 <Card
                   title="Total Points"
-                  subtitle="Sprints excluded"
+                  subtitle="Sprints included"
                   stat={driverStat?.pointsThisSeason}
                   icon={<Sigma size={18} />}
                 />
