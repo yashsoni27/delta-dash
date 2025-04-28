@@ -145,9 +145,9 @@ export default function Home() {
                 <Card
                   title="Wins"
                   subtitle={`${
-                    driverStat.seasonAchievements.SprintWins === 0
+                    driverStat?.seasonAchievements?.SprintWins === 0
                       ? "No"
-                      : driverStat.seasonAchievements.SprintWins
+                      : driverStat?.seasonAchievements?.SprintWins
                   } Sprint Wins`}
                   stat={driverStat?.seasonAchievements?.Wins}
                   icon={<Medal size={18} />}
