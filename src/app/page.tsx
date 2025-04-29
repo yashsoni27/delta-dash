@@ -6,13 +6,14 @@ import StandingsTable from "@/components/ui/StandingsTable";
 import { Medal, Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { dhlService, raceService } from "@/lib/api/index";
+import { dhlService, f1LiveService, raceService } from "@/lib/api/index";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
   const [fastestLap, setFastestLap] = useState<any | null>(null);
   const [lastRace, setLastRace] = useState<any | null>(null);
   const [lastWinner, setLastWinner] = useState<any | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   const fetchData = useCallback(async () => {
     const pitstopRes = await dhlService.getSingleFastestPitStop();
@@ -35,6 +36,23 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const connectToLiveTiming = async () => {
+      try {
+        await f1LiveService.connect();
+        setIsConnected(true);
+      } catch (error) {
+        console.error('Failed to connect to live timing:', error);
+      }
+    };
+
+    connectToLiveTiming();
+
+    return () => {
+      f1LiveService.disconnect();
+    };
   }, []);
 
   return (
