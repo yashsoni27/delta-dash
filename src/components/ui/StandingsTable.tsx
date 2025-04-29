@@ -1,10 +1,10 @@
 "use client";
-import { getConstructorStandings, getDriverStandings } from "@/lib/api";
 import { ChevronDown, ChevronUp, Minus, MoveRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import StandingsTableSkeleton from "../loading/StandingsTableSkeleton";
 import { useSearchParams } from "next/navigation";
+import { constructorService, driverService } from "@/lib/api/index";
 
 interface Standings {
   position: number | string;
@@ -32,7 +32,7 @@ function StandingsTableContent({
       setIsLoading(true);
       try {
         if (name === "Drivers") {
-          const response = await getDriverStandings(season);
+          const response = await driverService.getDriverStandings(season);
 
           const formattedDrivers = response.standings
             .slice(0, title === null ? 10 : response.standings.length + 1)
@@ -48,7 +48,7 @@ function StandingsTableContent({
 
           setStandings(formattedDrivers);
         } else if (name === "Constructors") {
-          const response = await getConstructorStandings();
+          const response = await constructorService.getConstructorStandings();
 
           const formattedConstructors = response.standings.map((item: any) => ({
             position: Number(item.position),

@@ -1,5 +1,4 @@
 import { PaginationInfo } from "@/types";
-import { fetchFromApi } from "./api";
 
 /* -------------------------------------------------------------------------- */
 /*                     Transform Response for Jolpica API                     */
@@ -14,20 +13,6 @@ export function transformResponse<T>(
     limit: parseInt(mrData.limit),
     offset: parseInt(mrData.offset),
   };
-}
-
-/* -------------------------------------------------------------------------- */
-/*                           Delayed fetch function                           */
-/* -------------------------------------------------------------------------- */
-export async function fetchWithDelay<T>(
-  url: string,
-  dataKey: string,
-  delay: number,
-  limit: number,
-  offset: number
-): Promise<any> {
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  return fetchFromApi<T>(url, dataKey, limit, offset);
 }
 
 /* -------------------------------------------------------------------------- */

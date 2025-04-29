@@ -5,11 +5,7 @@ import RankingEvolution from "@/components/ui/RankingEvolution";
 import StackedBarChart from "@/components/ui/StackedBarChart";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
-import {
-  getConstructorEvolution,
-  getDriverEvolution,
-  getFinishingStats,
-} from "@/lib/api";
+import { constructorService, driverService, statsService } from "@/lib/api/index";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -27,15 +23,15 @@ function StandingsContent() {
     const fetchEvolution = async () => {
       setIsLoading(true);
       try {
-        const finishingStat = await getFinishingStats(selectedYear.toString());
+        const finishingStat = await statsService.getFinishingStats(selectedYear.toString());
         if (title === "Drivers") {
-          const evolution = await getDriverEvolution(selectedYear.toString());
+          const evolution = await driverService.getDriverEvolution(selectedYear.toString());
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
           setStats(finishingStat?.drivers);
           setPtDistribution(finishingStat?.driversRound?.slice().reverse());
         } else if (title === "Constructors") {
-          const evolution = await getConstructorEvolution(
+          const evolution = await constructorService.getConstructorEvolution(
             selectedYear.toString()
           );
           setConstructorEvolution(evolution);

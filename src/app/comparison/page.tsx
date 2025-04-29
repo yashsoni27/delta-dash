@@ -1,12 +1,7 @@
 "use client";
 import ComparisonChart from "@/components/ui/ComparisonChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import {
-  getComparisonData,
-  getConstructors,
-  getConstructorStandings,
-} from "@/lib/api";
-import { motion } from "framer-motion";
+import { constructorService, statsService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
@@ -51,7 +46,7 @@ export default function Home() {
   const fetchConstructors = useCallback(async (year: string) => {
     try {
       setIsLoading(true);
-      const response = await getConstructorStandings(year);
+      const response = await constructorService.getConstructorStandings(year);
       const constructorsList = response?.standings || [];
       setConstructors(constructorsList);
       setSelectedConst(
@@ -68,7 +63,7 @@ export default function Home() {
   const fetchData = useCallback(async (year: string, constructorId: string) => {
     try {
       setIsLoading(true);
-      const response = await getComparisonData(year, constructorId);
+      const response = await statsService.getComparisonData(year, constructorId);
       // console.log("stats ", response);
       setStats(response);
     } catch (e) {

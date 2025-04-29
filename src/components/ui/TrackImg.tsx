@@ -1,4 +1,4 @@
-import { getTrackImg } from "@/lib/api";
+import { f1MediaService } from "@/lib/api/index";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ export default function TrackImg({
     const loadImage = async () => {
       try {
         setIsLoading(true);
-        const url = await getTrackImg(circuitId);
+        const url = await f1MediaService.getTrackImg(circuitId);
         if (url) {
           setImageUrl(url);
           setError(null);

@@ -6,14 +6,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StackedBarChart from "@/components/ui/StackedBarChart";
 import Table from "@/components/ui/Table";
 import TrackImg from "@/components/ui/TrackImg";
-import {
-  getAvgPitStopAndEvtId,
-  getFastestLaps,
-  getFastestLapVideo,
-  getPreviousRaces,
-  getQualificationResults,
-  getRaceResults,
-} from "@/lib/api";
+import { dhlService, raceService, statsService } from "@/lib/api/index";
 import { formatTime } from "@/lib/utils";
 import { Column } from "@/types";
 import { Calendar, CircleAlert, Flag } from "lucide-react";
@@ -120,7 +113,7 @@ export default function Home() {
     async (year: string) => {
       try {
         setIsLoading(true);
-        const previousRaces = await getPreviousRaces(year);
+        const previousRaces = await raceService.getPreviousRaces(year);
         const options = previousRaces.map((race: any) => ({
           name: race.Circuit.Location.country,
           value: parseInt(race.round, 10),
@@ -157,14 +150,14 @@ export default function Home() {
           setRaceName(selectedRace.raceName);
         }
 
-        const pitStopResponse = await getAvgPitStopAndEvtId();
+        const pitStopResponse = await dhlService.getAvgPitStopAndEvtId();
         if (pitStopResponse) {
           const eventId = pitStopResponse?.events[Number(round) - 1]?.id;
-          const vid = await getFastestLapVideo(eventId);
+          const vid = await dhlService.getFastestLapVideo(eventId);
           setVidData(vid);
         }
 
-        const response = await getFastestLaps(year, raceRound);
+        const response = await statsService.getFastestLaps(year, raceRound);
         if (response) {
           const fastest6Laps = response.fastest20Laps
             .map((item, index) => ({
@@ -177,7 +170,7 @@ export default function Home() {
           setSmTableData(fastest6Laps);
         }
 
-        const resultsResponse = await getRaceResults(year, raceRound);
+        const resultsResponse = await raceService.getRaceResults(year, raceRound);
         if (resultsResponse) {
           const raceResults = resultsResponse.map((item: any, index: any) => ({
             driver: item.Driver.familyName,
@@ -197,7 +190,7 @@ export default function Home() {
           setTableData(raceResults);
         }
 
-        const qualificationResponse = await getQualificationResults(year, raceRound);
+        const qualificationResponse = await raceService.getQualificationResults(year, raceRound);
         if (qualificationResponse) {
           setQualificationData(qualificationResponse);
         }

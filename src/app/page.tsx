@@ -3,16 +3,10 @@ import Card from "@/components/ui/Card";
 import CardSkeleton from "@/components/loading/CardSkeleton";
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
-import {
-  getFastestLapStanding,
-  getSingleFastestPitStop,
-  getMeetingId,
-  getPreviousRaces,
-  getRaceResults,
-} from "@/lib/api";
 import { Medal, Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { dhlService, raceService } from "@/lib/api/index";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
@@ -21,15 +15,15 @@ export default function Home() {
   const [lastWinner, setLastWinner] = useState<any | null>(null);
 
   const fetchData = useCallback(async () => {
-    const pitstopRes = await getSingleFastestPitStop();
+    const pitstopRes = await dhlService.getSingleFastestPitStop();
     setPitStopInfo(pitstopRes);
-    const standing = await getFastestLapStanding();
+    const standing = await dhlService.getFastestLapStanding();
     setFastestLap(standing.standings[0]);
 
-    const response = await getPreviousRaces();
+    const response = await raceService.getPreviousRaces();
     if (response) {
       setLastRace(response[0]?.raceName);
-      const lastResult = await getRaceResults(
+      const lastResult = await raceService.getRaceResults(
         response[0]?.season,
         response[0].round
       );

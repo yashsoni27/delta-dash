@@ -1,5 +1,5 @@
 "use client";
-import { getDriverStandings } from "@/lib/api";
+import { driverService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
@@ -35,7 +35,7 @@ export default function Home() {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const response = await getDriverStandings();
+        const response = await driverService.getDriverStandings();
         if (response) {
           setDrivers(response.standings);
         }

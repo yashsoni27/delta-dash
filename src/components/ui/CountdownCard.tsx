@@ -1,5 +1,5 @@
 "use client";
-import { getNextRace } from "@/lib/api";
+import { raceService } from "@/lib/api/index";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import CountdownCardSkeleton from "../loading/CountdownCardSkeleton";
@@ -22,7 +22,7 @@ const CountdownCard = () => {
     const fetchNextRace = async () => {
       setIsLoading(true);
       try {
-        const nextRace = await getNextRace();
+        const nextRace = await raceService.getNextRace();
         if (nextRace) {
           setSeason(nextRace.season);
           setRaceName(nextRace.raceName);

@@ -7,11 +7,7 @@ import Card from "@/components/ui/Card";
 import PieChart from "@/components/ui/PieChart";
 import RadialBarChart from "@/components/ui/RadialBarChart";
 import SankeyChart from "@/components/ui/SankeyChart";
-import {
-  getDriverStandings,
-  getDriverStats,
-  getLapsLedByDriver,
-} from "@/lib/api";
+import { driverService, statsService } from "@/lib/api/index";
 import { Calendar, CircleSlash2, Flag, Medal, Sigma, User } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -33,7 +29,7 @@ export default function Home() {
   // Fetch drivers when selectedYear changes
   const loadDrivers = useCallback(async (year: string) => {
     try {
-      const response = await getDriverStandings(year);
+      const response = await driverService.getDriverStandings(year);
       const driversData = response.standings.map((standing: any) => ({
         id: standing.Driver.driverId,
         name: standing.Driver.familyName,
@@ -52,7 +48,7 @@ export default function Home() {
     async (year: string, driverId: string) => {
       try {
         setIsLoading(true);
-        const driverData = await getDriverStats(year.toString(), driverId);
+        const driverData = await statsService.getDriverStats(year.toString(), driverId);
         // console.log("data: ", driverData);
         setDriverStat(driverData);
       } catch (e) {

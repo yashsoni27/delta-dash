@@ -1,5 +1,5 @@
 "use client";
-import { getConstructorStandings } from "@/lib/api";
+import { constructorService } from "@/lib/api/index";
 import { getConstructorColor, getConstructorGradient } from "@/lib/utils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -199,7 +199,7 @@ export default function Home() {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const response = await getConstructorStandings();
+        const response = await constructorService.getConstructorStandings();
         if (response) {
           const mergedTeams = response.standings.map((standing: any) => {
             const teamInfo = teamsInfo.find(

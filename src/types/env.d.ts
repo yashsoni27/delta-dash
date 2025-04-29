@@ -7,6 +7,7 @@ declare global {
       DHL_FASTEST_PITSTOP_ID: string;
       DHL_AVG_PITSTOP_ID: string;
       NEXT_PUBLIC_F1_MEDIA_BASE: string;
+      NEXT_PUBLIC_OPEN_F1_API_BASE: string;
       REVALIDATION_TIME: string;
     }
   }

@@ -5,11 +5,7 @@ import BarChart from "@/components/ui/BarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import PitStopChart from "@/components/ui/PitStopChart";
 import Table from "@/components/ui/Table";
-import {
-  getAvgPitStopAndEvtId,
-  getDriverAvgAndPoints,
-  getFastestPitstopAndStanding,
-} from "@/lib/api";
+import { dhlService } from "@/lib/api/index";
 import { DHLtoJolpicaConstructor, getConstructorHex } from "@/lib/utils";
 import { Column } from "@/types";
 import { useCallback, useEffect, useState } from "react";
@@ -87,7 +83,7 @@ export default function Home() {
   const fetchRaces = useCallback(async () => {
     try {
       setIsLoading(true);
-      const pitStopResponse = await getAvgPitStopAndEvtId();
+      const pitStopResponse = await dhlService.getAvgPitStopAndEvtId();
       setAvgPitStop(pitStopResponse?.values);
 
       const teamAverages = pitStopResponse?.values
@@ -115,7 +111,7 @@ export default function Home() {
   const fetchPitStopStanding = useCallback(async () => {
     try {
       setIsLoading(true);
-      const driverRes = await getDriverAvgAndPoints();
+      const driverRes = await dhlService.getDriverAvgAndPoints();
       if (driverRes) {
         const driversWithColors = driverRes.map((item: any) => ({
           ...item,
@@ -136,7 +132,7 @@ export default function Home() {
         setPitAvg(formattedData);
       }
 
-      const response = await getFastestPitstopAndStanding();
+      const response = await dhlService.getFastestPitstopAndStanding();
       if (response) {
         const pitStops = response.season_fastest.map(
           (item: any, index: any) => ({
