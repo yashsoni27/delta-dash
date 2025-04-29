@@ -6,11 +6,18 @@ A sleek and modern Formula 1 dashboard application for real-time race statistics
 ## ✨ Features
 
 - Historical race data comparison
-- Driver and constructor standings (WIP)
-- Circuit information and lap analysis (WIP)
+- Driver and constructor standings 
+- Circuit information and lap analysis
+- Driver data analysis over the season
 - Interactive track maps (planned in future)
 - Real-time tire strategy insights (planned in future)
-- Live race timing and tracking (planned in future)
+- Live race timing and tracking (WIP)
+
+## 📱 Screenshots
+
+![Delta Dash](https://github.com/user-attachments/assets/0bfa2f79-fa8e-4232-9c3b-7a451b818aa0)
+![DeltaDash](https://github.com/user-attachments/assets/6969d0c5-59bb-40d4-bf1a-3b9c137b74a2)
+
 
 ## 🚀 Getting Started
 
