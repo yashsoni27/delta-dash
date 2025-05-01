@@ -22,7 +22,7 @@ const getSegmentColor = (status: number) => {
     case 2064:
       return "blue";
     default:
-      return "navyblue";
+      return "dimgrey";
   }
 };
 
@@ -86,7 +86,7 @@ export default function Driver({
             className="grid items-center gap-2 mx-2"
             style={{
               gridTemplateColumns:
-                "3rem 6.5rem 3.5rem 5.5rem 5rem 5rem 6.5rem 30rem 10.5rem",
+                "3rem 6.5rem 3.5rem 5.5rem 3rem 5rem 6.5rem 25rem 6rem 6rem",
             }}
           >
             <div title="Position">
@@ -219,7 +219,7 @@ export default function Driver({
             </div>
 
             <div title="Sectors">
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-around">
                 {(Array.isArray(line.Sectors)
                   ? line.Sectors
                   : Object.values(line.Sectors ?? {})
@@ -236,7 +236,7 @@ export default function Driver({
                           : Object.values(sector.Segments ?? {})
                         ).map((segment: any, j: number) => (
                           <div
-                          key={`${i}-${j}`}
+                            key={`${i}-${j}`}
                             // className="bg-amber-400"
                             style={{
                               width: "10px",
@@ -249,173 +249,78 @@ export default function Driver({
                       </div>
                       <div className="flex items-center gap-1">
                         {sector.Value && (
-                          <p className="text-lg leading-none font-medium">
+                          <p
+                            className={`text leading-none font-medium ${
+                              sector?.OverallFastest
+                                ? "text-purple-500"
+                                : sector?.PersonalFastest
+                                ? "text-green-500"
+                                : "text-white"
+                            }`}
+                          >
                             {sector.Value}
                           </p>
                         )}
-                        {{ sector }}
-                        <p className="text-sm leading-none text-zinc-600">
-                          33.934
-                        </p>
+                        {TimingStats.Lines[racingNumber]?.BestSectors && (
+                          <p className="text-xs leading-none text-zinc-600">
+                            {
+                              TimingStats.Lines[racingNumber]?.BestSectors[i]
+                                ?.Value
+                            }
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
                 })}
+              </div>
+            </div>
 
-                {/* <div className="flex flex-col gap-1">
-                  <div className="flex flex-row gap-1">
+            <div title="Gear/RPM" className="mr-2">
+              <div className="flex justify-between">
+                <p className="flex h-8 w-8 items-center justify-start text-sm">
+                  {carData["3"]}
+                </p>
+                <p className="flex h-8 w-8 items-center justify-end text-sm">
+                  {carData["0"]}
+                </p>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-xl bg-zinc-700">
+                <div
+                  className="h-1.5 bg-blue-500"
+                  style={{ width: rpmPercent, transitionDuration: "0.1s" }}
+                ></div>
+              </div>
+            </div>
+
+            <div title="Speed">
+              <div className="flex justify-start gap-2 mb-2">
+                <div className="text-left text-sm leading-none font-medium">
+                  {carData["2"]}
+                </div>
+                <div className="text-xs leading-none text-zinc-600">km/h</div>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex flex-col gap-1">
+                  <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
                     <div
-                      className="bg-amber-400"
+                      className="h-1.5 bg-red-500"
                       style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
+                        width: brakeApplied ? "100%" : "0%",
+                        transitionDuration: "0.1s",
                       }}
                     ></div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <p className="text-lg leading-none font-medium text-violet-600">
-                      28.888
-                    </p>
-                    <p className="text-sm leading-none text-zinc-600">28.888</p>
+                  <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
+                    <div
+                      className="h-1.5 bg-emerald-500"
+                      style={{
+                        width: throttlePercent,
+                        transitionDuration: "0.1s",
+                      }}
+                    ></div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <div className="flex flex-row gap-1">
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                    <div
-                      className="bg-amber-400"
-                      style={{
-                        width: "10px",
-                        height: " 5px",
-                        borderRadius: " 2px",
-                      }}
-                    ></div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <p className="text-lg leading-none font-medium">29.389</p>
-                    <p className="text-sm leading-none text-zinc-600">29.287</p>
-                  </div>
-                </div> */}
               </div>
             </div>
           </div>
@@ -439,42 +344,5 @@ export default function Driver({
 //       </p>
 //       <p className="text-sm leading-none text-zinc-500">-</p>
 //     </div>
-
-//     {/* <div className="flex items-center gap-2 place-self-start">
-//       <p className="flex h-8 w-8 items-center justify-center font-mono text-lg">
-//         0
-//       </p>
-//       <div>
-//         <p className="text-right font-mono leading-none font-medium">
-//           0
-//         </p>
-//         <p className="text-sm leading-none text-zinc-600">km/h</p>
-//       </div>
-//       <div className="flex flex-col">
-//         <div className="flex flex-col gap-1">
-//           <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
-//             <div
-//               className="h-1.5 bg-red-500"
-//               style={{
-//                 width: "10000%",
-//                 transitionDuration: "0.1s",
-//               }}
-//             ></div>
-//           </div>
-//           <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
-//             <div
-//               className="h-1.5 bg-emerald-500"
-//               style={{ width: "0%", transitionDuration: "0.1s" }}
-//             ></div>
-//           </div>
-//           <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
-//             <div
-//               className="h-1.5 bg-blue-500"
-//               style={{ width: " 0%", transitionDuration: "0.1s" }}
-//             ></div>
-//           </div>
-//         </div>
-//       </div>
-//     </div> */}
 //   </div>
 // </div>

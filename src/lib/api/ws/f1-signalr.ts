@@ -7,7 +7,7 @@ import { EventEmitter } from "events";
 
 export class F1SignalRClient extends EventEmitter {
   private static readonly BASE_URL = "livetiming.formula1.com/signalr";
-  private static readonly HUB_NAME = "Streaming";
+  // private static readonly HUB_NAME = "Streaming";
   private socket: WebSocket | null = null;
   private connectionToken: string | null = null;
   private cookie: string | null = null;
@@ -31,7 +31,7 @@ export class F1SignalRClient extends EventEmitter {
         throw new Error("Failed to get connection token or cookie");
       }
     } catch (error) {
-      console.error("SignalR negotiation failed:", error);
+      // console.error("SignalR negotiation failed:", error);
       throw error;
     }
   }
@@ -42,7 +42,7 @@ export class F1SignalRClient extends EventEmitter {
     }
 
     const hub = encodeURIComponent(
-      JSON.stringify([{ name: F1SignalRClient.HUB_NAME }])
+      JSON.stringify([{ name: "Streaming" }])
     );
     const encodedToken = encodeURIComponent(this.connectionToken);
     const url = `wss://${F1SignalRClient.BASE_URL}/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodedToken}&connectionData=${hub}`;
@@ -84,7 +84,7 @@ export class F1SignalRClient extends EventEmitter {
       await this.negotiate();
       await this.connectWebSocket();
     } catch (error) {
-      console.error("Connection failed:", error);
+      // console.error("Connection failed:", error);
       throw error;
     }
   }
@@ -95,7 +95,7 @@ export class F1SignalRClient extends EventEmitter {
     }
 
     const message: SignalRMessage = {
-      H: F1SignalRClient.HUB_NAME,
+      H: "Streaming",
       M: "Subscribe",
       A: [streams],
       I: this.messageId++,

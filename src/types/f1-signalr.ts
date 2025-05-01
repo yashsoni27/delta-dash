@@ -1,10 +1,7 @@
 export type F1DataStream = 
   | "Heartbeat"
-  | "CarData.z"
-  | "Position.z"
   | "ExtrapolatedClock"
   | "TopThree"
-  | "RcmSeries"
   | "TimingStats"
   | "TimingAppData"
   | "WeatherData"
@@ -14,7 +11,11 @@ export type F1DataStream =
   | "SessionInfo"
   | "SessionData"
   | "LapCount"
-  | "TimingData";
+  | "TimingData"
+  | "CarData.z"
+  | "Position.z"
+  | "RcmSeries"
+  | "TeamRadio";
 
 export interface SignalRNegotiateResponse {
   Url: string;
