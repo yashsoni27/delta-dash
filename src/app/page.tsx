@@ -30,8 +30,6 @@ export default function Home() {
       );
       setLastWinner(lastResult[0]?.Driver?.familyName);
     }
-    // const Id = await getMeetingId(2);
-    // console.log(Id);
   }, []);
 
   useEffect(() => {
