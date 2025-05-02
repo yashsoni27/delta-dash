@@ -40,7 +40,7 @@ const CountdownCard = () => {
         const nextRace = await raceService.getNextRace();
         if (nextRace) {
           setSeason(nextRace.season);
-          setRaceName(nextRace.raceName.split("Grand Prix"));
+          setRaceName(nextRace.raceName);
           setCircuitId(nextRace.Circuit.circuitId);
 
           const now = new Date().getTime();
@@ -143,8 +143,15 @@ const CountdownCard = () => {
         role={sessionOngoing ? "button" : "presentation"}
       >
         <h2 className="text-lg text-left flex items-baseline">
-          {season} {raceName} :&nbsp;
-          <span className="text-sm">{sessionName}</span>
+          {season}&nbsp;
+          {timeLeft.days === 0 ? (
+            <>
+              {raceName.split("Grand Prix")}:&nbsp;
+              <span className="text-sm">{sessionName}</span>
+            </>
+          ) : (
+            raceName
+          )}
         </h2>
 
         <div className="flex justify-between items-center">

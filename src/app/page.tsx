@@ -73,13 +73,19 @@ export default function Home() {
         {lastWinner == null || lastRace == null ? (
           <CardSkeleton />
         ) : (
-          <Card
-            title="Last Race Winner"
-            icon={<Medal size={18} />}
-            stat={lastWinner}
-            subtitle={lastRace}
-            className="h-full"
-          />
+          <Link
+            href={{
+              pathname: "/races",
+            }}
+          >
+            <Card
+              title="Last Race Winner"
+              icon={<Medal size={18} />}
+              stat={lastWinner}
+              subtitle={lastRace}
+              className="h-full"
+            />
+          </Link>
         )}
 
         {/* Table grid */}

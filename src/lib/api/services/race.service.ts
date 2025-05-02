@@ -70,11 +70,12 @@ export class RaceService {
 
     if (!races || races.length === 0) return null;
 
-    const today = new Date();
+    const now = new Date();
 
     const nextRace = races.find((race: any) => {
-      const raceDate = new Date(race.date);
-      return raceDate >= today;
+      const raceDateTime = new Date(`${race.date}T${race.time}`);
+      const raceEndTime = new Date(raceDateTime.getTime() + (2 * 60 * 60 * 1000));
+      return raceEndTime >= now;
     });
 
     return nextRace;
