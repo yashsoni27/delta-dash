@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { usePathname } from "next/navigation";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
+
 // const myFont = Titillium_Web({ weight: ["200", "300", "400", "600", "700", "900"], subsets: ["latin"] });
 const myFont = localFont({
   src: "../../public/fonts/Formula1.otf", // Path relative to public folder
@@ -18,6 +19,10 @@ const myFont = localFont({
 export const metadata: Metadata = {
   title: "Delta Dash",
   description: "Formula 1 analysis dashboard",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
