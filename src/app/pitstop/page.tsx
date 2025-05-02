@@ -2,7 +2,7 @@
 import ChartSkeleton from "@/components/loading/ChartSkeleton";
 import StandingsTableSkeleton from "@/components/loading/StandingsTableSkeleton";
 import BarChart from "@/components/ui/BarChart";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 import PitStopChart from "@/components/ui/PitStopChart";
 import Table from "@/components/ui/Table";
 import { dhlService } from "@/lib/api/index";

@@ -1,6 +1,6 @@
 "use client";
 import ComparisonChart from "@/components/ui/ComparisonChart";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 import { constructorService, statsService } from "@/lib/api/index";
 import {
   getConstructorColor,

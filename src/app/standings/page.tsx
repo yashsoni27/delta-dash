@@ -1,5 +1,5 @@
 "use client";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 import PtDistributionChart from "@/components/ui/PtDistributionChart";
 import RankingEvolution from "@/components/ui/RankingEvolution";
 import StackedBarChart from "@/components/ui/StackedBarChart";

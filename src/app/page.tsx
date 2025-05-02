@@ -36,23 +36,6 @@ export default function Home() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const connectToLiveTiming = async () => {
-      try {
-        await f1LiveService.connect();
-        setIsConnected(true);
-      } catch (error) {
-        console.error('Failed to connect to live timing:', error);
-      }
-    };
-
-    connectToLiveTiming();
-
-    return () => {
-      f1LiveService.disconnect();
-    };
-  }, []);
-
   return (
     <main className="p-10 md:p-10 gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:pt-0">

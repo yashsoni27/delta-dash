@@ -65,7 +65,7 @@ export class F1SignalRClient extends EventEmitter {
         };
 
         this.socket.onerror = (error) => {
-          console.error("WebSocket Error:", error);
+          // console.error("WebSocket Error:", error);
           reject(error);
         };
 

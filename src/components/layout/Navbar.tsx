@@ -80,13 +80,13 @@ export default function Navbar() {
   useEffect(() => {
     const mainContent = document.getElementById("main-content");
     if (mainContent) {
-      mainContent.style.marginLeft = isLivePage
-        ? ""
+      mainContent.style.marginLeft = isLivePage === true
+        ? "0rem"
         : isSidebarExpanded
         ? "15rem"
         : "4rem";
     }
-  }, [isSidebarExpanded]);
+  }, [isSidebarExpanded, isLivePage]);
 
   return (
     <>

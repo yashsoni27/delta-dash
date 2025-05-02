@@ -33,33 +33,45 @@ export default function Live() {
   const [isConnected, setIsConnected] = useState(false);
   const [state, setState] = useState<LiveState>({});
   const [updated, setUpdated] = useState<Date>(new Date());
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const [connectionFailed, setConnectionFailed] = useState(false);
 
   useEffect(() => {
-    // Connect to the service if not already connected
     if (!f1LiveService.isConnected) {
       f1LiveService.connect();
     }
 
-    // Listen for state updates
     f1LiveService.on("stateUpdate", (newState) => {
       setState(newState);
       setUpdated(new Date());
     });
 
-    // Listen for connection status
     f1LiveService.on("connect", () => {
       setIsConnected(true);
+      setConnectionFailed(false);
+      setRetryAttempt(0);
     });
 
     f1LiveService.on("disconnect", () => {
       setIsConnected(false);
-      setState({}); // Clear state on disconnect
+      setState({});
+    });
+
+    f1LiveService.on("retrying", ({ attempt, maxRetries }) => {
+      setRetryAttempt(attempt);
+      setConnectionFailed(false);
+    });
+
+    f1LiveService.on("connectionFailed", () => {
+      setConnectionFailed(true);
     });
 
     return () => {
       f1LiveService.off("stateUpdate", setState);
       f1LiveService.off("connect", () => setIsConnected(true));
       f1LiveService.off("disconnect", () => setIsConnected(false));
+      f1LiveService.off("retrying", () => {});
+      f1LiveService.off("connectionFailed", () => {});
     };
   }, []);
 
@@ -81,12 +93,37 @@ export default function Live() {
   if (!isConnected) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
-        <p className="text-lg font-bold">Connecting...</p>
+        {connectionFailed ? (
+          <div className="text-center">
+            <p className="text-lg font-bold text-red-500">Connection failed</p>
+            <button
+              className="mt-4 px-4 py-2 bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+              onClick={() => {
+                setConnectionFailed(false);
+                setRetryAttempt(0);
+                f1LiveService.connect();
+              }}
+            >
+              Retry Connection
+            </button>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="text-lg font-bold">
+              Connecting
+              {retryAttempt > 0 ? ` (Attempt ${retryAttempt}/5)` : "..."}
+            </p>
+            <p className="text-sm text-zinc-400 animate-pulse">
+              {retryAttempt > 0
+                ? "Retrying connection..."
+                : "Establishing connection..."}
+            </p>
+          </div>
+        )}
       </div>
     );
   }
 
-  // Don't render if no session data
   if (!SessionInfo) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">

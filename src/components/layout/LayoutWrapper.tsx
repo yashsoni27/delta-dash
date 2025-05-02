@@ -19,7 +19,7 @@ export default function LayoutWrapper({
       <main 
         id="main-content" 
         className={`min-h-screen transition-all duration-300 ${
-          !isLivePage ? 'ml-60' : 'ml-0'
+          !isLivePage ? 'ml-20' : 'ml-0'
         }`}
       >
         {children}
