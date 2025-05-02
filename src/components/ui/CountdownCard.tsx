@@ -100,7 +100,7 @@ const CountdownCard = () => {
       }
 
       if (difference > 0) {
-        setSessionOngoing(true);
+        setSessionOngoing(false);
         return {
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -109,12 +109,10 @@ const CountdownCard = () => {
         };
       }
 
-      // If session is over
       setSessionOngoing(false);
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     };
 
-    // Initial calculation
     setTimeLeft(calculateTimeLeft());
 
     // Update every second
@@ -140,7 +138,7 @@ const CountdownCard = () => {
         className={`bg-gradient-to-tr from-red-900 to-red-700 p-5 rounded-lg shadow-lg border border-red-600 max-w-md text-center ${
           sessionOngoing
             ? "cursor-pointer hover:scale-[1.02] transition-transform"
-            : ""
+            : "cursor-default"
         }`}
         role={sessionOngoing ? "button" : "presentation"}
       >
