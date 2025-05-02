@@ -6,13 +6,14 @@ import StandingsTable from "@/components/ui/StandingsTable";
 import { Medal, Timer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { dhlService, raceService } from "@/lib/api/index";
+import { dhlService, f1LiveService, raceService } from "@/lib/api/index";
 
 export default function Home() {
   const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
   const [fastestLap, setFastestLap] = useState<any | null>(null);
   const [lastRace, setLastRace] = useState<any | null>(null);
   const [lastWinner, setLastWinner] = useState<any | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   const fetchData = useCallback(async () => {
     const pitstopRes = await dhlService.getSingleFastestPitStop();
@@ -29,8 +30,6 @@ export default function Home() {
       );
       setLastWinner(lastResult[0]?.Driver?.familyName);
     }
-    // const Id = await getMeetingId(2);
-    // console.log(Id);
   }, []);
 
   useEffect(() => {
@@ -74,13 +73,19 @@ export default function Home() {
         {lastWinner == null || lastRace == null ? (
           <CardSkeleton />
         ) : (
-          <Card
-            title="Last Race Winner"
-            icon={<Medal size={18} />}
-            stat={lastWinner}
-            subtitle={lastRace}
-            className="h-full"
-          />
+          <Link
+            href={{
+              pathname: "/races",
+            }}
+          >
+            <Card
+              title="Last Race Winner"
+              icon={<Medal size={18} />}
+              stat={lastWinner}
+              subtitle={lastRace}
+              className="h-full"
+            />
+          </Link>
         )}
 
         {/* Table grid */}

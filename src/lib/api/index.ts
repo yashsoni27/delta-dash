@@ -9,6 +9,7 @@ import { DhlService } from "./services/dhl.service";
 import { OpenF1ApiClient } from "./clients/openf1";
 import { F1MediaApiClient } from "./clients/f1media";
 import { F1MediaService } from "./services/f1media.service";
+import { F1LiveService } from "./services/f1-live.service";
 
 export class ApiFactory {
   private static jolpicaClient = new JolpicaApiClient(API_CONFIG.JOLPICA);
@@ -51,6 +52,10 @@ export class ApiFactory {
   static getF1MediaService() {
     return new F1MediaService(this.f1MediaClient);
   }
+
+  static getF1LiveService() {
+    return new F1LiveService();
+  }
 }
 
 export const raceService = ApiFactory.getRaceService();
@@ -59,3 +64,4 @@ export const constructorService = ApiFactory.getConstructorService();
 export const statsService = ApiFactory.getStatsService();
 export const dhlService = ApiFactory.getDhlService();
 export const f1MediaService = ApiFactory.getF1MediaService();
+export const f1LiveService = ApiFactory.getF1LiveService();
