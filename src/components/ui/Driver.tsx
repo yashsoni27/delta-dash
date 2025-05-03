@@ -1,5 +1,6 @@
 "use client";
 
+import { liveToJolpicaConstructor } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const drsEnabledValues = [10, 12, 14];
@@ -34,7 +35,6 @@ export default function Driver({
   TimingAppData,
   TimingStats,
 }: any) {
-  // console.log(line);
   const driver = DriverList[racingNumber];
   const carData =
     CarData.Entries[CarData.Entries.length - 1].Cars[racingNumber].Channels;
@@ -91,14 +91,12 @@ export default function Driver({
           >
             <div title="Position">
               <p
-                className="px-1 text-sm leading-none"
-                style={{
-                  color:
-                    TimingStats.Lines[racingNumber]?.PersonalBestLapTime
-                      ?.Position === 1
-                      ? "magenta"
-                      : "white",
-                }}
+                className={`px-1 text-sm leading-none ${
+                  TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                    ?.Position === 1
+                    ? "text-purple-500"
+                    : "text-white"
+                }`}
               >
                 {line.Position}
               </p>
@@ -108,19 +106,25 @@ export default function Driver({
               title="Driver"
               className="flex w-fit items-center justify-start gap-0.5 rounded-lg  font-medium min-w-full"
             >
+              <img
+                src={`/teams/${liveToJolpicaConstructor(driver?.TeamName)}.svg`}
+                alt={driver?.TeamName}
+                className="w-6 h-6"
+                onError={(e) => (e.currentTarget.src = "/vercel.svg")}
+              />
               <div className="flex h-min w-min items-center justify-center px-1">
                 <p className=" text-slate-300">{driver?.Tla}</p>
               </div>
-              <p
+              {/* <p
                 className="px-1 text-sm"
                 style={{
                   color: driver?.TeamColour
-                    ? `#${driver.TeamColour}`
+                    ? `#${driver?.TeamColour}`
                     : undefined,
                 }}
               >
                 {racingNumber}
-              </p>
+              </p> */}
             </div>
 
             <div title="DRS and PIT">
@@ -133,7 +137,7 @@ export default function Driver({
                   >
                     PIT
                   </div>
-                ) : line.PitOut ? (
+                ) : line?.PitOut ? (
                   <div
                   // style={{
                   //   color: "cyan",
@@ -174,7 +178,7 @@ export default function Driver({
                     L {currentStint?.TotalLaps}
                   </p>
                   <p className="text-xs leading-none text-zinc-500">
-                    PIT {appData?.Stints.length - 1}
+                    PIT {appData?.Stints?.length - 1}
                   </p>
                 </div>
               </div>
@@ -196,7 +200,7 @@ export default function Driver({
                     : "---"}
                 </p>
                 <p className="text-xs text-zinc-500">
-                  {line.GapToLeader ? line.GapToLeader : "---"}
+                  {line?.GapToLeader ? line?.GapToLeader : "---"}
                 </p>
               </div>
             </div>
@@ -220,9 +224,9 @@ export default function Driver({
 
             <div title="Sectors">
               <div className="flex gap-2 justify-around">
-                {(Array.isArray(line.Sectors)
-                  ? line.Sectors
-                  : Object.values(line.Sectors ?? {})
+                {(Array.isArray(line?.Sectors)
+                  ? line?.Sectors
+                  : Object.values(line?.Sectors ?? {})
                 ).map((sector: any, i: number) => {
                   return (
                     <div
@@ -231,24 +235,23 @@ export default function Driver({
                       className="flex flex-col gap-1"
                     >
                       <div className="flex flex-row gap-1">
-                        {(Array.isArray(sector.Segments)
-                          ? sector.Segments
-                          : Object.values(sector.Segments ?? {})
+                        {(Array.isArray(sector?.Segments)
+                          ? sector?.Segments
+                          : Object.values(sector?.Segments ?? {})
                         ).map((segment: any, j: number) => (
                           <div
                             key={`${i}-${j}`}
-                            // className="bg-amber-400"
                             style={{
                               width: "10px",
                               height: "5px",
                               borderRadius: "2px",
-                              backgroundColor: getSegmentColor(segment.Status),
+                              backgroundColor: getSegmentColor(segment?.Status),
                             }}
                           />
                         ))}
                       </div>
                       <div className="flex items-center gap-1">
-                        {sector.Value && (
+                        {sector?.Value && (
                           <p
                             className={`text leading-none font-medium ${
                               sector?.OverallFastest
@@ -258,13 +261,13 @@ export default function Driver({
                                 : "text-white"
                             }`}
                           >
-                            {sector.Value}
+                            {sector?.Value}
                           </p>
                         )}
-                        {TimingStats.Lines[racingNumber]?.BestSectors && (
+                        {TimingStats?.Lines[racingNumber]?.BestSectors && (
                           <p className="text-xs leading-none text-zinc-600">
                             {
-                              TimingStats.Lines[racingNumber]?.BestSectors[i]
+                              TimingStats?.Lines[racingNumber]?.BestSectors[i]
                                 ?.Value
                             }
                           </p>
@@ -329,20 +332,3 @@ export default function Driver({
     </>
   );
 }
-
-// <div className="flex flex-col gap-1 rounded-lg p-2 select-none">
-//   <div
-//     className="grid items-center gap-2 mx-2"
-//     style={{
-//       gridTemplateColumns:
-//         "3rem 6.5rem 3.5rem 5.5rem 4rem 5rem 6.5rem 30rem 10.5rem",
-//     }}
-//   >
-//     <div className="place-self-start">
-//       <p className="text-lg leading-none font-medium tabular-nums text-emerald-500">
-//         +1
-//       </p>
-//       <p className="text-sm leading-none text-zinc-500">-</p>
-//     </div>
-//   </div>
-// </div>

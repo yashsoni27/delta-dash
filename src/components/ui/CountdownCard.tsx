@@ -55,24 +55,30 @@ const CountdownCard = () => {
           ].map((session) => ({
             ...session,
             timeStamp: new Date(`${session.date}T${session.time}`).getTime(),
+            endTimeStamp:
+              new Date(`${session.date}T${session.time}`).getTime() +
+              2 * 60 * 60 * 1000,
           }));
-          // console.log('sessions', sessions, now);
 
-          const nextSession = sessions.find(
-            (session) => session.timeStamp > now
+          // Find ongoing session first
+          const currentSession = sessions.find(
+            (session) => now >= session.timeStamp && now <= session.endTimeStamp
           );
 
-          if (nextSession) {
-            const sessionDate = new Date(
-              `${nextSession.date}T${nextSession.time}`
-            );
-            setRaceDate(sessionDate.toISOString());
-            setSessionName(getSessionName(nextSession.type));
-            // setCurrentSession(nextSession);
+          // If there's an ongoing session, use it
+          if (currentSession) {
+            setRaceDate(`${currentSession.date}T${currentSession.time}`);
+            setSessionName(getSessionName(currentSession.type));
           } else {
-            let timeStamp = new Date(`${nextRace.date}T${nextRace.time}`);
-            setRaceDate(timeStamp.toISOString());
-            setSessionName("Race");
+            // Otherwise find next session
+            const nextSession = sessions.find(
+              (session) => session.timeStamp > now
+            );
+
+            if (nextSession) {
+              setRaceDate(`${nextSession.date}T${nextSession.time}`);
+              setSessionName(getSessionName(nextSession.type));
+            }
           }
         }
       } catch (e) {

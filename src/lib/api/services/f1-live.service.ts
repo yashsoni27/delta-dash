@@ -15,8 +15,10 @@ export class F1LiveService extends EventEmitter {
   private messageCount = 0;
   public isConnected = false;
   private maxRetries = 5;
-  private retryDelay = 3000; // 3 seconds
+  private retryDelay = 3000; // 2 seconds
   private retryCount = 0;
+  private lastEmitTime = 0;
+  private throttleInterval = 400;
 
   constructor() {
     super();
@@ -41,14 +43,47 @@ export class F1LiveService extends EventEmitter {
     return copy;
   }
 
+  private hasStateChanged(newState: F1State): boolean {
+    const stringify = (obj: any) => JSON.stringify(obj);
+    return stringify(this.state) !== stringify(newState);
+  }
+
   private setupEventListeners() {
     this.client.on("data", (data) => {
+      const now = Date.now();
       const parsedData = JSON.parse(data?.data);
 
+      if (Array.isArray(parsedData.M)) {
+        for (const message of parsedData.M) {
+          if (message.M === "feed") {
+            this.messageCount++;
+            let [field, value] = message.A;
+
+            if (field === "CarData.z" || field === "Position.z") {
+              const [parsedField] = field.split(".");
+              field = parsedField;
+              value = this.parseCompressed(value);
+            }
+
+            const newState = this.objectMerge(this.state, { [field]: value });
+            
+            if (this.hasStateChanged(newState) && 
+                now - this.lastEmitTime >= this.throttleInterval) {
+              this.state = newState;
+              this.emit("stateUpdate", {
+                ...this.state,
+                _timestamp: now,
+              });
+              this.lastEmitTime = now;
+            }
+          }
+        }
+      }
+
       if (parsedData?.R) {
+        // if (parsedData.R && Object.keys(parsedData.R).length && parsedData.I === "1") {
         this.messageCount++;
 
-        // Handle compressed data
         if (parsedData.R["CarData.z"]) {
           parsedData.R.CarData = this.parseCompressed(
             parsedData.R["CarData.z"]
@@ -63,9 +98,19 @@ export class F1LiveService extends EventEmitter {
           delete parsedData.R["Position.z"];
         }
 
-        this.state = this.objectMerge(this.state, parsedData.R);
+        const newState = this.objectMerge(this.state, parsedData.R);
 
-        this.emit("stateUpdate", this.state);
+        if (
+          this.hasStateChanged(newState) &&
+          now - this.lastEmitTime >= this.throttleInterval
+        ) {
+          this.state = newState;
+          this.emit("stateUpdate", {
+            ...this.state,
+            _timestamp: now,
+          });
+          this.lastEmitTime = now;
+        }
       }
     });
 
@@ -127,10 +172,10 @@ export class F1LiveService extends EventEmitter {
       }
     }
   }
-  
+
   public async connect() {
     if (!this.isConnected) {
-        await this.connectWithRetry();
+      await this.connectWithRetry();
     }
   }
 

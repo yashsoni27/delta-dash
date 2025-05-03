@@ -278,3 +278,20 @@ export function convertPitStopTableToJson(htmlString: string) {
 
   return results;
 }
+
+export function liveToJolpicaConstructor(constructorName: string): string {
+  const constructors: Record<string, string> = {
+    Mercedes: "mercedes",
+    "Red Bull Racing": "red_bull",
+    Ferrari: "ferrari",
+    McLaren: "mclaren",
+    Alpine: "alpine",
+    "Racing Bulls": "rb",
+    "Aston Martin": "aston_martin",
+    Williams: "williams",
+    "Kick Sauber": "sauber",
+    "Haas F1 Team": "haas",
+  };
+
+  return constructors[constructorName] || "Unknown";
+} 

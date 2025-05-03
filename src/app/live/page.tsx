@@ -2,6 +2,7 @@
 import Driver from "@/components/ui/Driver";
 import { f1LiveService } from "@/lib/api";
 import { useEffect, useState } from "react";
+import moment from "moment";
 
 interface LiveState {
   Heartbeat?: any;
@@ -29,6 +30,30 @@ const sortPosition = (a: any, b: any) => {
   return aPos - bPos;
 };
 
+const sortUtc = (a: any, b: any) => {
+  const aDate = moment.utc(a.Utc);
+  const bDate = moment.utc(b.Utc);
+  return bDate.diff(aDate);
+};
+
+const getFlagColor = (flag: string) => {
+  switch (flag?.toLowerCase()) {
+    case "allclear":
+    case "green":
+      return { shadow: "green", bg: "darkgreen" };
+    case "yellow":
+    case "scdeployed":
+    case "double yellow":
+      return { shadow: "yellow", bg: "#ffb900" };
+    case "red":
+      return { shadow: "red", bg: "crimson" };
+    case "blue":
+      return { shadow: "blue", bg: "navy" };
+    default:
+      return { shadow: "transparent", bg: "transparent" };
+  }
+};
+
 export default function Live() {
   const [isConnected, setIsConnected] = useState(false);
   const [state, setState] = useState<LiveState>({});
@@ -37,41 +62,49 @@ export default function Live() {
   const [connectionFailed, setConnectionFailed] = useState(false);
 
   useEffect(() => {
+    const handleStateUpdate = (newState: any) => {
+      console.log("State update received:", new Date().toISOString());
+      setState(newState);
+      // console.log(newState);
+      setUpdated(new Date());
+    };
+
+    const handleConnect = () => {
+      setIsConnected(true);
+      setConnectionFailed(false);
+      setRetryAttempt(0);
+    };
+
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      setState({});
+    };
+
+    const handleRetrying = ({ attempt, maxRetries }: any) => {
+      setRetryAttempt(attempt);
+      setConnectionFailed(false);
+    };
+
+    const handleConnectionFailed = () => {
+      setConnectionFailed(true);
+    };
+
     if (!f1LiveService.isConnected) {
       f1LiveService.connect();
     }
 
-    f1LiveService.on("stateUpdate", (newState) => {
-      setState(newState);
-      setUpdated(new Date());
-    });
-
-    f1LiveService.on("connect", () => {
-      setIsConnected(true);
-      setConnectionFailed(false);
-      setRetryAttempt(0);
-    });
-
-    f1LiveService.on("disconnect", () => {
-      setIsConnected(false);
-      setState({});
-    });
-
-    f1LiveService.on("retrying", ({ attempt, maxRetries }) => {
-      setRetryAttempt(attempt);
-      setConnectionFailed(false);
-    });
-
-    f1LiveService.on("connectionFailed", () => {
-      setConnectionFailed(true);
-    });
+    f1LiveService.on("stateUpdate", handleStateUpdate);
+    f1LiveService.on("connect", handleConnect);
+    f1LiveService.on("disconnect", handleDisconnect);
+    f1LiveService.on("retrying", handleRetrying);
+    f1LiveService.on("connectionFailed", handleConnectionFailed);
 
     return () => {
-      f1LiveService.off("stateUpdate", setState);
-      f1LiveService.off("connect", () => setIsConnected(true));
-      f1LiveService.off("disconnect", () => setIsConnected(false));
-      f1LiveService.off("retrying", () => {});
-      f1LiveService.off("connectionFailed", () => {});
+      f1LiveService.off("stateUpdate", handleStateUpdate);
+      f1LiveService.off("connect", handleConnect);
+      f1LiveService.off("disconnect", handleDisconnect);
+      f1LiveService.off("retrying", handleRetrying);
+      f1LiveService.off("connectionFailed", handleConnectionFailed);
     };
   }, []);
 
@@ -87,7 +120,28 @@ export default function Live() {
     TimingStats,
     CarData,
     Position,
+    RaceControlMessages,
+    SessionData,
   } = state;
+
+  const extrapolatedTimeRemaining =
+    ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
+      ? ExtrapolatedClock?.Extrapolating
+        ? moment
+            .utc(
+              Math.max(
+                moment
+                  .duration(ExtrapolatedClock?.Remaining)
+                  .subtract(
+                    moment.utc().diff(moment.utc(ExtrapolatedClock?.Utc))
+                  )
+                  .asMilliseconds(),
+                0
+              )
+            )
+            .format("HH:mm:ss")
+        : ExtrapolatedClock?.Remaining
+      : undefined;
 
   // Don't render if not connected
   if (!isConnected) {
@@ -135,7 +189,7 @@ export default function Live() {
   return (
     <>
       <div className="flex-row m-2 justify-between overflow-hidden rounded-lg border border-zinc-800 p-2 md:flex">
-        <div className="flex items-center gap-2">
+        <div title="Session Data" className="flex items-center gap-2">
           <div className="flex content-center justify-center">
             <img
               alt={SessionInfo?.Meeting?.Country?.Code}
@@ -152,18 +206,70 @@ export default function Live() {
               {SessionInfo?.Meeting?.Name}: {SessionInfo?.Name}
             </h1>
             <p className="text-2xl leading-none font-bold">
-              {ExtrapolatedClock?.Remaining}
+              {extrapolatedTimeRemaining}
             </p>
           </div>
         </div>
-        <div className="flex justify-end">
+        <div title="Weather Data" className="flex justify-between gap-4">
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+                {Number(WeatherData?.TrackTemp)}
+              </p>
+              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-green-500">
+                TRC
+              </p>
+            </div>
+          </div>
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+                {Number(WeatherData?.AirTemp)}
+              </p>
+              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-green-500">
+                AIR
+              </p>
+            </div>
+          </div>
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+                {Number(WeatherData?.Humidity)}
+              </p>
+              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
+                Humidity
+              </p>
+            </div>
+          </div>
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+                {Number(WeatherData?.Rainfall)}
+              </p>
+              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
+                Rain
+              </p>
+            </div>
+          </div>
+        </div>
+        {/* <div className="flex justify-between items-center gap-4">
+          <p>Data updated: {moment.utc(updated).format("HH:mm:ss.SSS")} UTC</p>
+        </div> */}
+        <div title="Laps/Track Info" className="flex justify-end">
           <div className="flex flex-row items-center gap-4 md:justify-self-end">
-            <p className="text-2xl font-bold whitespace-nowrap">
-              {LapCount?.CurrentLap} / {LapCount?.TotalLaps}
-            </p>
+            {!!LapCount && (
+              <p className="text-2xl font-bold whitespace-nowrap">
+                {LapCount.CurrentLap} / {LapCount.TotalLaps}
+              </p>
+            )}
             <div
-              className="flex h-8 items-center truncate rounded-md px-2 "
-              // style={{ boxShadow: "rgb(52, 185, 129) 0px 0px 60px 10px;" }}
+              className="flex h-8 items-center truncate rounded-md px-2"
+              style={{
+                boxShadow: `${
+                  getFlagColor(TrackStatus?.Message).shadow
+                } 0px 0px 60px 10px`,
+                backgroundColor: `${getFlagColor(TrackStatus?.Message).bg}`,
+              }}
             >
               <p className="text-lg font-medium">{TrackStatus?.Message}</p>
             </div>
@@ -196,9 +302,7 @@ export default function Live() {
               </div>
               {TimingData && CarData ? (
                 <>
-                  <div
-                    style={{ borderRight: "1px solid var(--colour-border)" }}
-                  >
+                  <div>
                     {Object.entries(TimingData.Lines)
                       .sort(sortPosition)
                       .map(([racingNumber, line]) => (
@@ -229,6 +333,78 @@ export default function Live() {
             <div className="flex-1 2xl:max-h-[50rem]">
               {/* For Track map  */}
             </div>
+          </div>
+          <div className="flex w-full flex-col gap-2 2xl:flex-row">
+            <div className="flex-1" title="Race Control">
+              <div>
+                <p>
+                  <strong>Race Control</strong>
+                </p>
+              </div>
+              <div>
+                {RaceControlMessages ? (
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      height: "400px",
+                      overflow: "auto",
+                      flexGrow: 1,
+                    }}
+                  >
+                    {[
+                      ...Object.values(RaceControlMessages?.Messages),
+                      ...Object.values(SessionData?.StatusSeries),
+                    ]
+                      .sort(sortUtc)
+                      .map((event: any, i: number) => (
+                        <li
+                          key={`race-control-${event.Utc}-${i}`}
+                          style={{ padding: "0.3rem", display: "flex" }}
+                        >
+                          <span
+                            style={{
+                              color: "grey",
+                              whiteSpace: "nowrap",
+                              marginRight: "0.5rem",
+                            }}
+                          >
+                            {moment.utc(event.Utc).format("HH:mm:ss")}
+                            {event.Lap && ` / Lap ${event.Lap}`}
+                          </span>
+                          {event.Category === "Flag" && (
+                            <span
+                              style={{
+                                backgroundColor: getFlagColor(event.Flag).bg,
+                                color: "azure",
+                                border: "1px solid dimgrey",
+                                borderRadius: "5px",
+                                padding: "0 5px",
+                                marginRight: "0.3rem",
+                              }}
+                            >
+                              FLAG
+                            </span>
+                          )}
+                          {event.Message && (
+                            <span>{event.Message.trim().toLowerCase()}</span>
+                          )}
+                          {event.TrackStatus && (
+                            <span>TrackStatus: {event.TrackStatus}</span>
+                          )}
+                          {event.SessionStatus && (
+                            <span>SessionStatus: {event.SessionStatus}</span>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <>
+                    <p>NO DATA YET</p>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex-1" title="Team Radio"></div>
           </div>
         </div>
       </div>
