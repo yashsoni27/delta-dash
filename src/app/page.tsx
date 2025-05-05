@@ -28,7 +28,7 @@ export default function Home() {
         response[0]?.season,
         response[0].round
       );
-      setLastWinner(lastResult[0]?.Driver?.familyName);
+      if (lastResult) setLastWinner(lastResult[0]?.Driver?.familyName);
     }
   }, []);
 

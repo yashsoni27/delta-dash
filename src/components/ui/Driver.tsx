@@ -172,6 +172,7 @@ export default function Driver({
                   decoding="async"
                   src={`/tyres/${currentStint?.Compound}.svg`}
                   style={{ color: " transparent" }}
+                  onError={(e) => (e.currentTarget.src = `/tyres/soft.png`)}
                 />
                 <div>
                   <p className="leading-none text-sm font-light">

@@ -193,7 +193,7 @@ export class RaceService {
     const response = Array.isArray((result.data as { Races: any[] })?.Races)
       ? (result.data as { Races: any[] }).Races[0]
       : undefined;
-    return response.Results;
+    return response?.Results;
   }
 
   // Get meeting Ids from OpenF1

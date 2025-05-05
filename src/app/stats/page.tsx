@@ -183,22 +183,22 @@ export default function Home() {
                   <div className="sm:rounded-lg bg-slate-900 p-4">
                     <RadialBarChart
                       heading="Season Performance"
-                      data={driverStat.seasonAchievements}
+                      data={driverStat?.seasonAchievements}
                     />
                   </div>
                   <div className="sm:rounded-lg bg-slate-900 p-4">
                     <PieChart
                       heading="Finish in Points"
                       data={driverStat?.finishPositions?.inPoints}
-                      color={driverStat.constructorId}
-                      driver={driverStat.familyName}
+                      color={driverStat?.constructorId}
+                      driver={driverStat?.familyName}
                     />
                   </div>
                   <div className="lg:col-span-2 sm:rounded-lg bg-slate-900 p-4">
                     <SankeyChart
                       heading="Start to Finish Flow"
-                      data={driverStat.startToFinishFlow}
-                      driver={driverStat.familyName}
+                      data={driverStat?.startToFinishFlow}
+                      driver={driverStat?.familyName}
                     />
                   </div>
                 </>

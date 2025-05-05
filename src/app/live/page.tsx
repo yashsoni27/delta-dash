@@ -43,6 +43,7 @@ const getFlagColor = (flag: string) => {
       return { shadow: "green", bg: "darkgreen" };
     case "yellow":
     case "scdeployed":
+    case "vscdeployed":
     case "double yellow":
       return { shadow: "yellow", bg: "#ffb900" };
     case "red":
@@ -123,6 +124,8 @@ export default function Live() {
     RaceControlMessages,
     SessionData,
   } = state;
+
+  console.log(RaceControlMessages);
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
@@ -214,7 +217,7 @@ export default function Live() {
           <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
-                {Number(WeatherData?.TrackTemp)}
+                {String(Number(WeatherData?.TrackTemp))}
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-green-500">
                 TRC
@@ -224,7 +227,7 @@ export default function Live() {
           <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
-                {Number(WeatherData?.AirTemp)}
+                {String(Number(WeatherData?.AirTemp))}
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-green-500">
                 AIR
@@ -234,7 +237,7 @@ export default function Live() {
           <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
-                {Number(WeatherData?.Humidity)}
+                {String(Number(WeatherData?.Humidity))}
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
                 Humidity
@@ -244,7 +247,7 @@ export default function Live() {
           <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
-                {Number(WeatherData?.Rainfall)}
+                {String(Number(WeatherData?.Rainfall))}
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
                 Rain
@@ -303,7 +306,7 @@ export default function Live() {
               {TimingData && CarData ? (
                 <>
                   <div>
-                    {Object.entries(TimingData.Lines)
+                    {Object.entries(TimingData?.Lines)
                       .sort(sortPosition)
                       .map(([racingNumber, line]) => (
                         <Driver
@@ -360,8 +363,9 @@ export default function Live() {
                         <li
                           key={`race-control-${event.Utc}-${i}`}
                           style={{ padding: "0.3rem", display: "flex" }}
+                          className="font-mono flex flex-col"
                         >
-                          <span
+                          <div
                             style={{
                               color: "grey",
                               whiteSpace: "nowrap",
@@ -370,30 +374,38 @@ export default function Live() {
                           >
                             {moment.utc(event.Utc).format("HH:mm:ss")}
                             {event.Lap && ` / Lap ${event.Lap}`}
-                          </span>
-                          {event.Category === "Flag" && (
-                            <span
-                              style={{
-                                backgroundColor: getFlagColor(event.Flag).bg,
-                                color: "azure",
-                                border: "1px solid dimgrey",
-                                borderRadius: "5px",
-                                padding: "0 5px",
-                                marginRight: "0.3rem",
-                              }}
-                            >
-                              FLAG
-                            </span>
-                          )}
-                          {event.Message && (
-                            <span>{event.Message.trim().toLowerCase()}</span>
-                          )}
-                          {event.TrackStatus && (
-                            <span>TrackStatus: {event.TrackStatus}</span>
-                          )}
-                          {event.SessionStatus && (
-                            <span>SessionStatus: {event.SessionStatus}</span>
-                          )}
+                          </div>
+                          <div className="flex flex-row gap-2">
+                            {event.Category === "Flag" && (
+                              // <span
+                              //   style={{
+                              //     backgroundColor: getFlagColor(event.Flag).bg,
+                              //     color: "azure",
+                              //     border: "1px solid dimgrey",
+                              //     borderRadius: "5px",
+                              //     padding: "0 5px",
+                              //     marginRight: "0.3rem",
+                              //   }}
+                              // >
+                              //   FLAG
+                              // </span>
+                              <img
+                                alt={event.Flag}
+                                src={`/flags/${
+                                  event.Flag === "CLEAR" ? "GREEN" : event.Flag
+                                }.svg`}
+                                height={30}
+                                width={30}
+                              />
+                            )}
+                            {event.Message && <div>{event.Message.trim()}</div>}
+                            {event.TrackStatus && (
+                              <div>TrackStatus: {event.TrackStatus}</div>
+                            )}
+                            {event.SessionStatus && (
+                              <div>SessionStatus: {event.SessionStatus}</div>
+                            )}
+                          </div>
                         </li>
                       ))}
                   </ul>
