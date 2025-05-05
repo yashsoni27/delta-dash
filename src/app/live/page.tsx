@@ -3,6 +3,7 @@ import Driver from "@/components/ui/Driver";
 import { f1LiveService } from "@/lib/api";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import Map from "@/components/ui/Map";
 
 interface LiveState {
   Heartbeat?: any;
@@ -36,20 +37,24 @@ const sortUtc = (a: any, b: any) => {
   return bDate.diff(aDate);
 };
 
-const getFlagColor = (flag: string) => {
+const getFlagDetails = (flag: string) => {
   switch (flag?.toLowerCase()) {
     case "allclear":
+      return { shadow: "green", bg: "#006400", text: "All Clear" };
     case "green":
-      return { shadow: "green", bg: "darkgreen" };
+      return { shadow: "green", bg: "#006400", text: "Green" };
     case "yellow":
+      return { shadow: "yellow", bg: "#ffb900", text: "Yellow" };
     case "scdeployed":
+      return { shadow: "yellow", bg: "#ffb900", text: "SC Deployed" };
     case "vscdeployed":
+      return { shadow: "yellow", bg: "#ffb900", text: "VSC Deployed" };
     case "double yellow":
-      return { shadow: "yellow", bg: "#ffb900" };
+      return { shadow: "yellow", bg: "#ffb900", text: "Double Yellow" };
     case "red":
-      return { shadow: "red", bg: "crimson" };
+      return { shadow: "red", bg: "crimson", text: "Red" };
     case "blue":
-      return { shadow: "blue", bg: "navy" };
+      return { shadow: "blue", bg: "#1f6da1", text: "Blue" };
     default:
       return { shadow: "transparent", bg: "transparent" };
   }
@@ -125,7 +130,7 @@ export default function Live() {
     SessionData,
   } = state;
 
-  console.log(RaceControlMessages);
+  console.log(state);
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
@@ -269,12 +274,14 @@ export default function Live() {
               className="flex h-8 items-center truncate rounded-md px-2"
               style={{
                 boxShadow: `${
-                  getFlagColor(TrackStatus?.Message).shadow
+                  getFlagDetails(TrackStatus?.Message).shadow
                 } 0px 0px 60px 10px`,
-                backgroundColor: `${getFlagColor(TrackStatus?.Message).bg}`,
+                backgroundColor: `${getFlagDetails(TrackStatus?.Message).bg}`,
               }}
             >
-              <p className="text-lg font-medium">{TrackStatus?.Message}</p>
+              <p className="text-lg font-medium">
+                {getFlagDetails(TrackStatus?.Message).text}
+              </p>
             </div>
           </div>
         </div>
@@ -282,13 +289,13 @@ export default function Live() {
       <div className="no-scrollbar flex-1 overflow-auto md:rounded-lg">
         <div className="flex w-full flex-col gap-2">
           <div className="flex w-full flex-col gap-2 2xl:flex-row">
-            <div className="overflow-x-auto">
+            <div title="Telemetry" className="overflow-x-auto">
               <div className="flex w-fit flex-col gap-0.5">
                 <div
                   className="grid items-center gap-2 p-1 px-2 mx-2 text-sm font-medium text-zinc-500"
                   style={{
                     gridTemplateColumns:
-                      "3rem 6.5rem 3.5rem 5.5rem 3rem 5rem 6.5rem 25rem 6rem 6rem",
+                      "3rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
                   }}
                 >
                   <p>Pos</p>
@@ -333,8 +340,31 @@ export default function Live() {
                 </div>
               )}
             </div>
-            <div className="flex-1 2xl:max-h-[50rem]">
+            <div title="Track Map" className="flex-1 2xl:max-h-[50rem] flex items-center">
               {/* For Track map  */}
+              <div>
+                {!!Position ? (
+                  <Map
+                    circuit={SessionInfo.Meeting.Circuit.Key}
+                    Position={Position.Position[Position.Position.length - 1]}
+                    DriverList={DriverList}
+                    TimingData={TimingData}
+                    TrackStatus={TrackStatus}
+                    WindDirection={WeatherData.WindDirection}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "400px",
+                    }}
+                  >
+                    <p>NO DATA YET</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex w-full flex-col gap-2 2xl:flex-row">
@@ -363,7 +393,7 @@ export default function Live() {
                         <li
                           key={`race-control-${event.Utc}-${i}`}
                           style={{ padding: "0.3rem", display: "flex" }}
-                          className="font-mono flex flex-col"
+                          className="font-mono flex flex-col text-slate-300"
                         >
                           <div
                             style={{
@@ -375,7 +405,7 @@ export default function Live() {
                             {moment.utc(event.Utc).format("HH:mm:ss")}
                             {event.Lap && ` / Lap ${event.Lap}`}
                           </div>
-                          <div className="flex flex-row gap-2">
+                          <div className="flex flex-row gap-2 leading-none">
                             {event.Category === "Flag" && (
                               // <span
                               //   style={{
@@ -394,6 +424,8 @@ export default function Live() {
                                 src={`/flags/${
                                   event.Flag === "CLEAR" ? "GREEN" : event.Flag
                                 }.svg`}
+                                loading="lazy"
+                                decoding="async"
                                 height={30}
                                 width={30}
                               />

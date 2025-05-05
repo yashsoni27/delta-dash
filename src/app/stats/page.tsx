@@ -219,7 +219,7 @@ export default function Home() {
                     // height={400}
                     // width={800}
                     data={driverStat?.finishPositions?.distribution}
-                    driver={driverStat.familyName}
+                    driver={driverStat?.familyName}
                     layout="vertical"
                     groupMode="grouped"
                     enableGridY={true}
@@ -236,7 +236,7 @@ export default function Home() {
                     // height={400}
                     // width={800}
                     data={driverStat?.lapsLed}
-                    driver={driverStat.familyName}
+                    driver={driverStat?.familyName}
                     keys={["lapsLed"]}
                     indexBy="gp"
                     layout="vertical"

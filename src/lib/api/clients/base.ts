@@ -8,7 +8,7 @@ export abstract class BaseApiClient {
   protected revalidationTime: number;
 
   constructor(config: ApiClientConfig) {
-    this.baseUrl = config.baseUrl;
+    this.baseUrl = config.baseUrl || '';
     this.revalidationTime = config.revalidationTime || 3600;
   }
 

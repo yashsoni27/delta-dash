@@ -10,12 +10,15 @@ import { OpenF1ApiClient } from "./clients/openf1";
 import { F1MediaApiClient } from "./clients/f1media";
 import { F1MediaService } from "./services/f1media.service";
 import { F1LiveService } from "./services/f1-live.service";
+import { MultviewerClient } from "./clients/multviewer";
+import { MultViewerService } from "./services/multviewer.service";
 
 export class ApiFactory {
   private static jolpicaClient = new JolpicaApiClient(API_CONFIG.JOLPICA);
   private static dhlClient = new DHLApiClient(API_CONFIG.DHL);
   private static openF1Client = new OpenF1ApiClient(API_CONFIG.OPEN_F1);
   private static f1MediaClient = new F1MediaApiClient(API_CONFIG.F1_MEDIA);
+  private static multViewerClient = new MultviewerClient(API_CONFIG.MULTVIEWER)
 
   static getRaceService() {
     return new RaceService(
@@ -53,6 +56,10 @@ export class ApiFactory {
     return new F1MediaService(this.f1MediaClient);
   }
 
+  static getMultViewerService() {
+    return new MultViewerService(this.multViewerClient);
+  }
+
   static getF1LiveService() {
     return new F1LiveService();
   }
@@ -65,3 +72,4 @@ export const statsService = ApiFactory.getStatsService();
 export const dhlService = ApiFactory.getDhlService();
 export const f1MediaService = ApiFactory.getF1MediaService();
 export const f1LiveService = ApiFactory.getF1LiveService();
+export const multViewerService = ApiFactory.getMultViewerService();

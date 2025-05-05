@@ -86,7 +86,7 @@ export default function Driver({
             className="grid items-center gap-2 mx-2"
             style={{
               gridTemplateColumns:
-                "3rem 6.5rem 3.5rem 5.5rem 3rem 5rem 6.5rem 25rem 6rem 6rem",
+                "3rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
             }}
           >
             <div title="Position">
@@ -185,7 +185,26 @@ export default function Driver({
               </div>
             </div>
 
-            <div title="Info"></div>
+            <div title="Info">
+              <div className="">
+                <div className="text-gray-500">
+                  {Number(appData?.GridPos) - appData?.Line === 0 ? (
+                    " "
+                  ) : Number(appData?.GridPos) - appData?.Line > 0 ? (
+                    <div className="text-green-500">
+                      +{Number(appData?.GridPos) - appData?.Line}
+                    </div>
+                  ) : (
+                    <div className="text-red-500">
+                      {Number(appData?.GridPos) - appData?.Line}
+                    </div>
+                  )}
+                </div>
+                <p className="text-gray-500 leading-none text-[0.7rem]">
+                  {line.Retired ? "RETIRED" : line.Stopped ? "STOPPED" : ""}
+                </p>
+              </div>
+            </div>
 
             <div title="Gap">
               <div className="place-self-start">
