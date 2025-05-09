@@ -1,10 +1,15 @@
 "use client";
 import ComparisonChart from "@/components/ui/ComparisonChart";
 import LoadingSpinner from "@/components/loading/LoadingSpinner";
-import { constructorService, statsService } from "@/lib/api/index";
+import {
+  constructorService,
+  f1MediaService,
+  statsService,
+} from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
+  getConstructorHex,
   lightenColor,
 } from "@/lib/utils";
 import { Calendar, Users } from "lucide-react";
@@ -30,6 +35,8 @@ export default function Home() {
   const [constructors, setConstructors] = useState<ConstructorStanding[]>([]);
   const [selectedConst, setSelectedConst] = useState<Constructor | null>(null);
   const [stats, setStats] = useState<any>();
+  const [driver1Logo, setDriver1Logo] = useState<any>();
+  const [driver2Logo, setDriver2Logo] = useState<any>();
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(Number(e.target.value));
@@ -63,8 +70,11 @@ export default function Home() {
   const fetchData = useCallback(async (year: string, constructorId: string) => {
     try {
       setIsLoading(true);
-      const response = await statsService.getComparisonData(year, constructorId);
-      // console.log("stats ", response);
+      const response = await statsService.getComparisonData(
+        year,
+        constructorId
+      );
+      console.log("stats ", response);
       setStats(response);
     } catch (e) {
       console.log("Failed in fetching data: ", e);
@@ -73,17 +83,55 @@ export default function Home() {
     }
   }, []);
 
-  // Effect to constructors races when year changes
+  const fetchDriverLogo = useCallback(
+    async (givenName: string, familyName: string) => {
+      try {
+        setIsLoading(true);
+        const driverCode =
+          givenName.substring(0, 3) + familyName.substring(0, 3);
+        const logoUrl = await f1MediaService.getDriverNumberLogo(driverCode);
+        return logoUrl;
+      } catch (e) {
+        console.log("Failed in fetching logos:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  // Effect to fetch constructors when year changes
   useEffect(() => {
     fetchConstructors(selectedYear.toString());
   }, [selectedYear, fetchConstructors]);
 
-  // Effect to fetch data when constructors changes
+  // Effect to fetch driverdata when constructors changes
   useEffect(() => {
     if (selectedConst !== null) {
       fetchData(selectedYear.toString(), selectedConst.constructorId);
     }
   }, [selectedConst, fetchData]);
+
+  useEffect(() => {
+    const loadDriverLogos = async () => {
+      if (stats?.driver1?.driverId && stats?.driver2?.driverId) {
+        const [logo1, logo2] = await Promise.all([
+          fetchDriverLogo(stats.driver1.givenName, stats.driver1.familyName),
+          fetchDriverLogo(stats.driver2.givenName, stats.driver2.familyName),
+        ]);
+
+        setDriver1Logo(logo1);
+        setDriver2Logo(logo2);
+      }
+    };
+
+    loadDriverLogos();
+
+    return () => {
+      if (driver1Logo) URL.revokeObjectURL(driver1Logo);
+      if (driver2Logo) URL.revokeObjectURL(driver2Logo);
+    };
+  }, [stats, fetchDriverLogo]);
 
   return (
     <>
@@ -155,12 +203,35 @@ export default function Home() {
                 className="2xl:col-start-1 lg:col-span-2 sm:rounded-lg p-4 bg-slate-900 flex flex-col border justify-between"
                 style={{
                   borderColor: getConstructorColor(stats?.constructorId),
+                  boxShadow: `inset 0 0 5px 5px ${getConstructorColor(
+                    stats?.constructorId
+                  )}`,
                 }}
               >
                 <div className="gap-2 flex justify-between items-center">
-                  <div className="text-8xl" style={{ color: stats?.color }}>
-                    {stats?.driver1?.driverNo}
-                  </div>
+                  {driver1Logo ? (
+                    <div
+                      className="rounded-lg p-2"
+                      style={{
+                        boxShadow: `0 0 20px 20px ${getConstructorColor(
+                          stats?.constructorId
+                        )}`,
+                        backgroundColor: `${getConstructorColor(
+                          stats?.constructorId
+                        )}`,
+                      }}
+                    >
+                      <img
+                        src={driver1Logo}
+                        alt={`${stats?.driver1?.givenName} number logo`}
+                        className="w-28 h-28"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-8xl" style={{ color: stats?.color }}>
+                      {stats?.driver1?.driverNo}
+                    </div>
+                  )}
                   <div className="text-right">
                     <div className="text-xl font-light text-gray-200 mb-1">
                       {stats?.driver1?.givenName}
@@ -219,12 +290,35 @@ export default function Home() {
                 className="2xl:col-start-5 lg:col-span-2 sm:rounded-lg p-4 bg-slate-900 flex flex-col border justify-between"
                 style={{
                   borderColor: getConstructorColor(stats?.constructorId),
+                  boxShadow: `inset 0 0 5px 5px ${getConstructorColor(
+                    stats?.constructorId
+                  )}`
                 }}
               >
                 <div className="gap-2 flex flex-row-reverse justify-between items-center">
-                  <div className="text-8xl" style={{ color: stats?.color }}>
-                    {stats?.driver2?.driverNo}
-                  </div>
+                  {driver2Logo ? (
+                    <div
+                      className="rounded-lg p-2"
+                      style={{
+                        boxShadow: `0 0 20px 20px ${getConstructorColor(
+                          stats?.constructorId
+                        )}`,
+                        backgroundColor: `${getConstructorColor(
+                          stats?.constructorId
+                        )}`,
+                      }}
+                    >
+                      <img
+                        src={driver2Logo}
+                        alt={`${stats?.driver2?.givenName} number logo`}
+                        className="w-28 h-28"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-8xl" style={{ color: stats?.color }}>
+                      {stats?.driver2?.driverNo}
+                    </div>
+                  )}
                   <div className="text-left">
                     <div className="text-xl font-light text-gray-200 mb-1">
                       {stats?.driver2?.givenName}

@@ -279,6 +279,9 @@ export function convertPitStopTableToJson(htmlString: string) {
   return results;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                     Live to Jolpica constructor adapter                    */
+/* -------------------------------------------------------------------------- */
 export function liveToJolpicaConstructor(constructorName: string): string {
   const constructors: Record<string, string> = {
     Mercedes: "mercedes",
