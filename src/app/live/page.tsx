@@ -130,7 +130,7 @@ export default function Live() {
     SessionData,
   } = state;
 
-  console.log(state);
+  // console.log(state);
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
