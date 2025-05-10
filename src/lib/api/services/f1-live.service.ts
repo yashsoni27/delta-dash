@@ -150,7 +150,7 @@ export class F1LiveService extends EventEmitter {
         // "TopThree", // Top 3 driver details
         "CarData.z", // Compressed Car Data
         "Position.z", // Compressed Position data
-        // 'TeamRadio', // Unknown
+        'TeamRadio', // Team Radio
         // "RcmSeries", // Unknown
       ]);
       this.emit("connect");

@@ -4,6 +4,7 @@ import { f1LiveService } from "@/lib/api";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import Map from "@/components/ui/Map";
+import Radio from "@/components/ui/Radio";
 
 interface LiveState {
   Heartbeat?: any;
@@ -22,6 +23,8 @@ interface LiveState {
   Position?: any;
   TeamRadio?: any;
 }
+
+const f1Url = "https://livetiming.formula1.com";
 
 const sortPosition = (a: any, b: any) => {
   const [, aLine] = a;
@@ -128,6 +131,7 @@ export default function Live() {
     Position,
     RaceControlMessages,
     SessionData,
+    TeamRadio,
   } = state;
 
   // console.log(state);
@@ -286,7 +290,7 @@ export default function Live() {
           </div>
         </div>
       </div>
-      <div className="no-scrollbar flex-1 overflow-auto md:rounded-lg">
+      <div className="flex-1 overflow-auto md:rounded-lg">
         <div className="flex w-full flex-col gap-2">
           <div className="flex w-full flex-col gap-2 2xl:flex-row">
             <div title="Telemetry" className="overflow-x-auto">
@@ -295,7 +299,7 @@ export default function Live() {
                   className="grid items-center gap-2 p-1 px-2 mx-2 text-sm font-medium text-zinc-500"
                   style={{
                     gridTemplateColumns:
-                      "3rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
+                      "2.5rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
                   }}
                 >
                   <p>Pos</p>
@@ -340,7 +344,10 @@ export default function Live() {
                 </div>
               )}
             </div>
-            <div title="Track Map" className="flex-1 2xl:max-h-[50rem] flex items-center">
+            <div
+              title="Track Map"
+              className="flex-1 2xl:max-h-[50rem] flex items-center"
+            >
               {/* For Track map  */}
               <div>
                 {!!Position ? (
@@ -368,7 +375,7 @@ export default function Live() {
             </div>
           </div>
           <div className="flex w-full flex-col gap-2 2xl:flex-row">
-            <div className="flex-1" title="Race Control">
+            <div className="flex-1 p-4" title="Race Control">
               <div>
                 <p>
                   <strong>Race Control</strong>
@@ -382,6 +389,7 @@ export default function Live() {
                       height: "400px",
                       overflow: "auto",
                       flexGrow: 1,
+                      scrollbarWidth: "thin",
                     }}
                   >
                     {[
@@ -396,10 +404,9 @@ export default function Live() {
                           className="font-mono flex flex-col text-slate-300"
                         >
                           <div
+                            className="mr-2 whitespace-nowrap"
                             style={{
                               color: "grey",
-                              whiteSpace: "nowrap",
-                              marginRight: "0.5rem",
                             }}
                           >
                             {moment.utc(event.Utc).format("HH:mm:ss")}
@@ -407,18 +414,6 @@ export default function Live() {
                           </div>
                           <div className="flex flex-row gap-2 leading-none">
                             {event.Category === "Flag" && (
-                              // <span
-                              //   style={{
-                              //     backgroundColor: getFlagColor(event.Flag).bg,
-                              //     color: "azure",
-                              //     border: "1px solid dimgrey",
-                              //     borderRadius: "5px",
-                              //     padding: "0 5px",
-                              //     marginRight: "0.3rem",
-                              //   }}
-                              // >
-                              //   FLAG
-                              // </span>
                               <img
                                 alt={event.Flag}
                                 src={`/flags/${
@@ -448,7 +443,44 @@ export default function Live() {
                 )}
               </div>
             </div>
-            <div className="flex-1" title="Team Radio"></div>
+            <div className="flex-1 p-" title="Team Radio">
+              <div>
+                <p>
+                  <strong>Team Radio</strong>
+                </p>
+              </div>
+              <div>
+                {TeamRadio ? (
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      height: "400px",
+                      overflow: "auto",
+                      flexGrow: 1,
+                      scrollbarWidth: "thin",
+                    }}
+                  >
+                    {[...Object.values(TeamRadio?.Captures).sort(sortUtc)].map(
+                      (radio: any, i: number) => {
+                        const driver = DriverList[radio?.RacingNumber];
+                        return (
+                          <Radio
+                            key={`team-radio-${radio.Utc}-${i}`}
+                            radio={radio}
+                            path={`${f1Url}/static/${SessionInfo.Path}${radio?.Path}`}
+                            driver={driver}
+                          />
+                        );
+                      }
+                    )}
+                  </ul>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p>NO DATA YET</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

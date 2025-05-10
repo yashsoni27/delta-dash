@@ -86,7 +86,7 @@ export default function Driver({
             className="grid items-center gap-2 mx-2"
             style={{
               gridTemplateColumns:
-                "3rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
+                "2.5rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
             }}
           >
             <div title="Position">
