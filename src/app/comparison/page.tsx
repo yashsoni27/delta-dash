@@ -135,7 +135,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="p-10 pt-0 md:pt-0 gap-4">
+      <div className="p-2 md:p-10 md:pt-0 gap-4">
         <div className="flex flex-col justify-end sm:flex-row gap-5 p-4">
           {/* Season selector */}
           {/* <div className="flex items-center gap-2">
@@ -156,14 +156,14 @@ export default function Home() {
             </select>
           </div> */}
 
-          {/* Race Selector */}
-          <div className="flex items-center gap-2">
+          {/* Constructor Selector */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs font-thin flex items-center">
               <Users size={16} />
               &nbsp;Constructor
             </span>
             <select
-              className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-40 px-4 py-2 bg-transparent bg-slate-800"
+              className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 sm:w-40 px-4 py-2 bg-transparent bg-slate-800"
               value={selectedConst?.constructorId || ""}
               onChange={handleConstructorChange}
               disabled={constructors?.length === 0}
@@ -208,10 +208,10 @@ export default function Home() {
                   )}`,
                 }}
               >
-                <div className="gap-2 flex justify-between items-center">
+                <div className="gap-2 flex flex-col sm:flex-row justify-between items-center">
                   {driver1Logo ? (
                     <div
-                      className="rounded-lg p-2"
+                      className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
                         boxShadow: `0 0 20px 20px ${getConstructorColor(
                           stats?.constructorId
@@ -224,20 +224,23 @@ export default function Home() {
                       <img
                         src={driver1Logo}
                         alt={`${stats?.driver1?.givenName} number logo`}
-                        className="w-28 h-28"
+                        className="w-20 h-20 sm:w-28 sm:h-28"
                       />
                     </div>
                   ) : (
-                    <div className="text-8xl" style={{ color: stats?.color }}>
+                    <div
+                      className="text-6xl sm:text-8xl"
+                      style={{ color: stats?.color }}
+                    >
                       {stats?.driver1?.driverNo}
                     </div>
                   )}
-                  <div className="text-right">
-                    <div className="text-xl font-light text-gray-200 mb-1">
+                  <div className="text-center sm:text-right">
+                    <div className="text-lg sm:text-xl font-light text-gray-200 mb-1">
                       {stats?.driver1?.givenName}
                     </div>
                     <div
-                      className="text-6xl font-bold"
+                      className="text-4xl sm:text-6xl font-bold"
                       style={{ color: stats?.color }}
                     >
                       {stats?.driver1?.familyName}
@@ -247,13 +250,13 @@ export default function Home() {
 
                 <img
                   src={`drivers/${stats?.driver1?.driverId}.avif`}
-                  className="scale-x-[-1] rounded-lg"
+                  className="scale-x-[-1] rounded-lg w-full h-auto object-contain"
                   alt={`${stats?.driver1?.givenName} ${stats?.driver1?.familyName}`}
                 />
 
-                <div className="flex justify-center items-center gap-2">
+                <div className="flex justify-center items-center gap-2 mt-4">
                   <div
-                    className="text-4xl font-semibold px-4 py-2 rounded-full"
+                    className="text-2xl sm:text-4xl font-semibold px-4 py-2 rounded-full"
                     style={{
                       color: stats?.color,
                       background: `${stats?.color}15`,
@@ -276,7 +279,7 @@ export default function Home() {
                   <img
                     src={`teams/${stats?.constructorId}.svg`}
                     alt={stats?.constructorId}
-                    className="w-40 h-40"
+                    className="w-32 h-32 sm:w-40 sm:h-40"
                   />
                 </div>
                 <ComparisonChart
@@ -292,13 +295,13 @@ export default function Home() {
                   borderColor: getConstructorColor(stats?.constructorId),
                   boxShadow: `inset 0 0 5px 5px ${getConstructorColor(
                     stats?.constructorId
-                  )}`
+                  )}`,
                 }}
               >
-                <div className="gap-2 flex flex-row-reverse justify-between items-center">
+                <div className="gap-2 flex flex-col sm:flex-row-reverse justify-between items-center">
                   {driver2Logo ? (
                     <div
-                      className="rounded-lg p-2"
+                      className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
                         boxShadow: `0 0 20px 20px ${getConstructorColor(
                           stats?.constructorId
@@ -311,20 +314,20 @@ export default function Home() {
                       <img
                         src={driver2Logo}
                         alt={`${stats?.driver2?.givenName} number logo`}
-                        className="w-28 h-28"
+                        className="w-20 h-20 sm:w-28 sm:h-28"
                       />
                     </div>
                   ) : (
-                    <div className="text-8xl" style={{ color: stats?.color }}>
+                    <div className="text-6xl sm:text-8xl" style={{ color: stats?.color }}>
                       {stats?.driver2?.driverNo}
                     </div>
                   )}
-                  <div className="text-left">
-                    <div className="text-xl font-light text-gray-200 mb-1">
+                  <div className="text-center sm:text-left">
+                    <div className="text-lg sm:text-xl font-light text-gray-200 mb-1">
                       {stats?.driver2?.givenName}
                     </div>
                     <div
-                      className="text-6xl font-bold"
+                      className="text-4xl sm:text-6xl font-bold"
                       style={{ color: stats?.color }}
                     >
                       {stats?.driver2?.familyName}
@@ -334,13 +337,13 @@ export default function Home() {
 
                 <img
                   src={`drivers/${stats?.driver2?.driverId}.avif`}
-                  className="scale-x-[1] rounded-lg"
+                  className="scale-x-[1] rounded-lg w-full h-auto object-contain"
                   alt={`${stats?.driver2?.givenName} ${stats?.driver2?.familyName}`}
                 />
 
-                <div className="flex justify-center items-center gap-2">
+                <div className="flex justify-center items-center gap-2 mt-4">
                   <div
-                    className="text-4xl font-semibold px-4 py-2 rounded-full"
+                    className="text-2xl sm:text-4xl font-semibold px-4 py-2 rounded-full"
                     style={{
                       color: stats?.color,
                       background: `${stats?.color}15`,

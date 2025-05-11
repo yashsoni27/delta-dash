@@ -50,11 +50,11 @@ export default function Home() {
   return (
     <>
       <div className="container mx-auto py-10 min-h-screen">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-items-center md:justify-items-normal gap-4">
           {drivers.map((driver, index) => (
             <div
               key={index}
-              className={`relative rounded-md overflow-hidden h-[190px] transition-transform duration-300 border group`}
+              className={`relative rounded-md overflow-hidden h-[190px] w-[90%] md:w-full transition-transform duration-300 border group`}
               style={{
                 background: getConstructorGradient(
                   driver.Constructors[driver.Constructors.length - 1].constructorId

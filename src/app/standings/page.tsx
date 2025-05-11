@@ -52,7 +52,7 @@ function StandingsContent() {
   }, [selectedYear, title]);
   return (
     <>
-      <div className="p-10 pt-0 md:pt-0 gap-4">
+      <div className="p-2 md:p-10 md:pt-0 gap-4">
         <div className="top-16 text-right z-10 py-4 w-full ml-auto px-4 sm:pr-0 flex gap-2 justify-end">
           <div className="flex items-center gap-2">
             <span className="text-xs font-thin">Season:</span>

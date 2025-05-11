@@ -210,7 +210,6 @@ export default function Home() {
               ...teamInfo,
             };
           });
-          // console.log(mergedTeams);
           setTeams(mergedTeams);
         }
       } catch (e) {
@@ -225,13 +224,12 @@ export default function Home() {
     <>
       <div className="container mx-auto py-10 min-h-screen">
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-items-center md:justify-items-normal gap-4"
           ref={teamContainerRef}
         >
           {teams.map((team: any, index: string) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative w-[90%] md:w-full">
               <div
-                // key={index}
                 onClick={() =>
                   setSelectedTeam(selectedTeam === team.code ? null : team.code)
                 }

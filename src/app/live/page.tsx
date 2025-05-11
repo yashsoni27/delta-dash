@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import Map from "@/components/ui/Map";
 import Radio from "@/components/ui/Radio";
+import { CloudRain } from "lucide-react";
 
 interface LiveState {
   Heartbeat?: any;
@@ -200,7 +201,7 @@ export default function Live() {
 
   return (
     <>
-      <div className="flex-row m-2 justify-between overflow-hidden rounded-lg border border-zinc-800 p-2 md:flex">
+      <div className="flex flex-col md:flex-row m-2 p-2 justify-between items-center overflow-hidden rounded-lg border border-zinc-800 gap-5">
         <div title="Session Data" className="flex items-center gap-2">
           <div className="flex content-center justify-center">
             <img
@@ -222,8 +223,11 @@ export default function Live() {
             </p>
           </div>
         </div>
-        <div title="Weather Data" className="flex justify-between gap-4">
-          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+        <div
+          title="Weather Data"
+          className="flex justify-between gap-4 w-full md:w-auto  "
+        >
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
                 {String(Number(WeatherData?.TrackTemp))}
@@ -233,7 +237,7 @@ export default function Live() {
               </p>
             </div>
           </div>
-          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
                 {String(Number(WeatherData?.AirTemp))}
@@ -243,7 +247,7 @@ export default function Live() {
               </p>
             </div>
           </div>
-          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
                 {String(Number(WeatherData?.Humidity))}
@@ -253,20 +257,22 @@ export default function Live() {
               </p>
             </div>
           </div>
-          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full bg-black">
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
             <div className="mt-2 flex flex-col items-center gap-0.5">
-              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+              {Number(WeatherData?.Rainfall) > 0 ? (
+                <CloudRain color="blue" />
+              ) : (
+                <CloudRain color="dimgrey" />
+              )}
+              {/* <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
                 {String(Number(WeatherData?.Rainfall))}
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
                 Rain
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
-        {/* <div className="flex justify-between items-center gap-4">
-          <p>Data updated: {moment.utc(updated).format("HH:mm:ss.SSS")} UTC</p>
-        </div> */}
         <div title="Laps/Track Info" className="flex justify-end">
           <div className="flex flex-row items-center gap-4 md:justify-self-end">
             {!!LapCount && (

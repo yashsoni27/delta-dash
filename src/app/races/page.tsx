@@ -170,7 +170,10 @@ export default function Home() {
           setSmTableData(fastest6Laps);
         }
 
-        const resultsResponse = await raceService.getRaceResults(year, raceRound);
+        const resultsResponse = await raceService.getRaceResults(
+          year,
+          raceRound
+        );
         if (resultsResponse) {
           const raceResults = resultsResponse.map((item: any, index: any) => ({
             driver: item.Driver.familyName,
@@ -190,7 +193,10 @@ export default function Home() {
           setTableData(raceResults);
         }
 
-        const qualificationResponse = await raceService.getQualificationResults(year, raceRound);
+        const qualificationResponse = await raceService.getQualificationResults(
+          year,
+          raceRound
+        );
         if (qualificationResponse) {
           setQualificationData(qualificationResponse);
         }
@@ -233,10 +239,10 @@ export default function Home() {
 
   return (
     <>
-      <div className="p-10 pt-0 md:pt-0 gap-4">
+      <div className="p-2 md:p-10 md:pt-0 gap-4">
         <div className="top-16 z-10 w-full ml-auto sm:pr-0 gap-2 flex flex-col-reverse md:flex-row justify-between">
-          <div className="p-4 text-xl">{raceName}</div>
-          <div className="flex flex-col sm:flex-row gap-5 p-4">
+          <div className="py-2 pb-4 md:p-4 text-xl text-center">{raceName}</div>
+          <div className="flex flex-row gap-4 py-2 md:p-4">
             {/* Season selector */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-thin flex items-center">
@@ -263,7 +269,7 @@ export default function Home() {
                 &nbsp;Race
               </span>
               <select
-                className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-40 px-4 py-2 bg-transparent bg-slate-800"
+                className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 w-36 px-3 py-2 bg-transparent bg-slate-800"
                 value={round !== null ? round : ""}
                 onChange={handleRoundChange}
                 disabled={raceOptions.length === 0}
@@ -324,19 +330,21 @@ export default function Home() {
                     colors={["#d1d1d1", "#1a73e8", "#ffd54f"]}
                   />
                 </div>
-                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900 w-full h-full">
-                  <Table
-                    heading="Top 6 Fastest Laps"
-                    columns={smColumns}
-                    data={smTableData}
-                  />
+                <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900 w-full h-full overflow-hidden">
+                  <div className="w-full h-full overflow-auto">
+                    <Table
+                      heading="Top 6 Fastest Laps"
+                      columns={smColumns}
+                      data={smTableData}
+                    />
+                  </div>
                 </div>
                 <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                   {selectedRace && (
                     <TrackImg
                       circuitId={selectedRace.circuitId}
                       circuitName={selectedRace.circuitName}
-                      className="object-cover w-full h-full"
+                      className="object-cover"
                     />
                   )}
                 </div>

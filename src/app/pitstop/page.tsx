@@ -185,7 +185,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="p-10 pt-0 md:pt-0 gap-4">
+      <div className="p-2 md:p-10 md:pt-0 gap-4">
         <div className="top-16 z-10 w-full ml-auto sm:pr-0 flex gap-2 justify-between">
           <div className="p-4 text-xl">{""}</div>
           <div className="flex gap-2 p-4"></div>
