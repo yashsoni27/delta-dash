@@ -23,14 +23,16 @@ type NavItemProps = {
   icon: LucideIcon;
   label: string;
   isExpanded: boolean;
+  onLinkClick: () => void;
 };
 
-const NavItem = ({ href, icon: Icon, label, isExpanded }: NavItemProps) => {
+const NavItem = ({ href, icon: Icon, label, isExpanded, onLinkClick }: NavItemProps) => {
   if (!isExpanded) {
     return (
       <Tooltip text={label}>
         <Link
           href={href}
+          onClick={onLinkClick}
           className="flex items-center p-2 my-1 hover:bg-slate-800 rounded-lg transition-colors justify-center"
         >
           <Icon strokeWidth={1} size={22} />
@@ -41,6 +43,7 @@ const NavItem = ({ href, icon: Icon, label, isExpanded }: NavItemProps) => {
   return (
     <Link
       href={href}
+      onClick={onLinkClick}
       className="flex items-center gap-3 p-2 my-1 hover:bg-slate-800 rounded-lg transition-colors"
     >
       <Icon strokeWidth={1} size={22} />
@@ -77,31 +80,58 @@ export default function Navbar() {
     setSidebarExpanded(!isSidebarExpanded);
   };
 
-  useEffect(() => {
-    const mainContent = document.getElementById("main-content");
-    if (mainContent) {
-      mainContent.style.marginLeft = isLivePage === true
-        ? "0rem"
-        : isSidebarExpanded
-        ? "15rem"
-        : "4rem";
+  const handleLinkClick = () => {
+    if (isSidebarExpanded) {
+      setSidebarExpanded(false);
     }
-  }, [isSidebarExpanded, isLivePage]);
+  };
+
+  // useEffect(() => {
+  //   const mainContent = document.getElementById("main-content");
+  //   if (mainContent) {
+  //     mainContent.style.marginLeft =
+  //       isLivePage === true ? "0rem" : isSidebarExpanded ? "15rem" : "4rem";
+  //   }
+  // }, [isSidebarExpanded, isLivePage]);
 
   return (
     <>
-      <nav className="p-4 border-b border-gray-800">
-        <div className="ml-20 flex justify-between items-center">
-          <Link href="/" className="text-xl">
+      <nav className="top-0 left-0 right-0 p-4 border-b border-gray-800 z-50">
+        <div className="flex justify-between items-center">
+          <Link href="/" className="md:ml-16 text-xl">
             Delta Dash
           </Link>
+          {!isLivePage && (
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-1 hover:bg-slate-800 rounded-lg"
+            >
+              {isSidebarExpanded ? (
+                <PanelLeftClose size={20} />
+              ) : (
+                <PanelLeftOpen size={20} />
+              )}
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Mobile Backdrop */}
+      {!isLivePage && isSidebarExpanded && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar navigation */}
       {!isLivePage && (
         <nav
-          className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-gray-800 transition-all duration-300 z-50 ${
+          className={`fixed md:fixed left-0 top-0 h-full bg-slate-900 border-r border-gray-800 transition-all duration-300 z-50 ${
             isSidebarExpanded ? "w-60" : "w-16"
-          }`}
+          }
+            md:translate-x-0
+            ${isSidebarExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         >
           <div className="flex flex-col h-full">
             {/* Logo Header */}
@@ -114,7 +144,7 @@ export default function Navbar() {
               )}
               <button
                 onClick={toggleSidebar}
-                className="p-1 hover:bg-slate-800 rounded-lg"
+                className="hidden md:block p-1 hover:bg-slate-800 rounded-lg"
               >
                 {isSidebarExpanded ? (
                   <PanelLeftClose size={20} />
@@ -131,6 +161,7 @@ export default function Navbar() {
                   key={item.href}
                   {...item}
                   isExpanded={isSidebarExpanded}
+                  onLinkClick={handleLinkClick}
                 />
               ))}
             </div>
