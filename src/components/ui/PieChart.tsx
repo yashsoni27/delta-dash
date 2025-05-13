@@ -68,7 +68,7 @@ export default function PieChart({
       <div
         className="bg-slate-800 opacity-95 text-xs text-white rounded-md w-40"
       >
-        <div className="p-2 border-b border-1 border-slate-400">{driver}</div>
+        <div className="p-2 border-b border-1 border-slate-500">{driver}</div>
         <div className="flex p-2 justify-between">
           <div>{datum.data.label}</div>
           <div>{datum.data.value}</div>

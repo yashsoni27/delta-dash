@@ -51,20 +51,19 @@ export default function PitStopChart({
     const country = sortedPoints[0].data.country;
     return (
       <div
-        className="bg-slate-800 p-2 rounded min-w-[130px] opacity-95"
+        className="bg-slate-800 rounded min-w-[130px] opacity-95"
         style={{
           fontSize: "10px",
-          padding: "8px",
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 font-bold">
-          R{lapNumber}&nbsp;&nbsp;-&nbsp;&nbsp;{country}
+        <div className="mb-2 p-2 border-b border-slate-500">
+          R{lapNumber}&nbsp;&nbsp;&nbsp;&nbsp;{country}
         </div>
         {sortedPoints.map((point) => (
           <div
             key={point.serieId}
-            className="flex justify-between items-center mb-1"
+            className="flex justify-between items-center mb-1 px-2 last:pb-2"
             style={{ color: point.serieColor }}
           >
             <span className="pr-2">{point.serieId}</span>

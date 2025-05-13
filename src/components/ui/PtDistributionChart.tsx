@@ -49,13 +49,13 @@ export default function PtDistributionChart({
 
   const CustomTooltip = ({ id, value, color, data }: BarTooltipProps<any>) => {
     return (
-      <div className="bg-slate-800 text-xs p-3 rounded-lg w-36 flex flex-col gap-2 opacity-95">
-        <div className="font">{driverNames[id as string] || String(id)}</div>
-        <div className="flex items-center gap-2">
-          <div className="text-xs py-2 flex justify-between w-full">
-            <div>{data.name}</div>
-            <div style={{ color: color }}>{value} pts</div>
-          </div>
+      <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
+        <div className="p-2 border-b border-slate-500">
+          {driverNames[id as string] || String(id)}
+        </div>
+        <div className="text-xs p-2 flex justify-between w-full">
+          <div>{data.name}</div>
+          <div style={{ color: color }}>{value} pts</div>
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ export default function PtDistributionChart({
       "constructor" in driverData
         ? (driverData.constructor as string)
         : undefined;
-    return getConstructorHex(constructor);
+    return getConstructorHex(constructor as string);
   };
 
   return (

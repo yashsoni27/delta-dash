@@ -1,5 +1,5 @@
 "use client";
-import { driverService } from "@/lib/api/index";
+import { driverService, f1MediaService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
@@ -31,6 +31,9 @@ interface Driver {
 
 export default function Home() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [driverImages, setDriverImages] = useState<{ [key: string]: string }>(
+    {}
+  );
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -47,6 +50,47 @@ export default function Home() {
     fetchDrivers();
   }, []);
 
+  useEffect(() => {
+    const fetchDriverImages = async () => {
+      const driverImagePromises = drivers.map(async (driver) => {
+        try {
+          const imageUrl = await f1MediaService.getDriverImage(
+            driver.Driver.givenName,
+            driver.Driver.familyName
+          );
+
+          if (imageUrl) {
+            return { driverId: driver.Driver.driverId, imageUrl };
+          }
+        } catch (error) {
+          console.error(
+            `Error fetching driver image for ${driver.Driver.driverId}:`,
+            error
+          );
+        }
+        return null;
+      });
+
+      const results = await Promise.all(driverImagePromises);
+      const newDriverImages = results.reduce(
+        (acc: { [key: string]: string }, result) => {
+          if (result) {
+            acc[result.driverId] = result.imageUrl;
+          }
+          return acc;
+        },
+        {}
+      );
+
+
+      setDriverImages(newDriverImages);
+    };
+
+    if (drivers.length > 0) {
+      fetchDriverImages();
+    }
+  }, [drivers]);
+
   return (
     <>
       <div className="container mx-auto py-10 min-h-screen">
@@ -57,10 +101,12 @@ export default function Home() {
               className={`relative rounded-md overflow-hidden h-[190px] w-[90%] md:w-full transition-transform duration-300 border group`}
               style={{
                 background: getConstructorGradient(
-                  driver.Constructors[driver.Constructors.length - 1].constructorId
+                  driver.Constructors[driver.Constructors.length - 1]
+                    .constructorId
                 ),
                 borderColor: getConstructorColor(
-                  driver.Constructors[driver.Constructors.length - 1].constructorId
+                  driver.Constructors[driver.Constructors.length - 1]
+                    .constructorId
                 ),
               }}
             >
@@ -68,8 +114,13 @@ export default function Home() {
               <div className="absolute inset-0 flex items-center justify-end pl-14 opacity-20 pointer-events-none transition-all duration-500 ease-in-out group-hover:justify-center group-hover:pr-16">
                 <div className="relative w-full h-3/4">
                   <Image
-                    src={`/teams/${driver.Constructors[driver.Constructors.length - 1].constructorId}.svg`}
-                    alt={`${driver.Constructors[driver.Constructors.length - 1].name} logo`}
+                    src={`/teams/${
+                      driver.Constructors[driver.Constructors.length - 1]
+                        .constructorId
+                    }.svg`}
+                    alt={`${
+                      driver.Constructors[driver.Constructors.length - 1].name
+                    } logo`}
                     layout="fill"
                     objectFit="contain"
                   />
@@ -82,7 +133,8 @@ export default function Home() {
                   className="text-lg font-bold"
                   style={{
                     color: getConstructorHex(
-                      driver.Constructors[driver.Constructors.length - 1].constructorId
+                      driver.Constructors[driver.Constructors.length - 1]
+                        .constructorId
                     ),
                   }}
                 >
@@ -99,7 +151,8 @@ export default function Home() {
                   className="text-4xl"
                   style={{
                     color: getConstructorHex(
-                      driver.Constructors[driver.Constructors.length - 1].constructorId
+                      driver.Constructors[driver.Constructors.length - 1]
+                        .constructorId
                     ),
                   }}
                 >
@@ -116,6 +169,18 @@ export default function Home() {
                   className="object-cover object-center"
                   style={{ objectPosition: "bottom right" }}
                 />
+                {/* {driverImages[driver.Driver.driverId] ? (
+                  <Image
+                    src={driverImages[driver.Driver.driverId]}
+                    alt={`${driver.Driver.givenName} ${driver.Driver.familyName}`}
+                    fill
+                    className="object-cover object-center"
+                    style={{ objectPosition: "bottom right" }}
+                  />
+                ) : (
+                  // <div className="w-full h-full animate-pulse bg-gray-700 bg-opacity-0"></div>
+                  <></>
+                )} */}
               </div>
             </div>
           ))}

@@ -1,4 +1,4 @@
-import { circuitIdToF1Adapter } from "@/lib/utils";
+import { circuitIdToF1Adapter, jolpicaToF1MediaConstructor } from "@/lib/utils";
 import { F1MediaApiClient } from "../clients/f1media";
 
 export class F1MediaService {
@@ -29,6 +29,42 @@ export class F1MediaService {
       return URL.createObjectURL(imageBlob);
     } catch (e) {
       console.log("Error in fetching driver number logo", e);
+      return null;
+    }
+  }
+
+  async getDriverImage(firstName: string, lastName: string): Promise<string | null> {
+    try {
+      const firstLetter = firstName.substring(0, 1);
+      const arg2 = firstName.substring(0, 3) + lastName.substring(0,3) + '01';
+      const arg1 = arg2 + `_${firstName}_${lastName}`; 
+      
+      const response = await this.f1MediaClient.fetchFromF1(
+        `d_driver_fallback_image.png/content/dam/fom-website/drivers/${firstLetter}/${arg1}/${arg2}.png`
+      );
+      const imageBlob = await response.blob();
+      return URL.createObjectURL(imageBlob);
+    } catch (e) {
+      console.log("Error in fetching driver headshot: ", e);
+      return null;
+    }
+  } 
+
+  async getCarImage(
+    season: string,
+    constructor: string
+  ): Promise<string | null> {
+    try {
+      const response = await this.f1MediaClient.fetchFromF1(
+        `d_team_car_fallback_image.png/content/dam/fom-website/teams/${season}/${jolpicaToF1MediaConstructor(
+          constructor
+        )}.png`
+      );
+
+      const imageBlob = await response.blob();
+      return URL.createObjectURL(imageBlob);
+    } catch (e) {
+      console.error("Error in fetching car image: ", e);
       return null;
     }
   }

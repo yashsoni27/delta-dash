@@ -22,10 +22,10 @@ const CustomTooltip = ({
   indexValue,
   data,
 }: BarTooltipProps<any>) => (
-  <div className="bg-slate-800 text-xs p-3 rounded-lg w-36 flex flex-col gap-2 opacity-95">
-    <div>{data.name}</div>
+  <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
+    <div className="p-2 border-b border-slate-500">{data.name}</div>
 
-    <div className="text-xs py-2 flex justify-between">
+    <div className="p-2 flex justify-between">
       <div>{id}</div>
       <div>{value}</div>
     </div>

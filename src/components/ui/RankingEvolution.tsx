@@ -69,17 +69,15 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
   const CustomTooltip = ({ point }: any) => {
     return (
       <div
-        className="bg-slate-800 space-y-2"
+        className="bg-slate-800 rounded-md min-w-[150px] opacity-95"
         style={{
           fontSize: "10px",
-          padding: "12px",
-          borderRadius: "4px",
           fontWeight: "light",
         }}
       >
-        <div className="">{point.serie.data.name}</div>
-        <div className="inline-flex space-x-3 content-center">
-          <div>{point.data.x} </div>
+        <div className="mb-2 p-2 border-b border-slate-500">R{point.data.x}</div>
+        <div className="flex justify-between items-center pb-2 px-2">
+          <div className="pr-2">{point.serie.data.name}</div>
           <div style={{ color: point.color }}>
             {point.data.y}
             <sup>th</sup> pos

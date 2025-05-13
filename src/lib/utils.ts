@@ -197,6 +197,10 @@ export const capitalizeWords = (str: string): string => {
     .join(" ");
 };
 
+
+/* -------------------------------------------------------------------------- */
+/*                     jolpica to f1 media circuit adapter                    */
+/* -------------------------------------------------------------------------- */
 export function circuitIdToF1Adapter(circuitId: string): string | null {
   const circuit: Record<string, string> = {
     albert_park: "Australia",
@@ -298,3 +302,21 @@ export function liveToJolpicaConstructor(constructorName: string): string {
 
   return constructors[constructorName] || "Unknown";
 } 
+
+
+export function jolpicaToF1MediaConstructor(constructorId: string): string {
+  const constructors: Record<string, string> = {
+    "mercedes": "mercedes",
+    "red_bull": "red-bull-racing",
+    "ferrari": "ferrari",
+    "mclaren": "mclaren",
+    "alpine": "alpine",
+    "rb": "racing-bulls",
+    "aston_martin": "aston-martin",
+    "williams": "williams",
+    "sauber": "kick-sauber",
+    "haas": "haas",
+  };
+
+  return constructors[constructorId] || "Unknown";
+}

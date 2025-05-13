@@ -73,19 +73,18 @@ export default function LapTimesChart({ data, heading }: any) {
 
     return (
       <div
-        className="bg-slate-800 p-2 rounded min-w-[100px] opacity-95"
+        className="bg-slate-800 rounded-md min-w-[120px] opacity-95"
         style={{
           fontSize: "10px",
-          padding: "8px",
           fontWeight: "light",
         }}
       >
-        <div className="mb-2">Lap {round}</div>
+        <div className="mb-2 p-2 border-b border-slate-500">Lap {round}</div>
         {sortedPoints.map((point) => {
           return (
             <div
               key={point.serieId}
-              className="flex justify-between items-center mb-1"
+              className="flex justify-between items-center mb-1 px-2 last:pb-2"
               style={{ color: point.serieColor }}
             >
               <span className="pr-2">{point.serieId}</span>

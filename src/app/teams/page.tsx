@@ -1,5 +1,5 @@
 "use client";
-import { constructorService } from "@/lib/api/index";
+import { constructorService, f1MediaService } from "@/lib/api/index";
 import { getConstructorColor, getConstructorGradient } from "@/lib/utils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -8,6 +8,7 @@ export default function Home() {
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const teamContainerRef = useRef<HTMLDivElement | null>(null);
   const [teams, setTeams] = useState<any>([]);
+  const [carImages, setCarImages] = useState<{ [key: string]: string }>({});
 
   const teamsInfo = [
     {
@@ -220,6 +221,43 @@ export default function Home() {
     fetchDrivers();
   }, []);
 
+  useEffect(() => {
+    const fetchCarImages = async () => {
+      const currentSeason = "2025"; // You might want to make this dynamic
+      const imagePromises = teams.map(async (team: any) => {
+        try {
+          const imageUrl = await f1MediaService.getCarImage(
+            currentSeason,
+            team.code
+          );
+          if (imageUrl) {
+            return { code: team.code, imageUrl };
+          }
+        } catch (error) {
+          console.error(`Error fetching car image for ${team.code}:`, error);
+        }
+        return null;
+      });
+
+      const results = await Promise.all(imagePromises);
+      const newCarImages = results.reduce(
+        (acc: { [key: string]: string }, result) => {
+          if (result) {
+            acc[result.code] = result.imageUrl;
+          }
+          return acc;
+        },
+        {}
+      );
+
+      setCarImages(newCarImages);
+    };
+
+    if (teams.length > 0) {
+      fetchCarImages();
+    }
+  }, [teams]);
+
   return (
     <>
       <div className="container mx-auto py-10 min-h-screen">
@@ -278,12 +316,24 @@ export default function Home() {
                   </div>
 
                   <div className="relative mt-10 h-32 sm:h-40 md:h-32 lg:h-40 xl:h-32 w-full">
-                    <Image
+                    {/* <Image
                       src={team.carImage}
                       layout="fill"
                       alt={`${team.name} car`}
                       className="object-contain"
-                    />
+                    /> */}
+                    {carImages[team.code] ? (
+                      <Image
+                        src={carImages[team.code]}
+                        layout="fill"
+                        alt={`${team.name} car`}
+                        className="object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="animate-pulse bg-gray-700 w-full h-full rounded-lg"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
