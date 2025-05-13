@@ -5,13 +5,13 @@ import localFont from "next/font/local";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Analytics } from "@vercel/analytics/next";
-import { usePathname } from "next/navigation";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 
 // const myFont = Titillium_Web({ weight: ["200", "300", "400", "600", "700", "900"], subsets: ["latin"] });
 const myFont = localFont({
-  src: "../../public/fonts/Formula1.otf", // Path relative to public folder
+  src: "../../public/fonts/Formula1.otf",
   weight: "100",
   style: "normal",
 });
@@ -37,6 +37,7 @@ export default function RootLayout({
           {children}
         </LayoutWrapper>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
