@@ -5,13 +5,39 @@ A sleek and modern Formula 1 dashboard application for real-time race statistics
 
 ## ✨ Features
 
-- Historical race data comparison
-- Driver and constructor standings 
-- Circuit information and lap analysis
-- Driver data analysis over the season
-- Interactive track maps (planned in future)
-- Real-time tire strategy insights (planned in future)
-- Live race timing and tracking (WIP)
+### Current Features
+- **Race Analysis**
+  - Historical race data comparison with interactive charts
+  - Detailed lap time analysis and visualization
+  - Track information with circuit maps
+  - Box plot analysis for race performance
+
+- **Standings & Statistics**
+  - Driver and constructor standings with evolution tracking
+  - Point distribution analysis
+  - Ranking evolution charts
+  - Detailed standings tables
+
+- **Driver & Team Analysis**
+  - Comprehensive driver statistics
+  - Team performance metrics
+  - Performance comparison tools
+  - Stacked bar charts for detailed analysis
+
+- **Pit Stop Analysis**
+  - Pit stop timing statistics
+  - DHL Fastest Pit Stop Award integration
+  - Pit stop strategy visualization
+
+- **Live Features**
+  - Race countdown timer
+  - Live timing and tracking (WIP)
+  - Real-time race updates
+
+### Planned Features
+- Interactive track maps with real-time car positions
+- Advanced tire strategy insights
+- Enhanced live race timing and tracking
 
 ## 📱 Screenshots
 
@@ -42,11 +68,20 @@ npm run dev
 
 ## 🛠️ Tech Stack
 
-- Next.js - Frontend framework
-- TypeScript - Type-safe development
-- TailwindCSS - Styling
-- Jolpica API - Race data integration
-- DHL API - Pitstop data integration
+- **Frontend Framework**
+  - Next.js - React framework for production
+  - TypeScript - Type-safe development
+  - TailwindCSS - Utility-first CSS framework
+
+- **Data Visualization**
+  - Custom chart components for various data representations
+  - Interactive data visualization tools
+  - Real-time data updates
+
+- **APIs Integration**
+  - Jolpica API - Race data integration
+  - DHL API - Pitstop data integration
+  - F1SignalR - Live race data integration
 
 
 ## 🤝 Contributing

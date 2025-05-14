@@ -1,3 +1,5 @@
+import {version} from  '../../../package.json';
+
 export default function Footer() {
   return (
     <footer className="bg-black border-t border-gray-500 py-4">
@@ -7,7 +9,7 @@ export default function Footer() {
             <p className="text-gray-700">
               &copy; {new Date().getFullYear()} Delta Dash. All rights reserved.
             </p>
-            <p className="text-gray-700">Version 0.3</p>
+            <p className="text-gray-700">Version {version}</p>
           </div>
           <div className="text-gray-700">
             <p>This project/website is unofficial and is not in any way associated with Formula 1.</p>
