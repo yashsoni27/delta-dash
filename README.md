@@ -42,7 +42,8 @@ A sleek and modern Formula 1 dashboard application for real-time race statistics
 ## 📱 Screenshots
 
 ![Delta Dash](https://github.com/user-attachments/assets/0bfa2f79-fa8e-4232-9c3b-7a451b818aa0)
-![DeltaDash](https://github.com/user-attachments/assets/6969d0c5-59bb-40d4-bf1a-3b9c137b74a2)
+![Live Telemetry](https://github.com/user-attachments/assets/2c61065e-0ede-444c-b49c-b36cf910578b)
+![Stats](https://github.com/user-attachments/assets/6969d0c5-59bb-40d4-bf1a-3b9c137b74a2)
 
 
 ## 🚀 Getting Started
