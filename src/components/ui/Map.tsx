@@ -157,7 +157,7 @@ export default function Map({
           </div>
           <div
             style={{
-              color: getTrackStatusColor(TrackStatus.Status),
+              // color: getTrackStatusColor(TrackStatus.Status),
               position: "absolute",
               top: "calc(1rem + 20px)",
               left: "1rem",
@@ -176,7 +176,7 @@ export default function Map({
           </div>
           <div
             style={{
-              color: getTrackStatusColor(TrackStatus.Status),
+              // color: getTrackStatusColor(TrackStatus.Status),
               position: "absolute",
               top: "calc(1rem + 40px)",
               left: "1rem",
@@ -259,7 +259,7 @@ export default function Map({
                     cy={ry}
                     r={stroke * (onTrack ? 1.25 : 0.75)}
                     fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
-                    stroke="transparent"
+                    stroke="black"
                     strokeWidth={fontSize / 10}
                     style={{ transition: "1s linear" }}
                   />
@@ -269,7 +269,7 @@ export default function Map({
                     fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
                     fontSize={fontSize}
                     // fontWeight="bold"
-                    stroke="transparent"
+                    stroke="black"
                     strokeWidth={fontSize / 20}
                     style={{
                       transform: `translate(${rx + stroke * 1.5}px, ${

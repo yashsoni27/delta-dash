@@ -135,7 +135,7 @@ export default function Live() {
     TeamRadio,
   } = state;
 
-  // console.log(state);
+  // console.log("check: ",Position);
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
@@ -334,6 +334,7 @@ export default function Live() {
                           CarData={CarData}
                           TimingAppData={TimingAppData}
                           TimingStats={TimingStats}
+                          SessionName={SessionInfo?.Name}
                         />
                       ))}
                   </div>
@@ -359,7 +360,7 @@ export default function Live() {
                 {!!Position ? (
                   <Map
                     circuit={SessionInfo.Meeting.Circuit.Key}
-                    Position={Position.Position[Position.Position.length - 1]}
+                    Position={Position.Position[0]}
                     DriverList={DriverList}
                     TimingData={TimingData}
                     TrackStatus={TrackStatus}

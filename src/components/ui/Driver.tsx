@@ -34,6 +34,7 @@ export default function Driver({
   CarData,
   TimingAppData,
   TimingStats,
+  SessionName,
 }: any) {
   const driver = DriverList[racingNumber];
   const carData =
@@ -164,22 +165,36 @@ export default function Driver({
 
             <div title="Tyre">
               <div className="flex flex-row items-center gap-2 place-self-start">
-                <img
-                  alt={`${currentStint?.Compound}`}
-                  loading="lazy"
-                  width="32"
-                  height="32"
-                  decoding="async"
-                  src={`/tyres/${currentStint?.Compound}.svg`}
-                  style={{ color: " transparent" }}
-                  onError={(e) => (e.currentTarget.src = `/tyres/soft.png`)}
-                />
+                {currentStint?.Compound &&
+                currentStint?.Compound != "UNKNOWN" ? (
+                  <img
+                    alt={`${currentStint?.Compound}`}
+                    loading="lazy"
+                    width="32"
+                    height="32"
+                    decoding="async"
+                    src={`/tyres/${currentStint?.Compound}.svg`}
+                    style={{ color: " transparent" }}
+                    // onError={(e) => (e.currentTarget.src = `/tyres/soft.png`)}
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-slate-700 animate-pulse rounded-2xl" />
+                )}
+
                 <div>
                   <p className="leading-none text-sm font-light">
-                    L {currentStint?.TotalLaps}
+                    {currentStint?.TotalLaps ? (
+                      <>L {currentStint?.TotalLaps} </>
+                    ) : (
+                      ""
+                    )}
                   </p>
                   <p className="text-xs leading-none text-zinc-500">
-                    PIT {appData?.Stints?.length - 1}
+                    {Number(appData?.Stints?.length) ? (
+                      <>PIT {appData?.Stints?.length - 1}</>
+                    ) : (
+                      <></>
+                    )}
                   </p>
                 </div>
               </div>
@@ -188,17 +203,35 @@ export default function Driver({
             <div title="Info">
               <div className="">
                 <div className="text-gray-500">
-                  {Number(appData?.GridPos) - appData?.Line === 0 ? (
-                    " "
-                  ) : Number(appData?.GridPos) - appData?.Line > 0 ? (
-                    <div className="text-green-500">
-                      +{Number(appData?.GridPos) - appData?.Line}
-                    </div>
-                  ) : (
-                    <div className="text-red-500">
-                      {Number(appData?.GridPos) - appData?.Line}
-                    </div>
-                  )}
+                  {/* {Number(appData?.GridPos) - appData?.Line !== 0 ? (
+                    Number(appData?.GridPos) - appData?.Line > 0 ? (
+                      <div className="text-green-500">
+                        +{Number(appData?.GridPos) - appData?.Line}
+                      </div>
+                    ) : (
+                      <div className="text-red-500">
+                        {Number(appData?.GridPos) - appData?.Line}
+                      </div>
+                    )
+                  ) : null} */}
+                  {(() => {
+                    const gridPos = Number(appData?.GridPos ?? 0);
+                    const line = Number(appData?.Line ?? 0);
+                    const diff = gridPos - line;
+                    if (
+                      isFinite(gridPos) &&
+                      isFinite(line) &&
+                      diff !== 0 &&
+                      SessionName === "Race"
+                    ) {
+                      return diff > 0 ? (
+                        <span className="text-green-500">+{diff}</span>
+                      ) : (
+                        <span className="text-red-500">{diff}</span>
+                      );
+                    }
+                    return <span className="text-gray-700">-</span>;
+                  })()}
                 </div>
                 <p className="text-gray-500 leading-none text-[0.7rem]">
                   {line.Retired ? "RETIRED" : line.Stopped ? "STOPPED" : ""}
@@ -271,7 +304,7 @@ export default function Driver({
                         ))}
                       </div>
                       <div className="flex items-center gap-1">
-                        {sector?.Value && (
+                        {sector?.Value ? (
                           <p
                             className={`text leading-none font-medium ${
                               sector?.OverallFastest
@@ -283,6 +316,8 @@ export default function Driver({
                           >
                             {sector?.Value}
                           </p>
+                        ) : (
+                          <p style={{ width: "60px" }}></p>
                         )}
                         {TimingStats?.Lines[racingNumber]?.BestSectors && (
                           <p className="text-xs leading-none text-zinc-600">

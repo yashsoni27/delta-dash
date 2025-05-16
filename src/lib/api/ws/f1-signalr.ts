@@ -41,15 +41,13 @@ export class F1SignalRClient extends EventEmitter {
       throw new Error("Negotiate must be called before connecting");
     }
 
-    const hub = encodeURIComponent(
-      JSON.stringify([{ name: "Streaming" }])
-    );
+    const hub = encodeURIComponent(JSON.stringify([{ name: "Streaming" }]));
     const encodedToken = encodeURIComponent(this.connectionToken);
     const url = `wss://${F1SignalRClient.BASE_URL}/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodedToken}&connectionData=${hub}`;
 
     return new Promise((resolve, reject) => {
       try {
-        this.socket = new WebSocket(url);
+        this.socket = new WebSocket(url, []);
 
         this.socket.onopen = () => {
           console.log("F1 SignalR Connected");
