@@ -198,4 +198,16 @@ export class DriverService {
       return { error: "Failed to fetch driver evolution" };
     }
   }
+
+  async getDriversByConstructor(season: string = "current", constructorId: string) {
+    try {
+      const response = await this.apiClient.fetchFromApi(
+        `${season}/constructors/${constructorId}/drivers`,
+        "Driver"
+      );
+      return response;
+    } catch (e) {
+      console.log("Error in fetching drivers by constructor: ", e);
+    }
+  }
 }
