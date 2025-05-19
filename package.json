@@ -1,6 +1,6 @@
 {
   "name": "f1-dash",
-  "version": "1.2",
+  "version": "1.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,6 +19,7 @@
     "@nivo/sankey": "^0.88.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
+    "elevenlabs": "^1.59.0",
     "express": "^4.21.2",
     "lucide-react": "^0.483.0",
     "moment": "^2.30.1",

@@ -67,14 +67,15 @@ export const getFlagDetails = (flag: string) => {
 export default function Live() {
   const [isConnected, setIsConnected] = useState(false);
   const [state, setState] = useState<LiveState>({});
-  const [updated, setUpdated] = useState<Date>(new Date());
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [connectionFailed, setConnectionFailed] = useState(false);
+  const [openTranscriptionId, setOpenTranscriptionId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const handleStateUpdate = (newState: any) => {
       setState(newState);
-      setUpdated(new Date());
     };
 
     const handleConnect = () => {
@@ -132,7 +133,6 @@ export default function Live() {
     SessionData,
     TeamRadio,
   } = state;
-
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
@@ -469,6 +469,15 @@ export default function Live() {
                             radio={radio}
                             path={`${f1Url}/static/${SessionInfo.Path}${radio?.Path}`}
                             driver={driver}
+                            isTranscriptionOpen={
+                              openTranscriptionId === `${radio.Utc}-${i}`
+                            }
+                            onTranscribe={() =>
+                              setOpenTranscriptionId(`${radio.Utc}-${i}`)
+                            }
+                            onCloseTranscription={() =>
+                              setOpenTranscriptionId(null)
+                            }
                           />
                         );
                       }
