@@ -1,7 +1,4 @@
 import { F1SignalRClient } from "../ws/f1-signalr";
-import { F1DataStream } from "@/types/f1-signalr";
-import { SessionInfo } from "@/types/session-info";
-import { TimingData, DriverTiming } from "@/types/timing-data";
 import { EventEmitter } from "events";
 import zlib from "zlib";
 
@@ -10,15 +7,13 @@ interface F1State {
 }
 export class F1LiveService extends EventEmitter {
   private client: F1SignalRClient;
-  private currentTimingData: { [key: string]: DriverTiming } = {};
   private state: F1State = {};
   private messageCount = 0;
   public isConnected = false;
   private maxRetries = 5;
   private retryDelay = 3000; // 2 seconds
   private retryCount = 0;
-  private lastEmitTime = 0;
-  private throttleInterval = 400;
+  private emitInterval = 50;
 
   constructor() {
     super();
@@ -43,18 +38,13 @@ export class F1LiveService extends EventEmitter {
     return copy;
   }
 
-  private hasStateChanged(newState: F1State): boolean {
-    const stringify = (obj: any) => JSON.stringify(obj);
-    return stringify(this.state) !== stringify(newState);
-  }
-
   private setupEventListeners() {
     this.client.on("data", (data) => {
       const now = Date.now();
       const parsedData = JSON.parse(data?.data);
 
-      if (Array.isArray(parsedData.M)) {
-        for (const message of parsedData.M) {
+      if (Array.isArray(parsedData?.M)) {
+        for (const message of parsedData?.M) {
           if (message.M === "feed") {
             this.messageCount++;
             let [field, value] = message.A;
@@ -66,22 +56,23 @@ export class F1LiveService extends EventEmitter {
             }
 
             const newState = this.objectMerge(this.state, { [field]: value });
-            
-            if (this.hasStateChanged(newState) && 
-                now - this.lastEmitTime >= this.throttleInterval) {
-              this.state = newState;
-              this.emit("stateUpdate", {
-                ...this.state,
-                _timestamp: now,
-              });
-              this.lastEmitTime = now;
-            }
+            this.state = newState;
+
+            setInterval(() => {
+              if (this.state) {
+                this.emit("stateUpdate", {
+                  ...this.state,
+                  _timestamp: Date.now(),
+                });
+              }
+            }, this.emitInterval);
           }
         }
-      }
-
-      if (parsedData?.R) {
-        // if (parsedData.R && Object.keys(parsedData.R).length && parsedData.I === "1") {
+      } else if (
+        parsedData?.R &&
+        Object.keys(parsedData?.R).length &&
+        parsedData?.I === "1"
+      ) {
         this.messageCount++;
 
         if (parsedData.R["CarData.z"]) {
@@ -99,18 +90,16 @@ export class F1LiveService extends EventEmitter {
         }
 
         const newState = this.objectMerge(this.state, parsedData.R);
+        this.state = newState;
 
-        if (
-          this.hasStateChanged(newState) &&
-          now - this.lastEmitTime >= this.throttleInterval
-        ) {
-          this.state = newState;
-          this.emit("stateUpdate", {
-            ...this.state,
-            _timestamp: now,
-          });
-          this.lastEmitTime = now;
-        }
+        setInterval(() => {
+          if (this.state) {
+            this.emit("stateUpdate", {
+              ...this.state,
+              _timestamp: Date.now(),
+            });
+          }
+        }, this.emitInterval);
       }
     });
 
@@ -150,7 +139,7 @@ export class F1LiveService extends EventEmitter {
         // "TopThree", // Top 3 driver details
         "CarData.z", // Compressed Car Data
         "Position.z", // Compressed Position data
-        'TeamRadio', // Team Radio
+        "TeamRadio", // Team Radio
         // "RcmSeries", // Unknown
       ]);
       this.emit("connect");
