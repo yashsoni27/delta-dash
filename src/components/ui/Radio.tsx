@@ -4,11 +4,11 @@ import moment from "moment";
 import { Pause, Play } from "lucide-react";
 import { liveToJolpicaConstructor } from "@/lib/utils";
 
-const pad = (n: any, l: any) => {
-  let str = `${n}`;
-  while (str.length < l) str = `0${str}`;
-  return str;
-};
+// const pad = (n: any, l: any) => {
+//   let str = `${n}`;
+//   while (str.length < l) str = `0${str}`;
+//   return str;
+// };
 
 // const secondsToMinutes = (seconds: number) => {
 //   const minutes = Math.floor(seconds / 60);

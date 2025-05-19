@@ -41,18 +41,18 @@ const sortUtc = (a: any, b: any) => {
   return bDate.diff(aDate);
 };
 
-const getFlagDetails = (flag: string) => {
+export const getFlagDetails = (flag: string) => {
   switch (flag?.toLowerCase()) {
     case "allclear":
-      return { shadow: "green", bg: "#006400", text: "All Clear" };
+      return { shadow: "green", bg: "#006400", text: "Track Clear" };
     case "green":
       return { shadow: "green", bg: "#006400", text: "Green" };
     case "yellow":
       return { shadow: "yellow", bg: "#ffb900", text: "Yellow" };
     case "scdeployed":
-      return { shadow: "yellow", bg: "#ffb900", text: "SC Deployed" };
+      return { shadow: "yellow", bg: "#ffb900", text: "Safety Car" };
     case "vscdeployed":
-      return { shadow: "yellow", bg: "#ffb900", text: "VSC Deployed" };
+      return { shadow: "yellow", bg: "#ffb900", text: "Virtual Safety Car" };
     case "double yellow":
       return { shadow: "yellow", bg: "#ffb900", text: "Double Yellow" };
     case "red":
@@ -73,9 +73,7 @@ export default function Live() {
 
   useEffect(() => {
     const handleStateUpdate = (newState: any) => {
-      console.log("State update received:", new Date().toISOString());
       setState(newState);
-      // console.log(newState);
       setUpdated(new Date());
     };
 
@@ -135,7 +133,6 @@ export default function Live() {
     TeamRadio,
   } = state;
 
-  // console.log("check: ",Position);
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock?.Utc && ExtrapolatedClock?.Remaining
@@ -264,12 +261,6 @@ export default function Live() {
               ) : (
                 <CloudRain color="dimgrey" />
               )}
-              {/* <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
-                {String(Number(WeatherData?.Rainfall))}
-              </p>
-              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
-                Rain
-              </p> */}
             </div>
           </div>
         </div>
@@ -360,7 +351,7 @@ export default function Live() {
                 {!!Position ? (
                   <Map
                     circuit={SessionInfo.Meeting.Circuit.Key}
-                    Position={Position.Position[0]}
+                    Position={Position.Position[Position.Position.length - 1]}
                     DriverList={DriverList}
                     TimingData={TimingData}
                     TrackStatus={TrackStatus}
@@ -410,14 +401,16 @@ export default function Live() {
                           style={{ padding: "0.3rem", display: "flex" }}
                           className="font-mono flex flex-col text-slate-300"
                         >
-                          <div
-                            className="mr-2 whitespace-nowrap"
-                            style={{
-                              color: "grey",
-                            }}
-                          >
-                            {moment.utc(event.Utc).format("HH:mm:ss")}
-                            {event.Lap && ` / Lap ${event.Lap}`}
+                          <div className="mr-2 whitespace-nowrap">
+                            <span className="text-gray-500 mr-2">
+                              {moment(event.Utc).local().format("HH:mm:ss")}
+                            </span>
+                            <span className="text-gray-700">
+                              {moment.utc(event.Utc).format("HH:mm")}
+                            </span>
+                            <span className="text-gray-500">
+                              {event.Lap && ` / Lap ${event.Lap}`}
+                            </span>
                           </div>
                           <div className="flex flex-row gap-2 leading-none">
                             {event.Category === "Flag" && (

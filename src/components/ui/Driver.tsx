@@ -58,8 +58,6 @@ export default function Driver({
     currentStint = stints[stints.length - 1];
   }
 
-  const lineStats = Object.values(line.Stats ?? {});
-
   const [posChanged, setPosChanged] = useState<any>();
   const [prevPos, setPrevPos] = useState<any>();
 
@@ -131,31 +129,23 @@ export default function Driver({
             <div title="DRS and PIT">
               <div className="text-sm inline-flex h-8 w-full items-center justify-start font-bold gap-2">
                 {line.InPit ? (
-                  <div
-                    style={{
-                      color: "cyan",
-                    }}
-                  >
-                    PIT
-                  </div>
+                  <div className="text-cyan-500">PIT</div>
                 ) : line?.PitOut ? (
-                  <div
-                  // style={{
-                  //   color: "cyan",
-                  // }}
-                  >
-                    OUT
-                  </div>
+                  <div className="text-white">OUT</div>
                 ) : (
                   <div
-                    style={{
-                      color:
-                        carData["45"] === 8
-                          ? "lightgrey"
-                          : drsEnabledValues.includes(carData["45"])
-                          ? "limegreen"
-                          : "dimgray",
-                    }}
+                    className={`${carData["45"] === 8 ? "text-gray-400" : ""}
+                      ${
+                        drsEnabledValues.includes(carData["45"])
+                          ? "text-green-500"
+                          : ""
+                      }
+                      ${
+                        carData["45"] !== 8 &&
+                        !drsEnabledValues.includes(carData["45"])
+                          ? "text-gray-700"
+                          : ""
+                      }`}
                   >
                     DRS
                   </div>
@@ -175,7 +165,6 @@ export default function Driver({
                     decoding="async"
                     src={`/tyres/${currentStint?.Compound}.svg`}
                     style={{ color: " transparent" }}
-                    // onError={(e) => (e.currentTarget.src = `/tyres/soft.png`)}
                   />
                 ) : (
                   <div className="w-8 h-8 bg-slate-700 animate-pulse rounded-2xl" />
@@ -190,7 +179,7 @@ export default function Driver({
                     )}
                   </p>
                   <p className="text-xs leading-none text-zinc-500">
-                    {Number(appData?.Stints?.length) ? (
+                    {appData?.Stints?.length ? (
                       <>PIT {appData?.Stints?.length - 1}</>
                     ) : (
                       <></>
@@ -269,7 +258,14 @@ export default function Driver({
                 >
                   {line?.LastLapTime?.Value}
                 </p>
-                <p className="text-xs leading-none text-zinc-500">
+                <p
+                  className={`text-xs leading-none  ${
+                    TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                      ?.Position === 1
+                      ? "text-purple-800"
+                      : "text-zinc-500"
+                  }`}
+                >
                   {line?.BestLapTime?.Value}
                 </p>
               </div>
@@ -320,7 +316,14 @@ export default function Driver({
                           <p style={{ width: "60px" }}></p>
                         )}
                         {TimingStats?.Lines[racingNumber]?.BestSectors && (
-                          <p className="text-xs leading-none text-zinc-600">
+                          <p
+                            className={`text-xs leading-none ${
+                              TimingStats?.Lines[racingNumber]?.BestSectors[i]
+                                ?.Position == 1
+                                ? "text-purple-800"
+                                : "text-zinc-600"
+                            }`}
+                          >
                             {
                               TimingStats?.Lines[racingNumber]?.BestSectors[i]
                                 ?.Value
@@ -346,7 +349,10 @@ export default function Driver({
               <div className="h-1.5 w-full overflow-hidden rounded-xl bg-zinc-700">
                 <div
                   className="h-1.5 bg-blue-500"
-                  style={{ width: rpmPercent, transitionDuration: "0.1s" }}
+                  style={{
+                    width: rpmPercent,
+                    transition: "all 0.2s linear",
+                  }}
                 ></div>
               </div>
             </div>
@@ -365,16 +371,16 @@ export default function Driver({
                       className="h-1.5 bg-red-500"
                       style={{
                         width: brakeApplied ? "100%" : "0%",
-                        transitionDuration: "0.1s",
+                        transition: "all 0.1s linear",
                       }}
                     ></div>
                   </div>
                   <div className="h-1.5 w-20 overflow-hidden rounded-xl bg-zinc-700">
                     <div
-                      className="h-1.5 bg-emerald-500"
+                      className="h-1.5 bg-green-500"
                       style={{
                         width: throttlePercent,
-                        transitionDuration: "0.1s",
+                        transition: "all 0.1s linear",
                       }}
                     ></div>
                   </div>

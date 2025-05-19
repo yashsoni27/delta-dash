@@ -157,7 +157,6 @@ export default function Map({
           </div>
           <div
             style={{
-              // color: getTrackStatusColor(TrackStatus.Status),
               position: "absolute",
               top: "calc(1rem + 20px)",
               left: "1rem",
@@ -176,7 +175,6 @@ export default function Map({
           </div>
           <div
             style={{
-              // color: getTrackStatusColor(TrackStatus.Status),
               position: "absolute",
               top: "calc(1rem + 40px)",
               left: "1rem",
@@ -253,29 +251,26 @@ export default function Map({
               );
               const fontSize = stroke * 2.5;
               return driver && !out ? (
-                <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
+                <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.25}>
                   <circle
                     cx={rx}
                     cy={ry}
-                    r={stroke * (onTrack ? 1.25 : 0.75)}
+                    r={stroke * (onTrack ? 1.25 : 0.6)}
                     fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
                     stroke="black"
-                    strokeWidth={fontSize / 10}
-                    style={{ transition: "1s linear" }}
+                    strokeWidth={fontSize / 20}
+                    style={{ transition: "all 1s linear" }}
                   />
                   <text
                     x={0}
                     y={0}
                     fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
-                    fontSize={fontSize}
-                    // fontWeight="bold"
-                    stroke="black"
-                    strokeWidth={fontSize / 20}
+                    fontSize={onTrack ? fontSize : fontSize * 0.75}
                     style={{
-                      transform: `translate(${rx + stroke * 1.5}px, ${
+                      transform: `translate(${rx + stroke * 2}px, ${
                         ry + stroke
                       }px)`,
-                      transition: "1s linear",
+                      transition: "all 1s linear",
                     }}
                   >
                     {driver.Tla}
@@ -303,7 +298,6 @@ export default function Map({
                   fontSize={fontSize}
                   fontWeight="bold"
                   fill="dimgrey"
-                  // stroke="transparent"
                   strokeWidth={fontSize / 40}
                 >
                   {string}
