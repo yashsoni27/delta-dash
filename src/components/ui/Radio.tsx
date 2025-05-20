@@ -4,6 +4,7 @@ import moment from "moment";
 import { MessageSquareText, Pause, Play } from "lucide-react";
 import { liveToJolpicaConstructor } from "@/lib/utils";
 import { ElevenLabsClient } from "elevenlabs";
+import { transcriptionService } from "@/lib/api";
 
 function groupBySpeaker(words: any[]) {
   if (!words) return;
@@ -61,24 +62,25 @@ export default function Radio({
     if (!path) return;
     setIsTranscribing(true);
     try {
-      const client = new ElevenLabsClient({
-        apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
-      });
-      const response = await fetch(
-        `/api/proxy?url=${encodeURIComponent(path)}`
-      );
-      const audioBlob = await response.blob();
+      // const client = new ElevenLabsClient({
+      //   apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
+      // });
+      // const response = await fetch(
+      //   `/api/proxy?url=${encodeURIComponent(path)}`
+      // );
+      // const audioBlob = await response.blob();
 
-      const result = await client.speechToText.convert({
-        file: audioBlob,
-        model_id: "scribe_v1",
-        tag_audio_events: true,
-        language_code: "eng",
-        diarize: true,
-      });
+      // const result = await client.speechToText.convert({
+      //   file: audioBlob,
+      //   model_id: "scribe_v1",
+      //   tag_audio_events: true,
+      //   language_code: "eng",
+      //   diarize: true,
+      // });
+      const result = await transcriptionService.transcribeAudio(path);
 
       setTranscription(result);
-      setShowTranscription(true);
+      // setShowTranscription(true);
     } catch (e) {
       console.log("Transcription error: ", e);
     } finally {
@@ -118,7 +120,7 @@ export default function Radio({
     }
     if (!playing && typeof audioRef.current?.pause === "function") {
       audioRef.current.pause();
-      clearInterval(intervalRef?.current);
+      if (intervalRef.current !== null) clearInterval(intervalRef.current);
     }
   }, [playing]);
 
@@ -176,35 +178,37 @@ export default function Radio({
             <MessageSquareText size={20} color="#d0d0d1" />
           )}
         </button>
-        {groupedTranscription?.length > 0 && isTranscriptionOpen && (
-          <div
-            className="absolute z-10 left-full top-0 ml-2 w-[350px] max-w-[25vw] border border-gray-600 bg-black rounded-lg flex flex-col gap-2 text-sm"
-            style={{ pointerEvents: "auto" }}
-          >
-            <button
-              onClick={onCloseTranscription}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white text-lg font-bold"
+        {groupedTranscription &&
+          groupedTranscription?.length > 0 &&
+          isTranscriptionOpen && (
+            <div
+              className="absolute z-10 left-full top-0 ml-2 w-[350px] max-w-[25vw] border border-gray-600 bg-black rounded-lg flex flex-col gap-2 text-sm"
               style={{ pointerEvents: "auto" }}
-              tabIndex={0}
-              aria-label="Close transcription"
             >
-              ×
-            </button>
-            <div className="pt-6 pb-2 px-2 flex flex-col gap-2">
-              {groupedTranscription?.map((group, idx) => (
-                <div
-                  key={idx}
-                  className={`px-3 py-2 rounded`}
-                  style={{
-                    color: getSpeakerColor(group.speaker),
-                  }}
-                >
-                  "{group.text}"
-                </div>
-              ))}
+              <button
+                onClick={onCloseTranscription}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white text-lg font-bold"
+                style={{ pointerEvents: "auto" }}
+                tabIndex={0}
+                aria-label="Close transcription"
+              >
+                ×
+              </button>
+              <div className="pt-6 pb-2 px-2 flex flex-col gap-2">
+                {groupedTranscription?.map((group, idx) => (
+                  <div
+                    key={idx}
+                    className={`px-3 py-2 rounded`}
+                    style={{
+                      color: getSpeakerColor(group.speaker),
+                    }}
+                  >
+                    "{group.text}"
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
       <audio
         ref={audioRef}

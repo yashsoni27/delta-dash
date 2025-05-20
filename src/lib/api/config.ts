@@ -19,4 +19,7 @@ export const API_CONFIG = {
     baseUrl: process.env.NEXT_PUBLIC_MULTVIEWER_BASE as string,
     revalidationTime: parseInt(process.env.REVALIDATION_TIME || "3600"),
   },
+  ELEVENLABS: {
+    apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY as string,
+  }
 };

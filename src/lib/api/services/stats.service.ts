@@ -117,10 +117,7 @@ export class StatsService {
   }
 
   // Get Head to Head data
-  async getComparisonData(
-    season: string = "current",
-    constructorId: string
-  ) {
+  async getComparisonData(season: string = "current", constructorId: string) {
     const raceResults = await this.apiClient.fetchFromApi(
       `${season}/constructors/${constructorId}/results`,
       "Race",
@@ -133,7 +130,7 @@ export class StatsService {
       100,
       0
     );
-  
+
     // Track all drivers and their last appearance
     const driversMap = new Map<
       string,
@@ -157,17 +154,17 @@ export class StatsService {
         dnf: number;
       }
     >();
-  
+
     // Process race results first to set driver identities
     if ((raceResults?.data as any)?.Races) {
       const races = (raceResults?.data as any)?.Races;
-  
+
       [...races].reverse().forEach((race: any) => {
         const round = parseInt(race.round);
-  
+
         race.Results.forEach((result: any) => {
           const driverId = result.Driver.driverId;
-  
+
           // Add or update driver info
           if (!driversMap.has(driverId)) {
             driversMap.set(driverId, {
@@ -190,70 +187,70 @@ export class StatsService {
               dnf: 0,
             });
           }
-  
+
           const driver = driversMap.get(driverId)!;
-  
+
           // Update statistics
           driver.races++;
           driver.points += parseFloat(result.points);
-  
+
           const position = parseInt(result.position);
           const gridPosition = parseInt(result.grid);
-  
+
           // Update best finish
           if (position < driver.bestFinish) {
             driver.bestFinish = position;
           }
-  
+
           // Update best grid
           if (gridPosition < driver.bestGrid) {
             driver.bestGrid = gridPosition;
           }
-  
+
           // Count poles
           if (gridPosition === 1) {
             driver.poles++;
           }
-  
+
           // Count podiums
           if (position <= 3) {
             driver.podiums++;
           }
-  
+
           // Count wins
           if (position === 1) {
             driver.wins++;
           }
-  
+
           // Count DNFs
           if (result.status !== "Finished" && !result.status.includes("Lap")) {
             driver.dnf++;
           }
         });
-  
+
         // Process qualifying and race battles if we have two drivers
         if (race.Results.length === 2) {
           const [result1, result2] = race.Results;
           const driver1 = driversMap.get(result1.Driver.driverId)!;
           const driver2 = driversMap.get(result2.Driver.driverId)!;
-  
+
           // Qualifying battle
           const grid1 = parseInt(result1.grid);
           const grid2 = parseInt(result2.grid);
-  
+
           driver1.qualifying++;
           driver2.qualifying++;
-  
+
           if (grid1 < grid2) {
             driver1.qualifyingWins++;
           } else if (grid2 < grid1) {
             driver2.qualifyingWins++;
           }
-  
+
           // Race battle
           const pos1 = parseInt(result1.position);
           const pos2 = parseInt(result2.position);
-  
+
           if (pos1 < pos2) {
             driver1.raceWins++;
           } else if (pos2 < pos1) {
@@ -262,28 +259,28 @@ export class StatsService {
         }
       });
     }
-  
+
     // Process sprint results
     if ((sprintResults?.data as any)?.Races) {
       const sprints = (sprintResults?.data as any)?.Races;
-  
+
       sprints.forEach((sprint: any) => {
         if (!sprint.SprintResults) return;
-  
+
         // Process sprint battles if we have two drivers
         if (sprint.SprintResults.length === 2) {
           const [result1, result2] = sprint.SprintResults;
           const driver1 = driversMap.get(result1.Driver.driverId)!;
           const driver2 = driversMap.get(result2.Driver.driverId)!;
-  
+
           // Update points from sprint
           driver1.points += parseFloat(result1.points);
           driver2.points += parseFloat(result2.points);
-  
+
           // Compare sprint results between teammates
           const pos1 = parseInt(result1.position);
           const pos2 = parseInt(result2.position);
-  
+
           // Add sprint win to whoever finished ahead
           if (pos1 < pos2) {
             driver1.sprintWins++;
@@ -294,11 +291,11 @@ export class StatsService {
           // Handle case with just one driver or more than two
           sprint.SprintResults.forEach((result: any) => {
             const driverId = result.Driver.driverId;
-  
+
             // Make sure driver exists in our map
             if (driversMap.has(driverId)) {
               const driver = driversMap.get(driverId)!;
-  
+
               // Update points from sprint
               driver.points += parseFloat(result.points);
             }
@@ -306,12 +303,12 @@ export class StatsService {
         }
       });
     }
-  
+
     // Get the two most recent drivers
     const sortedDrivers = Array.from(driversMap.values())
       .sort((a, b) => b.lastRound - a.lastRound)
       .slice(0, 2);
-  
+
     return {
       season,
       constructorId,
@@ -328,7 +325,7 @@ export class StatsService {
       const constructorStats: Record<string, any> = {};
       const driverPointsByRound: Record<string, any> = {};
       const constructorPointsByRound: Record<string, any> = {};
-  
+
       const previousRaceResponse = await this.raceService.getPreviousRaces();
       const gpNames = previousRaceResponse.reduce(
         (acc: Record<string, string>, race: any) => {
@@ -344,9 +341,14 @@ export class StatsService {
         },
         {}
       );
-      const initialResult = await this.apiClient.fetchFromApi(`${season}/results`, "Race", 1, 0);
+      const initialResult = await this.apiClient.fetchFromApi(
+        `${season}/results`,
+        "Race",
+        1,
+        0
+      );
       const totalRaces = parseInt(previousRaceResponse[0].round);
-  
+
       const totalResults = initialResult?.total;
       const batchSize = 80;
       const requiredRequests = Math.ceil(totalResults / batchSize);
@@ -354,9 +356,9 @@ export class StatsService {
         { length: requiredRequests },
         (_, i) => i * batchSize
       );
-  
+
       const concurrencyLimits = 3;
-  
+
       // Fetch all race results in batches
       for (let i = 0; i < offsets.length; i += concurrencyLimits) {
         const batch = offsets.slice(i, i + concurrencyLimits);
@@ -377,19 +379,19 @@ export class StatsService {
             // Process each race
             for (const race of batchResult.data.Races) {
               if (!race.Results) continue;
-  
+
               const round = parseInt(race.round);
-  
+
               // Process each result in this race
               for (const result of race.Results) {
                 if (!result.Driver || !result.Constructor) continue;
-  
+
                 // Extract data
                 const driverId = result.Driver.driverId;
                 const constructorId = result.Constructor.constructorId;
                 const position = parseInt(result.position);
                 const points = parseFloat(result.points);
-  
+
                 // Process driver statistics
                 if (!driverStats[driverId]) {
                   driverStats[driverId] = {
@@ -408,7 +410,7 @@ export class StatsService {
                     racesCompleted: 0,
                   };
                 }
-  
+
                 // Process constructor statistics
                 if (!constructorStats[constructorId]) {
                   constructorStats[constructorId] = {
@@ -423,7 +425,7 @@ export class StatsService {
                     entries: 0,
                   };
                 }
-  
+
                 // Update driver statistics
                 const driver = driverStats[driverId];
                 driver.racesCompleted++;
@@ -437,7 +439,7 @@ export class StatsService {
                 )
                   driver.DNF--;
                 driver.totalPoints += points;
-  
+
                 // Update constructor statistics
                 const constructor = constructorStats[constructorId];
                 constructor.entries++;
@@ -451,7 +453,7 @@ export class StatsService {
                 )
                   constructor.DNF--;
                 constructor.totalPoints += points;
-  
+
                 // Initialize driver if not exists
                 if (!driverPointsByRound[driverId]) {
                   driverPointsByRound[driverId] = {
@@ -462,7 +464,7 @@ export class StatsService {
                 }
                 // Add points for this round
                 driverPointsByRound[driverId].points[round - 1] = points;
-  
+
                 // Initialize constructor if not exists
                 if (!constructorPointsByRound[constructorId]) {
                   constructorPointsByRound[constructorId] = {
@@ -478,44 +480,52 @@ export class StatsService {
           }
         }
       }
-  
+
       // For including Sprint weekend points
       const sprintRoundsData = await this.raceService.getSprintRounds(season);
-  
+
       // Process sprint results for sprint rounds
       for (const round of sprintRoundsData.sprintRounds) {
-        const sprintResult = await this.raceService.getSprintResults(season, round);
-  
-        if ((sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults) {
-          const data = sprintResult.data as { Races: { SprintResults: any[] }[] };
+        const sprintResult = await this.raceService.getSprintResults(
+          season,
+          round
+        );
+
+        if (
+          (sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults
+        ) {
+          const data = sprintResult.data as {
+            Races: { SprintResults: any[] }[];
+          };
           const results = data.Races[0].SprintResults;
-  
+
           // Process sprint results similar to race results
           for (const result of results) {
             if (!result.Driver || !result.Constructor) continue;
-  
+
             const driverId = result.Driver.driverId;
             const constructorId = result.Constructor.constructorId;
             const position = parseInt(result.position);
             const points = parseFloat(result.points);
-  
+
             // Update points in existing stats objects
             if (driverPointsByRound[driverId]) {
               driverPointsByRound[driverId].points[round - 1] += points;
               driverStats[driverId].totalPoints += points;
             }
-  
+
             if (constructorPointsByRound[constructorId]) {
-              constructorPointsByRound[constructorId].points[round - 1] += points;
+              constructorPointsByRound[constructorId].points[round - 1] +=
+                points;
               constructorStats[constructorId].totalPoints += points;
             }
           }
         }
       }
-  
+
       // Sort by total points
       const sortByPoints = (a: any, b: any) => b.totalPoints - a.totalPoints;
-  
+
       // Transform data for stacked bar chart
       const driverRoundData = Object.entries(driverPointsByRound)
         .map(([driverId, data]) => {
@@ -531,7 +541,7 @@ export class StatsService {
           };
         })
         .sort((a, b) => b.totalPoints - a.totalPoints);
-  
+
       // Transform data for constructor stacked bar chart
       const constructorRoundData = Object.entries(constructorPointsByRound)
         .map(([constructorId, data]) => {
@@ -547,7 +557,7 @@ export class StatsService {
           };
         })
         .sort((a, b) => b.totalPoints - a.totalPoints);
-  
+
       // Format driver data for visualization
       const formattedDriverData = Array.from(
         { length: totalRaces },
@@ -556,7 +566,7 @@ export class StatsService {
           const roundPoints: any = {
             name: gpNames[roundNumber] || `R${roundNumber}`, // Use GP abbreviation if available
           };
-  
+
           driverRoundData.forEach((driver) => {
             roundPoints[driver.driver] = {
               name: driver.name,
@@ -564,11 +574,11 @@ export class StatsService {
               points: driver.pointsByRound[index],
             };
           });
-  
+
           return roundPoints;
         }
       );
-  
+
       // Format constructor data for visualization
       const formattedConstructorData = Array.from(
         { length: totalRaces },
@@ -577,7 +587,7 @@ export class StatsService {
           const roundPoints: any = {
             name: gpNames[roundNumber] || `R${roundNumber}`,
           };
-  
+
           constructorRoundData.forEach((constructor) => {
             roundPoints[constructor.constructor] = {
               name: constructor.name,
@@ -585,11 +595,11 @@ export class StatsService {
               points: constructor.pointsByRound[index],
             };
           });
-  
+
           return roundPoints;
         }
       );
-  
+
       return {
         drivers: Object.values(driverStats).sort(sortByPoints),
         constructors: Object.values(constructorStats).sort(sortByPoints),
@@ -644,7 +654,7 @@ export class StatsService {
         color: string;
       }>;
     }
-  
+
     try {
       const response = await this.apiClient.fetchFromApi(
         `${season}/drivers/${driverId}/results`,
@@ -652,16 +662,18 @@ export class StatsService {
         limit,
         offset
       );
-  
+
       const initialResult = await this.raceService.getRaceCalendar();
       const totalRaces = initialResult.total;
-  
-      const constructors = await this.constructorService.getConstructors(season);
+
+      const constructors = await this.constructorService.getConstructors(
+        season
+      );
       const totalDrivers = constructors.total * 2;
-  
-      // console.log(response);
+
+      const currentRound = response?.total;
       const races = (response?.data as { Races: any[] })?.Races || [];
-  
+
       // Initialize stats object
       const stats: DriverStats = {
         familyName: "",
@@ -694,18 +706,18 @@ export class StatsService {
         startToFinishFlow: [],
         lapsLed: [],
       };
-  
+
       races.forEach((race: any) => {
         const result = race.Results[0];
         const position = parseInt(result.position);
         const grid = parseInt(result.grid);
         const points = parseFloat(result.points);
-  
+
         stats.familyName = result.Driver.familyName;
         stats.constructorId = result.Constructor.constructorId;
-  
+
         stats.seasonAchievements.TotalRounds = totalRaces;
-  
+
         // Season Achievements - count wins
         if (position === 1) {
           stats.seasonAchievements.Wins++;
@@ -722,11 +734,11 @@ export class StatsService {
         if (result.status === "Disqualified") {
           stats.seasonAchievements.DSQ++;
         }
-  
+
         // Points this Season
         stats.pointsThisSeason += points;
         stats.pointsWithoutSprint += points;
-  
+
         // Finish Positions Distribution
         const positionIndex = position - 1;
         if (positionIndex >= 0 && positionIndex < totalDrivers) {
@@ -737,63 +749,70 @@ export class StatsService {
           stats.finishPositions.distribution[positionIndex].color =
             getConstructorHex(result.Constructor.constructorId);
         }
-  
+
         // Finish Positions in Points
         if (points > 0) {
           stats.finishPositions.inPoints.withPoints++;
         } else {
           stats.finishPositions.inPoints.withoutPoints++;
         }
-  
+
         // Start to Finish Position Flow
         stats.startToFinishFlow.push({
           start: grid,
           finish: position,
         });
       });
-  
+
       // Adding sprint round details
       const sprintRoundsData = await this.raceService.getSprintRounds(season);
-  
+
       for (const round of sprintRoundsData.sprintRounds) {
-        const sprintResponse = await this.apiClient.fetchFromApi(
-          `${season}/${round}/drivers/${driverId}/sprint`,
-          "Race",
-          limit,
-          offset
-        );
-  
-        if ((sprintResponse?.data as { Races: any[] })?.Races?.[0]?.SprintResults) {
-          const data = sprintResponse.data as { Races: { SprintResults: any[] }[] };
-          const results = data.Races[0].SprintResults;
-  
-          // Process sprint results similar to race results
-          for (const result of results) {
-            if (!result.Driver || !result.Constructor) continue;
-            const sprintPosition = parseInt(result.position);
-            const sprintPoints = parseFloat(result.points);
-  
-            // Sprint points
-            stats.pointsThisSeason += sprintPoints; 
-            
-            // Sprint Wins
-            if (sprintPosition === 1) {
-              stats.seasonAchievements.SprintWins ++;
-            }
-  
-            // Sprint Podiums 
-            if (sprintPosition <= 3) {
-              stats.seasonAchievements.SprintPodiums ++;
+        if (round <= currentRound) {
+          const sprintResponse = await this.apiClient.fetchFromApi(
+            `${season}/${round}/drivers/${driverId}/sprint`,
+            "Race",
+            limit,
+            offset
+          );
+
+          if (
+            (sprintResponse?.data as { Races: any[] })?.Races?.[0]
+              ?.SprintResults
+          ) {
+            const data = sprintResponse.data as {
+              Races: { SprintResults: any[] }[];
+            };
+            const results = data.Races[0].SprintResults;
+
+            // Process sprint results similar to race results
+            for (const result of results) {
+              if (!result.Driver || !result.Constructor) continue;
+              const sprintPosition = parseInt(result.position);
+              const sprintPoints = parseFloat(result.points);
+
+              // Sprint points
+              stats.pointsThisSeason += sprintPoints;
+
+              // Sprint Wins
+              if (sprintPosition === 1) {
+                stats.seasonAchievements.SprintWins++;
+              }
+
+              // Sprint Podiums
+              if (sprintPosition <= 3) {
+                stats.seasonAchievements.SprintPodiums++;
+              }
             }
           }
         }
       }
-  
+
       // Average points per GP
       stats.averagePointsPerGP = parseFloat(
         (stats.pointsWithoutSprint / races.length).toFixed(1)
       );
-  
+
       // Get laps led data
       const lapsLedData = await this.getLapsLedByDriver(season, driverId);
       if (lapsLedData) {
@@ -802,39 +821,35 @@ export class StatsService {
           color: getConstructorHex(stats.constructorId),
         }));
       }
-  
+
       // Total laps led
       stats.totalLapsLed = (lapsLedData ?? []).reduce(
         (total, lap) => total + lap.lapsLed,
         0
       );
-  
-  
+
       return stats;
     } catch (e) {
       console.log("Error in fetching driver stats: ", e);
     }
   }
-  
+
   // Get laps led by a driver
-  async getLapsLedByDriver(
-    season: string = "current",
-    driverId: string
-  ) {
+  async getLapsLedByDriver(season: string = "current", driverId: string) {
     try {
       const initialResult = await this.raceService.getPreviousRaces(season);
       const gpNames = initialResult.reduce(
         (acc: Record<string, string>, race: any) => {
           const gpName = race.raceName.replace("Grand Prix", "").trim();
           const usedAbbreviations = new Set(Object.values(acc));
-  
+
           let abbreviation = gpName.includes(" ")
             ? gpName
                 .split(" ")
                 .map((word: any) => word[0])
                 .join("")
             : gpName.slice(0, 3).toUpperCase();
-  
+
           // If abbreviation already exists, try alternative
           if (usedAbbreviations.has(abbreviation)) {
             // For single word names, use first 2 chars + last char
@@ -850,44 +865,44 @@ export class StatsService {
             }
             abbreviation = abbreviation.toUpperCase();
           }
-  
+
           acc[race.round] = abbreviation;
           return acc;
         },
         {}
       );
-  
+
       const totalRaces = parseInt(initialResult[0].round);
-  
+
       const lapsLedPerRound: Array<{
         round: number;
         gp: string;
         locality: string;
         lapsLed: number;
       }> = [];
-  
+
       for (let roundNum = 1; roundNum <= totalRaces; roundNum++) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
-          `/${season}/${roundNum}/drivers/${driverId}/laps`,
+          `${season}/${roundNum}/drivers/${driverId}/laps`,
           "Race",
           100,
           100,
           0
         );
-  
+
         const locality =
           roundResponse?.data?.Races?.[0]?.Circuit?.Location?.locality;
-  
+
         const laps = roundResponse?.data?.Races?.[0]?.Laps || [];
         let lapsLed = 0;
-  
+
         laps.forEach((lap: any) => {
           const timing = lap.Timings?.[0];
           if (timing?.position === "1") {
             lapsLed++;
           }
         });
-  
+
         lapsLedPerRound.push({
           round: roundNum,
           gp: gpNames[roundNum],
@@ -895,11 +910,10 @@ export class StatsService {
           lapsLed,
         });
       }
-  
+
       return lapsLedPerRound;
     } catch (e) {
       console.log("Error in fetching LapsLed: ", e);
     }
   }
-
 }

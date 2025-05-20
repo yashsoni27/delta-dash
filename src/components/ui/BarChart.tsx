@@ -145,6 +145,7 @@ export default function BarChart({
           innerPadding={1}
           enableLabel={enableLabel}
           labelSkipHeight={20}
+          labelSkipWidth={20}
           labelPosition="end"
           labelOffset={-15}
           enableTotals={enableTotals}

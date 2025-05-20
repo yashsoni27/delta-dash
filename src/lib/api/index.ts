@@ -12,13 +12,18 @@ import { F1MediaService } from "./services/f1media.service";
 import { F1LiveService } from "./services/f1-live.service";
 import { MultviewerClient } from "./clients/multviewer";
 import { MultViewerService } from "./services/multviewer.service";
+import { ElevenLabsApiClient } from "./clients/elevenlabs";
+import { TranscriptionService } from "./services/transcription.service";
 
 export class ApiFactory {
   private static jolpicaClient = new JolpicaApiClient(API_CONFIG.JOLPICA);
   private static dhlClient = new DHLApiClient(API_CONFIG.DHL);
   private static openF1Client = new OpenF1ApiClient(API_CONFIG.OPEN_F1);
   private static f1MediaClient = new F1MediaApiClient(API_CONFIG.F1_MEDIA);
-  private static multViewerClient = new MultviewerClient(API_CONFIG.MULTVIEWER)
+  private static multViewerClient = new MultviewerClient(API_CONFIG.MULTVIEWER);
+  private static elevenLabsClient = new ElevenLabsApiClient(
+    process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || ""
+  );
 
   static getRaceService() {
     return new RaceService(
@@ -63,6 +68,10 @@ export class ApiFactory {
   static getF1LiveService() {
     return new F1LiveService();
   }
+
+  static getTranscriptionService() {
+    return new TranscriptionService(this.elevenLabsClient);
+  }
 }
 
 export const raceService = ApiFactory.getRaceService();
@@ -73,3 +82,4 @@ export const dhlService = ApiFactory.getDhlService();
 export const f1MediaService = ApiFactory.getF1MediaService();
 export const f1LiveService = ApiFactory.getF1LiveService();
 export const multViewerService = ApiFactory.getMultViewerService();
+export const transcriptionService = ApiFactory.getTranscriptionService();
