@@ -75,7 +75,7 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-500">R{point.data.x}</div>
+        <div className="mb-2 p-2 border-b border-slate-600">R{point.data.x}</div>
         <div className="flex justify-between items-center pb-2 px-2">
           <div className="pr-2">{point.serie.data.name}</div>
           <div style={{ color: point.color }}>

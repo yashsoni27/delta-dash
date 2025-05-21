@@ -23,7 +23,7 @@ const CustomTooltip = ({
   data,
 }: BarTooltipProps<any>) => (
   <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
-    <div className="p-2 border-b border-slate-500">{data.name}</div>
+    <div className="p-2 border-b border-slate-600">{data.name}</div>
 
     <div className="p-2 flex justify-between">
       <div>{id}</div>

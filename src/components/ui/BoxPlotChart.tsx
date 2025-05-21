@@ -58,65 +58,48 @@ export default function BoxPlotChart({ data, heading }: any) {
 
     return (
       <div
-        className="bg-slate-950 p-4 rounded min-w-[150px] opacity-95 text-xs"
+        className="bg-slate-800 rounded-md min-w-[150px] opacity-95 text-xs"
         style={{
           fontSize: "10px",
           fontWeight: "light",
         }}
       >
-        <div className="flex items-center mb-2">
-          <span
-            className="w-3 h-3 mr-2 rounded-sm"
-            style={{ backgroundColor: color }}
-          ></span>
-          <span className="font-semibold">{group || "Data"}</span>
+        <div className="flex items-center justify-between mb-2 border-b border-slate-600 p-2">
+          <div className="flex items-center">
+            <div
+              className="w-3 h-3 mr-2 rounded-sm"
+              style={{ backgroundColor: color }}
+            ></div>
+            <div className="text-sm">{group || "Data"}</div>
+          </div>
+          <div className="text-xs text-slate-400">{n ?? "N/A"} Laps</div>
         </div>
 
-        <div className="flex">
-          <div className="mr-4">
-            <div className="mb-4">
-              <span className="font-bold">n:</span> {n ?? "N/A"}
+        <div className="flex py-2 px-3">
+          <div className="mr-4 mb-1">
+            <div className="flex justify-between gap-2">
+              <span>Best:</span>{" "}
+              <span className="ml-2">{extrema?.[0].toFixed(2) ?? "N/A"}</span>
             </div>
-
-            <div className="mb-1">
-              <span className="font-normal">Summary</span>
-              <div className="ml-1">
-                <div>
-                  mean:{" "}
-                  <span className="font-semibold">
-                    {mean?.toFixed(2) ?? "N/A"}
-                  </span>
-                </div>
-                <div>
-                  min:{" "}
-                  <span className="font-semibold">
-                    {extrema?.[0].toFixed(2) ?? "N/A"}
-                  </span>
-                </div>
-                <div>
-                  max:{" "}
-                  <span className="font-semibold">
-                    {extrema?.[1].toFixed(2) ?? "N/A"}
-                  </span>
-                </div>
-              </div>
+            <div className="flex justify-between gap-2">
+              <span>Average: </span>
+              <span className="">{mean?.toFixed(2) ?? "N/A"}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span>Worst: </span>
+              <span className="">{extrema?.[1].toFixed(2) ?? "N/A"}</span>
             </div>
           </div>
 
-          <div className="">
-            <div className="mb-1">
-              <span className="font-normal">Quantiles</span>
-              <div className="ml-1">
-                {values?.map((value: number, index: number) => (
-                  <div key={index}>
-                    {Number(quantiles?.[index] * 100) ?? "?"}%:{" "}
-                    <span className="font-semibold">
-                      {value?.toFixed(2) ?? "N/A"}
-                    </span>
-                  </div>
-                ))}
+          <div className="mb-1 ml-1">
+            {values?.map((value: number, index: number) => (
+              <div key={index}>
+                {Number(quantiles?.[index] * 100) ?? "?"}%:{" "}
+                <span className="">
+                  {value?.toFixed(2) ?? "N/A"}
+                </span>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

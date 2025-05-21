@@ -31,15 +31,20 @@ interface Driver {
 
 export default function Home() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [driverImages, setDriverImages] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [season, setSeason] = useState<string>();
+  const [driverImages, setDriverImages] = useState<{
+    [key: string]: {
+      imageUrl: string;
+      numberLogo: string;
+    };
+  }>({});
 
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
         const response = await driverService.getDriverStandings();
         if (response) {
+          setSeason(response.season);
           setDrivers(response.standings);
         }
       } catch (e) {
@@ -58,14 +63,28 @@ export default function Home() {
             driver.Driver.givenName,
             driver.Driver.familyName
           );
+          const driverCode =
+            driver.Driver.givenName.substring(0, 3) +
+            driver.Driver.familyName.substring(0, 3);
+          const numberLogo = await f1MediaService.getDriverNumberLogo(
+            driverCode
+          );
+          // const constructorLogo = await f1MediaService.getConstructorLogo(
+          //   season || "",
+          //   driver.Constructors[driver.Constructors.length - 1].constructorId
+          // );
 
-          if (imageUrl) {
-            return { driverId: driver.Driver.driverId, imageUrl };
+          if (imageUrl && numberLogo) {
+            return {
+              driverId: driver.Driver.driverId,
+              imageUrl,
+              numberLogo,
+            };
           }
-        } catch (error) {
-          console.error(
+        } catch (e) {
+          console.log(
             `Error fetching driver image for ${driver.Driver.driverId}:`,
-            error
+            e
           );
         }
         return null;
@@ -73,15 +92,25 @@ export default function Home() {
 
       const results = await Promise.all(driverImagePromises);
       const newDriverImages = results.reduce(
-        (acc: { [key: string]: string }, result) => {
+        (
+          acc: {
+            [key: string]: {
+              imageUrl: string;
+              numberLogo: string;
+            };
+          },
+          result
+        ) => {
           if (result) {
-            acc[result.driverId] = result.imageUrl;
+            acc[result.driverId] = {
+              imageUrl: result.imageUrl,
+              numberLogo: result.numberLogo,
+            };
           }
           return acc;
         },
         {}
       );
-
 
       setDriverImages(newDriverImages);
     };
@@ -147,40 +176,62 @@ export default function Home() {
 
               {/* Number */}
               <div className="absolute bottom-5 left-5 z-10">
-                <p
-                  className="text-4xl"
-                  style={{
-                    color: getConstructorHex(
-                      driver.Constructors[driver.Constructors.length - 1]
-                        .constructorId
-                    ),
-                  }}
-                >
-                  {driver.Driver.permanentNumber}
-                </p>
+                {driverImages[driver.Driver.driverId] ? (
+                  <Image
+                    src={driverImages[driver.Driver.driverId].numberLogo}
+                    alt={`${driver.Driver.givenName} number`}
+                    width={50}
+                    height={50}
+                    className="rounded-es-2xl rounded-se-2xl"
+                    style={{
+                      background: getConstructorColor(
+                        driver.Constructors[driver.Constructors.length - 1]
+                          .constructorId
+                      ),
+                      boxShadow: `0 0 15px 10px ${getConstructorColor(
+                        driver.Constructors[driver.Constructors.length - 1]
+                          .constructorId
+                      )}`,
+                    }}
+                  />
+                ) : (
+                  <>
+                    <p
+                      className="text-4xl"
+                      style={{
+                        color: getConstructorHex(
+                          driver.Constructors[driver.Constructors.length - 1]
+                            .constructorId
+                        ),
+                      }}
+                    >
+                      {driver.Driver.permanentNumber}
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Driver image - larger and right-aligned */}
               <div className="absolute right-0 bottom-0 h-full w-3/6">
-                <Image
-                  src={`/drivers/${driver.Driver.driverId}.avif`}
-                  alt={`${driver.Driver.givenName} ${driver.Driver.familyName}`}
-                  fill
-                  className="object-cover object-center"
-                  style={{ objectPosition: "bottom right" }}
-                />
-                {/* {driverImages[driver.Driver.driverId] ? (
+                {driverImages[driver.Driver.driverId] ? (
                   <Image
-                    src={driverImages[driver.Driver.driverId]}
+                    src={driverImages[driver.Driver.driverId].imageUrl}
                     alt={`${driver.Driver.givenName} ${driver.Driver.familyName}`}
                     fill
                     className="object-cover object-center"
                     style={{ objectPosition: "bottom right" }}
                   />
                 ) : (
-                  // <div className="w-full h-full animate-pulse bg-gray-700 bg-opacity-0"></div>
-                  <></>
-                )} */}
+                  <>
+                    {/* <Image
+                      src={`/drivers/${driver.Driver.driverId}.avif`}
+                      alt={`${driver.Driver.givenName} ${driver.Driver.familyName}`}
+                      fill
+                      className="object-cover object-center"
+                      style={{ objectPosition: "bottom right" }}
+                    /> */}
+                  </>
+                )}
               </div>
             </div>
           ))}

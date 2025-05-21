@@ -33,22 +33,25 @@ export class F1MediaService {
     }
   }
 
-  async getDriverImage(firstName: string, lastName: string): Promise<string | null> {
+  async getDriverImage(
+    firstName: string,
+    lastName: string
+  ): Promise<string | null> {
     try {
       const firstLetter = firstName.substring(0, 1);
-      const arg2 = firstName.substring(0, 3) + lastName.substring(0,3) + '01';
-      const arg1 = arg2 + `_${firstName}_${lastName}`; 
-      
+      const arg2 = firstName.substring(0, 3) + lastName.substring(0, 3) + "01";
+      const arg1 = arg2 + `_${firstName}_${lastName}`;
+
       const response = await this.f1MediaClient.fetchFromF1(
         `d_driver_fallback_image.png/content/dam/fom-website/drivers/${firstLetter}/${arg1}/${arg2}.png`
       );
       const imageBlob = await response.blob();
       return URL.createObjectURL(imageBlob);
     } catch (e) {
-      console.log("Error in fetching driver headshot: ", e);
+      console.log("Error in fetching driver headShot: ", e);
       return null;
     }
-  } 
+  }
 
   async getCarImage(
     season: string,
@@ -68,4 +71,22 @@ export class F1MediaService {
       return null;
     }
   }
+
+  // async getConstructorLogo(
+  //   season: string,
+  //   constructorId: string
+  // ): Promise<string | null> {
+  //   try {
+  //     const response = await this.f1MediaClient.fetchFromF1(
+  //       `content/dam/fom-website/teams/${season}/${jolpicaToF1MediaConstructor(
+  //         constructorId
+  //       )}-logo.png`
+  //     );
+
+  //     const imageBlob = await response.blob();
+  //     return URL.createObjectURL(imageBlob);
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 }

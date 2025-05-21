@@ -57,7 +57,7 @@ export default function PitStopChart({
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-500">
+        <div className="mb-2 p-2 border-b border-slate-600">
           R{lapNumber}&nbsp;&nbsp;&nbsp;&nbsp;{country}
         </div>
         {sortedPoints.map((point) => (

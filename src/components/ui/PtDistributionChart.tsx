@@ -50,7 +50,7 @@ export default function PtDistributionChart({
   const CustomTooltip = ({ id, value, color, data }: BarTooltipProps<any>) => {
     return (
       <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
-        <div className="p-2 border-b border-slate-500">
+        <div className="p-2 border-b border-slate-600">
           {driverNames[id as string] || String(id)}
         </div>
         <div className="text-xs p-2 flex justify-between w-full">

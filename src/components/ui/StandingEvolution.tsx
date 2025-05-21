@@ -116,7 +116,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-500">R{round}</div>
+        <div className="mb-2 p-2 border-b border-slate-600">R{round}</div>
         {sortedPoints.map((point) => {
           return (
             <div

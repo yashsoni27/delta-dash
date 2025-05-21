@@ -79,7 +79,7 @@ export default function LapTimesChart({ data, heading }: any) {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-500">Lap {round}</div>
+        <div className="mb-2 p-2 border-b border-slate-600">Lap {round}</div>
         {sortedPoints.map((point) => {
           return (
             <div
