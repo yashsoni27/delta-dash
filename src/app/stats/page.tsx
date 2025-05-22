@@ -235,10 +235,10 @@ export default function Home() {
                     heading="Laps Led per Race"
                     data={driverStat?.lapsLed}
                     driver={driverStat?.familyName}
-                    keys={["lapsLed"]}
+                    keys={["lapsLed", "lapsNotLed"]}
                     indexBy="gp"
                     layout="horizontal"
-                    groupMode="grouped"
+                    groupMode="stacked"
                     enableGridX={true}
                     enableTotals={false}
                     enableLabel={true}

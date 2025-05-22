@@ -88,14 +88,21 @@ export default function BarChart({
 
   const CustomTooltip = ({ value, indexValue, data }: BarTooltipProps) => {
     return (
-      <div className="bg-slate-800 text-xs rounded-md min-w-32 max-w-48 flex flex-col opacity-95">
-        <div className="p-2 border-1 border-b border-slate-600">{driver}</div>
-
+      <div className="bg-slate-800 text-xs rounded-md min-w-44 max-w-48 flex flex-col opacity-95">
+        <div className="p-2 border-1 border-b border-slate-600">
+          {data.locality || driver}
+        </div>
         <div className="p-2 text-xs flex justify-between gap-3">
-          <div>{data.locality || indexValue}</div>
+          <div>
+            {data?.locality
+              ? data?.lapsLed === value
+                ? "Laps Led"
+                : "Laps Not Led"
+              : indexValue}
+          </div>
           <div className="font-bold">
-            {value}{" "}
-            {data.locality ? (value == "1" ? "lap led" : "laps led") : ""}
+            {/* {data?.locality ? } */}
+            {value} {data.locality ? (value == "1" ? "lap" : "laps") : ""}
           </div>
         </div>
       </div>
@@ -126,20 +133,29 @@ export default function BarChart({
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
-      <div ref={containerRef} className="w-full h-[400px]">
+      <div
+        ref={containerRef}
+        className="w-full min-h-[400px]"
+        // style={{ maxHeight: height }}
+      >
         <Bar
           data={data}
-          height={height || containerDimensions.height}
-          width={width || containerDimensions.width}
+          height={containerDimensions.height}
+          width={containerDimensions.width}
           theme={chartTheme}
-          colors={(bar) => String(bar.data["color"] || "#1f2941")}
+          colors={(bar) => {
+            if (bar?.id === "lapsNotLed") {
+              return "#1b2433";
+            }
+            return String(bar.data["color"] || "#1f2941");
+          }}
           tooltip={pitStopTooltip == true ? PitStopToolTip : CustomTooltip}
           keys={keys}
           indexBy={indexBy}
           valueFormat={(value) => {
             const num = Number(value);
             return Number.isInteger(num) ? num.toString() : num.toFixed(2);
-          }}          
+          }}
           margin={margin}
           padding={padding}
           innerPadding={1}
@@ -148,6 +164,12 @@ export default function BarChart({
           labelSkipWidth={20}
           labelPosition="end"
           labelOffset={-15}
+          label={(d) => {
+            if (d.id != "lapsNotLed") {
+              return `${d.value}`;
+            }
+            return "";
+          }}
           enableTotals={enableTotals}
           layout={layout}
           groupMode={groupMode}
