@@ -5,7 +5,7 @@ export class RaceRepository {
   private setupPromise: Promise<void>;
 
   constructor() {
-    this.db = neon(process.env.NEXT_PUBLIC_NEON_DATABASE_URL!);
+    this.db = neon(process.env.DATABASE_URL || process.env.NEXT_PUBLIC_NEON_DATABASE_URL!);
     this.setupPromise = this.setupDatabase();
   }
 
