@@ -35,8 +35,8 @@ export default function Home() {
   const [constructors, setConstructors] = useState<ConstructorStanding[]>([]);
   const [selectedConst, setSelectedConst] = useState<Constructor | null>(null);
   const [stats, setStats] = useState<any>();
-  const [driver1Logo, setDriver1Logo] = useState<any>();
-  const [driver2Logo, setDriver2Logo] = useState<any>();
+  const [driver1Img, setDriver1Img] = useState<any>();
+  const [driver2Img, setDriver2Img] = useState<any>();
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(Number(e.target.value));
@@ -74,7 +74,6 @@ export default function Home() {
         year,
         constructorId
       );
-      console.log("stats ", response);
       setStats(response);
     } catch (e) {
       console.log("Failed in fetching data: ", e);
@@ -83,14 +82,18 @@ export default function Home() {
     }
   }, []);
 
-  const fetchDriverLogo = useCallback(
+  const fetchDriverImage = useCallback(
     async (givenName: string, familyName: string) => {
       try {
         setIsLoading(true);
         const driverCode =
           givenName.substring(0, 3) + familyName.substring(0, 3);
         const logoUrl = await f1MediaService.getDriverNumberLogo(driverCode);
-        return logoUrl;
+        const headShotUrl = await f1MediaService.getDriverImage(
+          givenName,
+          familyName
+        );
+        return { headShot: headShotUrl, logo: logoUrl };
       } catch (e) {
         console.log("Failed in fetching logos:", e);
       } finally {
@@ -102,10 +105,12 @@ export default function Home() {
 
   // Effect to fetch constructors when year changes
   useEffect(() => {
+    setDriver1Img(null);
+    setDriver2Img(null);
     fetchConstructors(selectedYear.toString());
   }, [selectedYear, fetchConstructors]);
 
-  // Effect to fetch driverdata when constructors changes
+  // Effect to fetch driverData when constructors changes
   useEffect(() => {
     if (selectedConst !== null) {
       fetchData(selectedYear.toString(), selectedConst.constructorId);
@@ -116,22 +121,22 @@ export default function Home() {
     const loadDriverLogos = async () => {
       if (stats?.driver1?.driverId && stats?.driver2?.driverId) {
         const [logo1, logo2] = await Promise.all([
-          fetchDriverLogo(stats.driver1.givenName, stats.driver1.familyName),
-          fetchDriverLogo(stats.driver2.givenName, stats.driver2.familyName),
+          fetchDriverImage(stats.driver1.givenName, stats.driver1.familyName),
+          fetchDriverImage(stats.driver2.givenName, stats.driver2.familyName),
         ]);
 
-        setDriver1Logo(logo1);
-        setDriver2Logo(logo2);
+        setDriver1Img(logo1);
+        setDriver2Img(logo2);
       }
     };
 
     loadDriverLogos();
 
     return () => {
-      if (driver1Logo) URL.revokeObjectURL(driver1Logo);
-      if (driver2Logo) URL.revokeObjectURL(driver2Logo);
+      if (driver1Img) URL.revokeObjectURL(driver1Img);
+      if (driver2Img) URL.revokeObjectURL(driver2Img);
     };
-  }, [stats, fetchDriverLogo]);
+  }, [stats, fetchDriverImage]);
 
   return (
     <>
@@ -209,7 +214,7 @@ export default function Home() {
                 }}
               >
                 <div className="gap-2 flex flex-col sm:flex-row justify-between items-center">
-                  {driver1Logo ? (
+                  {driver1Img ? (
                     <div
                       className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
@@ -222,7 +227,7 @@ export default function Home() {
                       }}
                     >
                       <img
-                        src={driver1Logo}
+                        src={driver1Img?.logo}
                         alt={`${stats?.driver1?.givenName} number logo`}
                         className="w-20 h-20 sm:w-28 sm:h-28"
                       />
@@ -249,7 +254,8 @@ export default function Home() {
                 </div>
 
                 <img
-                  src={`drivers/${stats?.driver1?.driverId}.avif`}
+                  // src={`drivers/${stats?.driver1?.driverId}.avif`}
+                  src={driver1Img?.headShot}
                   className="scale-x-[-1] rounded-lg w-full h-auto object-contain"
                   alt={`${stats?.driver1?.givenName} ${stats?.driver1?.familyName}`}
                 />
@@ -299,7 +305,7 @@ export default function Home() {
                 }}
               >
                 <div className="gap-2 flex flex-col sm:flex-row-reverse justify-between items-center">
-                  {driver2Logo ? (
+                  {driver2Img ? (
                     <div
                       className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
@@ -312,13 +318,16 @@ export default function Home() {
                       }}
                     >
                       <img
-                        src={driver2Logo}
+                        src={driver2Img?.logo}
                         alt={`${stats?.driver2?.givenName} number logo`}
                         className="w-20 h-20 sm:w-28 sm:h-28"
                       />
                     </div>
                   ) : (
-                    <div className="text-6xl sm:text-8xl" style={{ color: stats?.color }}>
+                    <div
+                      className="text-6xl sm:text-8xl"
+                      style={{ color: stats?.color }}
+                    >
                       {stats?.driver2?.driverNo}
                     </div>
                   )}
@@ -336,7 +345,8 @@ export default function Home() {
                 </div>
 
                 <img
-                  src={`drivers/${stats?.driver2?.driverId}.avif`}
+                  // src={`drivers/${stats?.driver2?.driverId}.avif`}
+                  src={driver2Img?.headShot}
                   className="scale-x-[1] rounded-lg w-full h-auto object-contain"
                   alt={`${stats?.driver2?.givenName} ${stats?.driver2?.familyName}`}
                 />

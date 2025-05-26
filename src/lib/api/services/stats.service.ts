@@ -47,7 +47,8 @@ export class StatsService {
           this.apiClient.fetchWithDelay<{ data: any }>(
             `${season}/${round}/laps`,
             "Race",
-            index * 100,
+            // index * 100,
+            batchSize,
             batchSize,
             offset
           )
@@ -629,7 +630,7 @@ export class StatsService {
         PointsFinish: number;
         DNF: number;
         DSQ: number;
-        TotalRounds: number;
+        TotalRounds?: number;
       };
       pointsThisSeason: number;
       pointsWithoutSprint: number;
@@ -651,6 +652,7 @@ export class StatsService {
         round: number;
         gp: string;
         lapsLed: number;
+        lapsNotLed: number;
         color: string;
       }>;
     }
@@ -663,8 +665,8 @@ export class StatsService {
         offset
       );
 
-      const initialResult = await this.raceService.getRaceCalendar();
-      const totalRaces = initialResult.total;
+      // const initialResult = await this.raceService.getRaceCalendar();
+      // const totalRaces = initialResult.total;
 
       const constructors = await this.constructorService.getConstructors(
         season
@@ -716,7 +718,7 @@ export class StatsService {
         stats.familyName = result.Driver.familyName;
         stats.constructorId = result.Constructor.constructorId;
 
-        stats.seasonAchievements.TotalRounds = totalRaces;
+        // stats.seasonAchievements.TotalRounds = totalRaces;
 
         // Season Achievements - count wins
         if (position === 1) {
@@ -879,6 +881,7 @@ export class StatsService {
         gp: string;
         locality: string;
         lapsLed: number;
+        lapsNotLed: number;
       }> = [];
 
       for (let roundNum = 1; roundNum <= totalRaces; roundNum++) {
@@ -895,11 +898,14 @@ export class StatsService {
 
         const laps = roundResponse?.data?.Races?.[0]?.Laps || [];
         let lapsLed = 0;
+        let lapsNotLed = 0;
 
         laps.forEach((lap: any) => {
           const timing = lap.Timings?.[0];
           if (timing?.position === "1") {
             lapsLed++;
+          } else {
+            lapsNotLed++;
           }
         });
 
@@ -908,6 +914,7 @@ export class StatsService {
           gp: gpNames[roundNum],
           locality: locality,
           lapsLed,
+          lapsNotLed,
         });
       }
 

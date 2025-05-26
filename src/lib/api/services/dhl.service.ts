@@ -117,8 +117,6 @@ export class DhlService {
 
       const result = Object.values(driverPoints);
 
-      // console.log("res: ", result);
-
       return result;
     } catch (e) {
       console.log("Error in DHL API: ", e);
@@ -151,7 +149,6 @@ export class DhlService {
         ),
       }));
   
-      // console.log("trans", transformedValues);
   
       return { events: events, values: transformedValues };
     } catch (e) {

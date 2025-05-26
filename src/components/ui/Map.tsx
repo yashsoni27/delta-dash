@@ -1,6 +1,7 @@
 "use client";
 import { multViewerService } from "@/lib/api";
-import { Maximize, Minimize } from "lucide-react";
+import { CircleArrowUp, Compass, Maximize, Minimize, Wind } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const space = 1000;
@@ -45,7 +46,7 @@ const sortDriverPosition = (Lines: any) => (a: any, b: any) => {
   return Number(driverB?.Position) - Number(driverA?.Position);
 };
 
-const bearingToCardinal = (bearing: any) => {
+export const bearingToCardinal = (bearing: any) => {
   const cardinalDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   return cardinalDirections[Math.floor(bearing / 45) % 8];
 };
@@ -163,15 +164,14 @@ export default function Map({
             }}
           >
             N
-            <span
+            <CircleArrowUp
+              size={20}
               style={{
                 display: "inline-block",
                 marginLeft: "0.5rem",
-                transform: `rotate(${-data.rotation}deg)`,
+                transform: `rotate(${-data.rotation % 360}deg)`,
               }}
-            >
-              ↑
-            </span>
+            />
           </div>
           <div
             style={{
@@ -180,7 +180,14 @@ export default function Map({
               left: "1rem",
             }}
           >
-            Wind {bearingToCardinal(Number(WindDirection))}
+            {/* <Wind
+              size={18}
+              style={{
+                display: "inline-block",
+              }}
+            />{" "} */}
+            Wind{" "}
+            {bearingToCardinal(Number(WindDirection))}
             <span
               style={{
                 display: "inline-block",

@@ -3,7 +3,7 @@ import Driver from "@/components/ui/Driver";
 import { f1LiveService } from "@/lib/api";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import Map from "@/components/ui/Map";
+import Map, { bearingToCardinal } from "@/components/ui/Map";
 import Radio from "@/components/ui/Radio";
 import { CloudRain } from "lucide-react";
 
@@ -56,7 +56,7 @@ export const getFlagDetails = (flag: string) => {
     case "double yellow":
       return { shadow: "yellow", bg: "#ffb900", text: "Double Yellow" };
     case "red":
-      return { shadow: "red", bg: "crimson", text: "Red" };
+      return { shadow: "red", bg: "crimson", text: "Red Flag" };
     case "blue":
       return { shadow: "blue", bg: "#1f6da1", text: "Blue" };
     default:
@@ -251,6 +251,16 @@ export default function Live() {
               </p>
               <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
                 Humidity
+              </p>
+            </div>
+          </div>
+          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
+                {(Number(WeatherData?.WindSpeed) * 3.6).toFixed(2)}{" "}
+              </p>
+              <p className="flex h-[11px] shrink-0 text-center text-[10px] leading-[normal] font-medium text-blue-500">
+                Wind
               </p>
             </div>
           </div>
