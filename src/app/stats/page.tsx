@@ -51,7 +51,6 @@ export default function Home() {
       try {
         setIsLoading(true);
         const driverData = await statsService.getDriverStats(year.toString(), driverId);
-        // console.log("data: ", driverData);
         setDriverStat(driverData);
       } catch (e) {
         console.log("Error in fetching driver data: ", e);

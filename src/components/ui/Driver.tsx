@@ -1,6 +1,7 @@
 "use client";
 
 import { liveToJolpicaConstructor } from "@/lib/utils";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const drsEnabledValues = [10, 12, 14];
@@ -179,8 +180,8 @@ export default function Driver({
                     )}
                   </p>
                   <p className="text-xs leading-none text-zinc-500">
-                    {appData?.Stints?.length ? (
-                      <>PIT {appData?.Stints?.length - 1}</>
+                    {line?.NumberOfPitStops ? (
+                      <>PIT {line.NumberOfPitStops}</>
                     ) : (
                       <></>
                     )}
@@ -214,9 +215,15 @@ export default function Driver({
                       SessionName === "Race"
                     ) {
                       return diff > 0 ? (
-                        <span className="text-green-500">+{diff}</span>
+                        <span className="text-zinc-300 inline-flex">
+                          <ChevronUp color="#22c55e" size={22} />{" "}
+                          {Math.abs(diff)}
+                        </span>
                       ) : (
-                        <span className="text-red-500">{diff}</span>
+                        <span className="text-zinc-300 inline-flex">
+                          <ChevronDown color="#ef4444" size={22} />{" "}
+                          {Math.abs(diff)}
+                        </span>
                       );
                     }
                     return <span className="text-gray-700">-</span>;

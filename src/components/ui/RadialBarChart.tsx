@@ -43,7 +43,7 @@ export default function RadialBarChart({
       <div style={{ height: 300 }}>
         <ResponsiveRadialBar
           data={chartData}
-          // maxValue={data["TotalRounds"]}
+          // maxValue={data["TotalRounds"]} // removed from backend
           theme={chartTheme}
           margin={margin}
           innerRadius={0.2}

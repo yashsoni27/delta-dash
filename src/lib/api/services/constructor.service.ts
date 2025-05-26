@@ -167,7 +167,6 @@ export class ConstructorService {
         const roundData = roundResponse.data;
         const standingsList = roundData.StandingsLists[0];
         const currentRound = standingsList.round;
-        // console.log(standingsList);
 
         for (const standing of standingsList.ConstructorStandings) {
           const constructor = standing.Constructor;

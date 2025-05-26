@@ -104,7 +104,6 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
 
   const CustomTooltip = ({ slice }: { slice: any }) => {
     if (!slice?.points?.length) return null;
-    console.log(slice);
     const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
     const round = sortedPoints[0].data.x;
 

@@ -29,7 +29,6 @@ function groupBySpeaker(words: any[]) {
   if (currentText)
     groups.push({ speaker: currentSpeaker, text: currentText.trim() });
 
-  console.log(groups);
   return groups;
 }
 
@@ -62,21 +61,6 @@ export default function Radio({
     if (!path) return;
     setIsTranscribing(true);
     try {
-      // const client = new ElevenLabsClient({
-      //   apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
-      // });
-      // const response = await fetch(
-      //   `/api/proxy?url=${encodeURIComponent(path)}`
-      // );
-      // const audioBlob = await response.blob();
-
-      // const result = await client.speechToText.convert({
-      //   file: audioBlob,
-      //   model_id: "scribe_v1",
-      //   tag_audio_events: true,
-      //   language_code: "eng",
-      //   diarize: true,
-      // });
       const result = await transcriptionService.transcribeAudio(path);
 
       setTranscription(result);
@@ -127,7 +111,7 @@ export default function Radio({
   const percent = (progress / duration) * 100;
 
   return (
-    <li className="flex items-center p-3 w-[500px] justify-between gap-2 ">
+    <li className="flex items-center p-2 w-[500px] justify-between gap-2 ">
       <div>
         <span className="text-sm text-gray-500 mr-2">
           {moment(radio.Utc).local().format("HH:mm:ss")}
@@ -152,9 +136,18 @@ export default function Radio({
       </div>
       <div className="inline-flex items-center gap-2 relative">
         {playing ? (
-          <Pause onClick={() => setPlaying(false)} size={22} />
+          <div
+            className="p-2 rounded-3xl"
+            style={{
+              backgroundColor: "#1b2433",
+            }}
+          >
+            <Pause onClick={() => setPlaying(false)} size={20} />
+          </div>
         ) : (
-          <Play onClick={() => setPlaying(true)} size={22} />
+          <div className="p-2">
+            <Play onClick={() => setPlaying(true)} size={20} />
+          </div>
         )}
         <span
           className="inline-block mr-2 rounded-xl w-40 h-2"
@@ -169,7 +162,7 @@ export default function Radio({
             transcribeAudio();
           }}
           disabled={isTranscribing}
-          className="p-1 rounded-3xl hover:bg-gray-700"
+          className="p-2 rounded-3xl hover:bg-gray-800"
           id="transcribe-btn"
         >
           {isTranscribing ? (
