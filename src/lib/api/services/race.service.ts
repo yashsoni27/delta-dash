@@ -6,13 +6,21 @@ import {
 import { JolpicaApiClient } from "../clients/jolpica";
 import { OpenF1ApiClient } from "../clients/openf1";
 import { F1MediaApiClient } from "../clients/f1media";
+import { CacheService } from "@/lib/cache/cache.service";
+import { RaceRepository } from "@/lib/db/race.repository";
 
 export class RaceService {
+  private cacheService: CacheService;
+  private raceRepository: RaceRepository;
+
   constructor(
     private apiClient: JolpicaApiClient,
     private openF1Client: OpenF1ApiClient,
     private f1MediaClient: F1MediaApiClient
-  ) {}
+  ) {
+    this.cacheService = CacheService.getInstance();
+    this.raceRepository = new RaceRepository();
+  }
 
   // Race calendar
   async getRaceCalendar(
@@ -20,12 +28,39 @@ export class RaceService {
     limit: number = 30,
     offset: number = 0
   ) {
-    return this.apiClient.fetchFromApi(
+    // // Cache first
+    // const cacheKey = `raceCalender_${season}`;
+    // const cachedData = await this.cacheService.get(cacheKey);
+    // if ((cachedData?.data?.Races?.length ?? 0) > 0) {
+    //   console.log("cache return", cachedData);
+    //   return cachedData;
+    // }
+
+    // then trying DB
+    const dbData = await this.raceRepository.getAllRaces(Number(season));
+    if ((dbData?.data?.Races?.length ?? 0) > 0) {
+      // this.cacheService.set(cacheKey, dbData);
+      // console.log("DB return", dbData);
+      return dbData;
+    }
+
+    // Fallback to API call
+    const apiData: any = await this.apiClient.fetchFromApi(
       `${season}/races`,
       "Race",
       limit,
       offset
     );
+
+    // Save API data to DB for future requests
+    if (apiData?.data?.Races) {
+      for (const race of apiData.data.Races) {
+        await this.raceRepository.saveRace(race);
+      }
+    }
+    // this.cacheService.set(cacheKey, apiData);
+
+    return apiData;
   }
 
   // Round Details -- unused
@@ -43,7 +78,7 @@ export class RaceService {
       const races = await this.getRaceCalendar(season);
       const sprintRounds: number[] = [];
 
-      (races.data as { Races: any[] }).Races.forEach((race: any) => {
+      (races?.data as { Races: any[] }).Races.forEach((race: any) => {
         if (race.Sprint) {
           sprintRounds.push(parseInt(race.round));
         }
@@ -62,11 +97,11 @@ export class RaceService {
 
   // Next Race
   async getNextRace(season: string = "current") {
-    const result = await this.apiClient.fetchFromApi<any>(
-      `${season}/races`,
-      "Race"
-    );
-    const races = result.data?.Races;
+    if (season === "current") {
+      season = new Date().getFullYear().toString();
+    }
+    const result: any = await this.getRaceCalendar(season);
+    const races = result?.data?.Races;
 
     if (!races || races.length === 0) return null;
 
@@ -74,7 +109,7 @@ export class RaceService {
 
     const nextRace = races.find((race: any) => {
       const raceDateTime = new Date(`${race.date}T${race.time}`);
-      const raceEndTime = new Date(raceDateTime.getTime() + (2 * 60 * 60 * 1000));
+      const raceEndTime = new Date(raceDateTime.getTime() + 2 * 60 * 60 * 1000);
       return raceEndTime >= now;
     });
 
@@ -83,10 +118,11 @@ export class RaceService {
 
   // Previous Races
   async getPreviousRaces(season: string = "current") {
-    const result = await this.apiClient.fetchFromApi<any>(
-      `${season}/races`,
-      "Race"
-    );
+    // const result = await this.apiClient.fetchFromApi<any>(
+    //   `${season}/races`,
+    //   "Race"
+    // );
+    const result = await this.getRaceCalendar(season);
     const races = result.data?.Races;
 
     if (!races || races.length === 0) return [];
@@ -250,22 +286,4 @@ export class RaceService {
       console.log("Error in fetching meeting Id: ", e);
     }
   }
-
-  // async getTrackImg(circuitId: string) {
-  //   try {
-  //     const circuit = circuitIdToF1Adapter(circuitId);
-
-  //     const response = await this.f1MediaClient.fetchFromF1(`${circuit}_Circuit`);
-  //     console.log(response);
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to fetch track image: ${response.statusText}`);
-  //     }
-
-  //     const imageBlob = await response.blob();
-  //     return URL.createObjectURL(imageBlob);
-  //   } catch (e) {
-  //     console.log("Error in fetching from F1: ", e);
-  //   }
-  // }
 }
