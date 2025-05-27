@@ -1,13 +1,18 @@
+import { ConstructorRepository, IConstructorStandingRoundData, IConstructorStaticData } from "@/lib/db/constructor.repository";
 import { JolpicaApiClient } from "../clients/jolpica";
 import { DriverService } from "./driver.service";
 import { RaceService } from "./race.service";
 
 export class ConstructorService {
+  private constructorRepository: ConstructorRepository;
+
   constructor(
     private apiClient: JolpicaApiClient,
     private driverService: DriverService,
     private raceService: RaceService
-  ) {}
+  ) {
+    this.constructorRepository = new ConstructorRepository();
+  }
 
   // Constructor info
   async getConstructors(
@@ -139,24 +144,65 @@ export class ConstructorService {
     offset: number = 0
   ) {
     try {
-      const constructorMapping: any = {};
+
+      const lastStoredRound = await this.constructorRepository.getLastStoredRoundForConstructor(season);
+
+      let constructorEvolutionResult: any = null;
+      let startRoundForApi: number = 1;
+      let totalRacesFromApi: number;
 
       const fullSeasonResponse = await this.apiClient.fetchFromApi<any>(
         `${season}/constructorStandings`,
         "Standings",
-        limit,
+        1,
         offset
       );
-      const fullSeasonData = fullSeasonResponse.data;
-      const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
+      totalRacesFromApi = parseInt(fullSeasonResponse.data.StandingsLists[0].round);
 
-      for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
-        // const roundResponse = await fetchFromApi<any>(
-        //   `/${season}/${roundNum}/constructorStandings`,
-        //   "Standings",
-        //   limit,
-        //   offset
-        // );
+      // Fetching from DB if available
+      if (lastStoredRound !== null) {
+        constructorEvolutionResult =
+          await this.constructorRepository.getConstructorEvolutionFromDb(
+            season,
+            limit,
+            offset
+          );
+
+        // Return DB data if it's up to date
+        if (
+          constructorEvolutionResult &&
+          constructorEvolutionResult.totalRounds >= totalRacesFromApi
+        ) {
+          console.log(
+            `Constructor evolution data for season ${season} is up-to-date in DB.`
+          );
+          console.log(constructorEvolutionResult); // For debugging
+          return constructorEvolutionResult;
+        }
+
+        // DB data is partial, start fetching from the next round
+        startRoundForApi = lastStoredRound + 1;
+        console.log(
+          `DB data for season ${season} is partial. Fetching new rounds from API starting from round ${startRoundForApi}.`
+        );
+      } else {
+        // No data in DB, fetch all rounds from API
+        console.log(
+          `No constructor evolution data in DB for season ${season}. Fetching all rounds from API.`
+        );
+      }
+
+      const constructorMapping: any = constructorEvolutionResult
+        ? constructorEvolutionResult.constructorsEvolution.reduce(
+            (acc: any, constructor: any) => {
+              acc[constructor.constructorId] = constructor;
+              return acc;
+            },
+            {}
+          )
+        : {};
+
+      for (let roundNum = startRoundForApi; roundNum <= totalRacesFromApi; roundNum++) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
           `/${season}/${roundNum}/constructorStandings`,
           "Standings",
@@ -172,11 +218,29 @@ export class ConstructorService {
           const constructor = standing.Constructor;
           const constructorId = constructor.constructorId;
 
-          // Add driver to mapping if new
+          // Prepare constructor static data to save/update
+          const constructorStatic: IConstructorStaticData = {
+            constructorId: constructorId,
+            constructorName: constructor.name,
+            nationality: constructor.nationality,
+          };
+          await this.constructorRepository.saveConstructor(constructorStatic);
+
+          // Prepare constructor standing data for this round to save/update
+          const constructorStanding: IConstructorStandingRoundData = {
+            season: season,
+            round: currentRound,
+            constructorId: constructorId,
+            position: parseInt(standing.position),
+            points: parseFloat(standing.points),
+          };
+          await this.constructorRepository.saveConstructorStandingRound(constructorStanding);
+
+
+          // Update the constructorMapping for the final output
           if (!constructorMapping[constructorId]) {
             constructorMapping[constructorId] = {
               constructorId: constructorId,
-              // code: constructor.code,
               name: constructor.name,
               nationality: constructor.nationality,
               rounds: [],
@@ -185,20 +249,26 @@ export class ConstructorService {
 
           // Add this round's data
           constructorMapping[constructorId].rounds.push({
-            round: parseInt(currentRound),
+            round: currentRound,
             position: parseInt(standing.position),
             points: parseFloat(standing.points),
           });
         }
       }
 
-      // Convert mapping to array
-      const constructorEvolution = Object.values(constructorMapping);
+      // Convert mapping to array and sort by position
+      const constructorsEvolution = Object.values(constructorMapping).sort(
+        (a: any, b: any) => {
+          const lastA = a.rounds[a.rounds.length - 1]?.position || Infinity;
+          const lastB = b.rounds[b.rounds.length - 1]?.position || Infinity;
+          return lastA - lastB;
+        }
+      );
 
       return {
-        season: fullSeasonData.season,
-        totalRounds: totalRounds,
-        constructorsEvolution: constructorEvolution,
+        season: season,
+        totalRounds: totalRacesFromApi,
+        constructorsEvolution: constructorsEvolution,
       };
     } catch (error) {
       console.error("Error fetching constructor evolution:", error);
