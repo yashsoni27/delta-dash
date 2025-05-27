@@ -28,19 +28,9 @@ export class RaceService {
     limit: number = 30,
     offset: number = 0
   ) {
-    // // Cache first
-    // const cacheKey = `raceCalender_${season}`;
-    // const cachedData = await this.cacheService.get(cacheKey);
-    // if ((cachedData?.data?.Races?.length ?? 0) > 0) {
-    //   console.log("cache return", cachedData);
-    //   return cachedData;
-    // }
 
-    // then trying DB
     const dbData = await this.raceRepository.getAllRaces(Number(season));
     if ((dbData?.data?.Races?.length ?? 0) > 0) {
-      // this.cacheService.set(cacheKey, dbData);
-      // console.log("DB return", dbData);
       return dbData;
     }
 
@@ -58,18 +48,8 @@ export class RaceService {
         await this.raceRepository.saveRace(race);
       }
     }
-    // this.cacheService.set(cacheKey, apiData);
 
     return apiData;
-  }
-
-  // Round Details -- unused
-  async getRoundDetails(season: string = "current", round: number) {
-    const result = await this.apiClient.fetchFromApi(
-      `${season}/${round}/races`,
-      "Race"
-    );
-    return result;
   }
 
   // Get Sprint rounds
@@ -118,10 +98,6 @@ export class RaceService {
 
   // Previous Races
   async getPreviousRaces(season: string = "current") {
-    // const result = await this.apiClient.fetchFromApi<any>(
-    //   `${season}/races`,
-    //   "Race"
-    // );
     const result = await this.getRaceCalendar(season);
     const races = result.data?.Races;
 

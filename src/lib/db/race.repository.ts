@@ -18,6 +18,8 @@ export class RaceRepository {
         round INTEGER NOT NULL,
         race_name VARCHAR(255) NOT NULL,
         circuit_id VARCHAR(100) NOT NULL,
+        country VARCHAR(100) NOT NULL,
+        locality VARCHAR(100) NOT NULL,
         date VARCHAR(255) NOT NULL,
         time VARCHAR(255) NOT NULL,
         first_practice JSONB,
@@ -42,6 +44,8 @@ export class RaceRepository {
           round, 
           race_name,
           circuit_id,
+          country,
+          locality,
           date,
           time,
           first_practice,
@@ -54,6 +58,8 @@ export class RaceRepository {
           ${parseInt(race.round)},
           ${race.raceName},
           ${race.Circuit.circuitId},
+          ${race.Circuit.Location.country},
+          ${race.Circuit.Location.locality},
           ${race.date},
           ${race.time},
           ${JSON.stringify(race.FirstPractice)},
@@ -66,6 +72,8 @@ export class RaceRepository {
         DO UPDATE SET
           race_name = EXCLUDED.race_name,
           circuit_id = EXCLUDED.circuit_id,
+          country = EXCLUDED.country,
+          locality = EXCLUDED.locality,
           date = EXCLUDED.date,
           time = EXCLUDED.time,
           first_practice = EXCLUDED.first_practice,
@@ -102,6 +110,10 @@ export class RaceRepository {
             raceName: race.race_name,
             Circuit: {
               circuitId: race.circuit_id,
+              Location: {
+                country: race.country,
+                locality: race.locality,
+              }
             },
             date: race.date,
             time: race.time,
