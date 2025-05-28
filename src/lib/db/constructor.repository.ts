@@ -177,6 +177,7 @@ export class ConstructorRepository {
             round: s.round,
             position: s.position,
             points: parseFloat(s.points),
+            locality: s.locality || undefined,  
           }));
 
           const maxRoundForThisConstructor = standings[standings.length - 1]?.round || 0;
