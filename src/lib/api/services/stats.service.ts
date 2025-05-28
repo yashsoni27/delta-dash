@@ -3,13 +3,18 @@ import { JolpicaApiClient } from "../clients/jolpica";
 import { LapTiming } from "@/types";
 import { ConstructorService } from "./constructor.service";
 import { RaceService } from "./race.service";
+import { StatsRepository } from "@/lib/db/stats.repository";
 
 export class StatsService {
+  private statsRepository: StatsRepository;
+
   constructor(
     private apiClient: JolpicaApiClient,
     private constructorService: ConstructorService,
     private raceService: RaceService
-  ) {}
+  ) {
+    this.statsRepository = new StatsRepository();
+  }
 
   // Get fastest lap info
   async getFastestLaps(
@@ -327,9 +332,9 @@ export class StatsService {
       const driverPointsByRound: Record<string, any> = {};
       const constructorPointsByRound: Record<string, any> = {};
 
-      const previousRaceResponse = await this.raceService.getPreviousRaces();
+      const previousRaceResponse = await this.raceService.getPreviousRaces(season);
       const gpNames = previousRaceResponse.reduce(
-        (acc: Record<string, string>, race: any) => {
+        (acc: Record<string, any>, race: any) => {
           const gpName = race.raceName.replace("Grand Prix", "").trim();
           const abbreviation = gpName.includes(" ")
             ? gpName
@@ -337,7 +342,10 @@ export class StatsService {
                 .map((word: any) => word[0])
                 .join("")
             : gpName.slice(0, 3).toUpperCase();
-          acc[race.round] = abbreviation;
+          acc[race.round] = {
+            name: race.Circuit.Location.meetingCode || abbreviation,
+            locality: race.Circuit.Location.locality,
+          }
           return acc;
         },
         {}
@@ -487,38 +495,40 @@ export class StatsService {
 
       // Process sprint results for sprint rounds
       for (const round of sprintRoundsData.sprintRounds) {
-        const sprintResult = await this.raceService.getSprintResults(
-          season,
-          round
-        );
+        if (round <= totalRaces) {
+          const sprintResult = await this.raceService.getSprintResults(
+            season,
+            round
+          );
 
-        if (
-          (sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults
-        ) {
-          const data = sprintResult.data as {
-            Races: { SprintResults: any[] }[];
-          };
-          const results = data.Races[0].SprintResults;
+          if (
+            (sprintResult?.data as { Races: any[] })?.Races?.[0]?.SprintResults
+          ) {
+            const data = sprintResult.data as {
+              Races: { SprintResults: any[] }[];
+            };
+            const results = data.Races[0].SprintResults;
 
-          // Process sprint results similar to race results
-          for (const result of results) {
-            if (!result.Driver || !result.Constructor) continue;
+            // Process sprint results similar to race results
+            for (const result of results) {
+              if (!result.Driver || !result.Constructor) continue;
 
-            const driverId = result.Driver.driverId;
-            const constructorId = result.Constructor.constructorId;
-            const position = parseInt(result.position);
-            const points = parseFloat(result.points);
+              const driverId = result.Driver.driverId;
+              const constructorId = result.Constructor.constructorId;
+              const position = parseInt(result.position);
+              const points = parseFloat(result.points);
 
-            // Update points in existing stats objects
-            if (driverPointsByRound[driverId]) {
-              driverPointsByRound[driverId].points[round - 1] += points;
-              driverStats[driverId].totalPoints += points;
-            }
+              // Update points in existing stats objects
+              if (driverPointsByRound[driverId]) {
+                driverPointsByRound[driverId].points[round - 1] += points;
+                driverStats[driverId].totalPoints += points;
+              }
 
-            if (constructorPointsByRound[constructorId]) {
-              constructorPointsByRound[constructorId].points[round - 1] +=
-                points;
-              constructorStats[constructorId].totalPoints += points;
+              if (constructorPointsByRound[constructorId]) {
+                constructorPointsByRound[constructorId].points[round - 1] +=
+                  points;
+                constructorStats[constructorId].totalPoints += points;
+              }
             }
           }
         }
@@ -565,7 +575,8 @@ export class StatsService {
         (_, index) => {
           const roundNumber = index + 1;
           const roundPoints: any = {
-            name: gpNames[roundNumber] || `R${roundNumber}`, // Use GP abbreviation if available
+            name: gpNames[roundNumber]?.name || `R${roundNumber}`,
+            locality: gpNames[roundNumber]?.locality,
           };
 
           driverRoundData.forEach((driver) => {
@@ -586,7 +597,8 @@ export class StatsService {
         (_, index) => {
           const roundNumber = index + 1;
           const roundPoints: any = {
-            name: gpNames[roundNumber] || `R${roundNumber}`,
+            name: gpNames[roundNumber]?.name || `R${roundNumber}`,
+            locality: gpNames[roundNumber]?.locality,
           };
 
           constructorRoundData.forEach((constructor) => {
@@ -664,9 +676,6 @@ export class StatsService {
         limit,
         offset
       );
-
-      // const initialResult = await this.raceService.getRaceCalendar();
-      // const totalRaces = initialResult.total;
 
       const constructors = await this.constructorService.getConstructors(
         season
@@ -839,7 +848,54 @@ export class StatsService {
   // Get laps led by a driver
   async getLapsLedByDriver(season: string = "current", driverId: string) {
     try {
+      const lastStoredRound =
+        await this.statsRepository.getLastStoredRoundForDriver(
+          season,
+          driverId
+        );
+      let lapsLedPerRound: Array<{
+        round: number;
+        gp: string;
+        locality: string;
+        lapsLed: number;
+        lapsNotLed: number;
+      }> = [];
+
+      // If there's data in the DB, fetch it first
+      if (lastStoredRound !== null) {
+        console.log(
+          `Fetching Laps Led from DB for ${driverId}, Season ${season}, up to round ${lastStoredRound}`
+        );
+        const dbResult = await this.statsRepository.getLapsLedByDriver(
+          season,
+          driverId
+        );
+        lapsLedPerRound = Array.isArray(dbResult)
+          ? dbResult.map((row: any) => ({
+              round: Number(row.round),
+              gp: row.gp,
+              locality: row.locality,
+              lapsLed: Number(row.lapsLed),
+              lapsNotLed: Number(row.lapsNotLed),
+            }))
+          : [];
+      }
+
+      // Determine the starting round for API calls
+      const startRoundForApi =
+        lastStoredRound !== null ? lastStoredRound + 1 : 1;
+
       const initialResult = await this.raceService.getPreviousRaces(season);
+      const totalRaces = parseInt(initialResult[0].round);
+
+      // If the DB has all available rounds, return immediately
+      if (lastStoredRound === totalRaces) {
+        console.log(
+          `DB is up to date for ${driverId}, Season ${season}. Returning cached data.`
+        );
+        return lapsLedPerRound;
+      }
+
       const gpNames = initialResult.reduce(
         (acc: Record<string, string>, race: any) => {
           const gpName = race.raceName.replace("Grand Prix", "").trim();
@@ -874,17 +930,11 @@ export class StatsService {
         {}
       );
 
-      const totalRaces = parseInt(initialResult[0].round);
-
-      const lapsLedPerRound: Array<{
-        round: number;
-        gp: string;
-        locality: string;
-        lapsLed: number;
-        lapsNotLed: number;
-      }> = [];
-
-      for (let roundNum = 1; roundNum <= totalRaces; roundNum++) {
+      for (
+        let roundNum = startRoundForApi;
+        roundNum <= totalRaces;
+        roundNum++
+      ) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
           `${season}/${roundNum}/drivers/${driverId}/laps`,
           "Race",
@@ -909,15 +959,31 @@ export class StatsService {
           }
         });
 
-        lapsLedPerRound.push({
+        const roundData = {
           round: roundNum,
           gp: gpNames[roundNum],
           locality: locality,
           lapsLed,
           lapsNotLed,
+        };
+
+        lapsLedPerRound.push(roundData);
+
+        await this.statsRepository.saveDriverLapsLed({
+          season: season,
+          driverId: driverId,
+          round: roundData.round,
+          gp: roundData.gp,
+          locality: roundData.locality,
+          lapsLed: roundData.lapsLed,
+          lapsNotLed: roundData.lapsNotLed,
         });
       }
 
+      console.log(
+        "Final Laps Led Per Round (DB + new API data): ",
+        lapsLedPerRound
+      );
       return lapsLedPerRound;
     } catch (e) {
       console.log("Error in fetching LapsLed: ", e);

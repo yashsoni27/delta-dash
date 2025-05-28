@@ -119,7 +119,7 @@ function StandingsContent() {
                             }}
                           />
                         </div>
-                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                        <div className="lg:col-span-2 sm:rounded-lg p-4 bg-slate-900">
                           <PtDistributionChart
                             heading="Points Distribution"                        
                             data={ptDistribution}
@@ -127,11 +127,12 @@ function StandingsContent() {
                             groupMode="stacked"
                             layout="horizontal"
                             margin={{
-                              top: 20,
-                              right: 30,
-                              bottom: 40,
+                              top: 10,
+                              right: 10,
+                              bottom: 20,
                               left: 40,
                             }}
+                            barHeight={18}
                           />
                         </div>
                       </>
@@ -171,7 +172,7 @@ function StandingsContent() {
                             }}
                           />
                         </div>
-                        <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
+                        <div className="lg:col-span-2 sm:rounded-lg p-4 bg-slate-900">
                           <PtDistributionChart
                             heading="Points Distribution"                        
                             data={ptDistribution}
@@ -179,11 +180,12 @@ function StandingsContent() {
                             groupMode="stacked"
                             layout="horizontal"
                             margin={{
-                              top: 20,
-                              right: 30,
-                              bottom: 40,
+                              top: 10,
+                              right: 10,
+                              bottom: 20,
                               left: 40,
                             }}
+                            barHeight={18}
                           />
                         </div>
                       </>

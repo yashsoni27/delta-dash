@@ -10,7 +10,11 @@ function transformData(rankings: Evolutions) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
-        data: { x: string | number; y: number | null }[];
+        data: {
+          x: string | number;
+          y: number | null;
+          locality: string | undefined;
+        }[];
         name: string;
         constructorId: string;
       } = {
@@ -24,6 +28,7 @@ function transformData(rankings: Evolutions) {
         driverSeries.data.push({
           x: i + 1 == driver.rounds[i].round ? i + 1 : driver.rounds[i].round,
           y: driver.rounds[i].position,
+          locality: driver.rounds[i].locality || undefined,
         });
       }
 
@@ -35,7 +40,7 @@ function transformData(rankings: Evolutions) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
-        data: { x: string | number; y: number }[];
+        data: { x: string | number; y: number; locality: string | undefined }[];
         constructorId: string;
         name: string;
       } = {
@@ -49,6 +54,7 @@ function transformData(rankings: Evolutions) {
         constructorSeries.data.push({
           x: constructor.rounds[i].round,
           y: constructor.rounds[i].position,
+          locality: constructor.rounds[i].locality || undefined,
         });
       }
 
@@ -75,7 +81,9 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-600">R{point.data.x}</div>
+        <div className="mb-2 p-2 border-b border-slate-600">
+          {point.data.locality}
+        </div>
         <div className="flex justify-between items-center pb-2 px-2">
           <div className="pr-2">{point.serie.data.name}</div>
           <div style={{ color: point.color }}>

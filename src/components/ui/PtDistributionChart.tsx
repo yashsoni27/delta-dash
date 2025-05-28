@@ -10,6 +10,7 @@ interface PtDistributionChartProps {
   layout?: "vertical" | "horizontal";
   groupMode?: "grouped" | "stacked";
   margin?: { top: number; right: number; bottom: number; left: number };
+  barHeight?: number;
 }
 
 export default function PtDistributionChart({
@@ -19,17 +20,28 @@ export default function PtDistributionChart({
   layout = "horizontal",
   groupMode = "stacked",
   margin = { top: 20, right: 20, bottom: 40, left: 30 },
+  barHeight = 15,
 }: PtDistributionChartProps) {
-  // Get all keys (excluding 'name')
+  // Get all keys (excluding 'name' and 'locality')
   const keys = Object.keys(data[0]).filter(
     (key) =>
       key !== "name" &&
+      key !== "locality" && 
       typeof data[0][key] === "object" &&
       data[0][key] !== null &&
       "points" in data[0][key]
   );
 
-  // Create driver names mapping
+  // Calculate dynamic height based on number of bars
+  const chartHeight = useMemo(() => {
+    const numberOfBars = data.length;
+    const totalBarHeight = numberOfBars * barHeight;
+    const totalMargin = margin.top + margin.bottom;
+    const additionalPadding = numberOfBars * 10;
+    
+    return totalBarHeight + totalMargin + additionalPadding;
+  }, [data.length, barHeight, margin]);
+
   const driverNames: Record<string, string> = useMemo(() => {
     const names: Record<string, string> = {};
     keys.forEach((driverId) => {
@@ -51,10 +63,10 @@ export default function PtDistributionChart({
     return (
       <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
         <div className="p-2 border-b border-slate-600">
-          {driverNames[id as string] || String(id)}
+          {data.locality}
         </div>
         <div className="text-xs p-2 flex justify-between w-full">
-          <div>{data.name}</div>
+          <div>{driverNames[id as string] || String(id)}</div>
           <div style={{ color: color }}>{value} pts</div>
         </div>
       </div>
@@ -65,11 +77,13 @@ export default function PtDistributionChart({
   const chartData = data.map((round) => {
     const formattedRound: { name: string; [key: string]: number | string } = {
       name: round.name,
+      locality: round.locality || "",
     };
 
     Object.entries(round).forEach(([driverKey, driverData]) => {
       if (
         driverKey !== "name" &&
+        driverKey !== "locality" &&
         typeof driverData === "object" &&
         driverData !== null &&
         "points" in driverData
@@ -77,7 +91,6 @@ export default function PtDistributionChart({
         formattedRound[driverKey] = (driverData as { points: number }).points;
       }
     });
-
     return formattedRound;
   });
 
@@ -96,6 +109,7 @@ export default function PtDistributionChart({
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
+      <div style={{height: chartHeight}}>
       <ResponsiveBar
         data={chartData}
         theme={chartTheme}
@@ -104,14 +118,13 @@ export default function PtDistributionChart({
         colors={({ id }) => getColor(String(id))}
         tooltip={CustomTooltip}
         margin={margin}
-        innerPadding={1.5}
-        padding={0.1}
+        innerPadding={1}
+        padding={0.075}
         layout={layout}
         groupMode={groupMode}
         enableLabel={false}
         // enableTotals={true}
         isInteractive={true}
-        // axisBottom={null}
         axisLeft={{
           tickSize: 5,
           tickPadding: 5,
@@ -120,9 +133,9 @@ export default function PtDistributionChart({
         enableGridX={true}
         enableGridY={false}
         animate={true}
-        role="application"
         ariaLabel="Points Distribution"
       />
+      </div>
     </>
   );
 }

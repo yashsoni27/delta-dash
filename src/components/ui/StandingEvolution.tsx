@@ -9,7 +9,7 @@ function transformData(rankings: Evolutions) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
-        data: { x: number | string; y: number }[];
+        data: { x: number | string; y: number; locality: string | undefined }[];
         name: string;
         color: string;
         constructorId: string;
@@ -26,6 +26,7 @@ function transformData(rankings: Evolutions) {
         driverSeries.data.push({
           x: driver.rounds[i].round,
           y: driver.rounds[i].points,
+          locality: driver.rounds[i].locality || undefined,
         });
       }
 
@@ -37,7 +38,7 @@ function transformData(rankings: Evolutions) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
-        data: { x: string | number; y: number }[];
+        data: { x: string | number; y: number; locality: string | undefined }[];
         constructorId: string;
         color: string;
         name: string;
@@ -53,6 +54,7 @@ function transformData(rankings: Evolutions) {
         constructorSeries.data.push({
           x: constructor.rounds[i].round,
           y: constructor.rounds[i].points,
+          locality: constructor.rounds[i].locality || undefined,
         });
       }
 
@@ -68,7 +70,7 @@ export const chartTheme = {
     ticks: {
       text: {
         fill: "#94a3b8",
-        fontSize: 11
+        fontSize: 11,
       },
       line: {
         stroke: "rgba(255, 255, 255, 0.10)",
@@ -106,6 +108,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
     if (!slice?.points?.length) return null;
     const sortedPoints = [...slice.points].sort((a, b) => b.data.y - a.data.y);
     const round = sortedPoints[0].data.x;
+    const locality = sortedPoints[0].data.locality || "";
 
     return (
       <div
@@ -115,7 +118,9 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-600">R{round}</div>
+        <div className="mb-2 p-2 border-b border-slate-600">
+          {locality}
+        </div>
         {sortedPoints.map((point) => {
           return (
             <div

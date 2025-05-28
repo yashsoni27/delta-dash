@@ -1,11 +1,20 @@
+import {
+  DriverRepository,
+  IDriverStandingRoundData,
+  IDriverStaticData,
+} from "@/lib/db/driver.repository";
 import { JolpicaApiClient } from "../clients/jolpica";
 import { RaceService } from "./race.service";
 
 export class DriverService {
+  private driverRepository: DriverRepository;
+
   constructor(
     private apiClient: JolpicaApiClient,
     private raceService: RaceService
-  ) {}
+  ) {
+    this.driverRepository = new DriverRepository();
+  }
 
   // Get Driver details -- unused
   async getDrivers(season: string = "current") {
@@ -92,18 +101,70 @@ export class DriverService {
     offset: number = 0
   ) {
     try {
-      const driverMapping: any = {};
+      const lastStoredRound =
+        await this.driverRepository.getLastStoredRoundForDriver(season);
+
+      let driverEvolutionResult: any = null;
+      let startRoundForApi: number = 1;
+      let totalRacesFromApi: number;
 
       const fullSeasonResponse = await this.apiClient.fetchFromApi<any>(
         `${season}/driverStandings`,
         "Standings",
-        limit,
+        1,
         offset
       );
-      const fullSeasonData = fullSeasonResponse.data;
-      const totalRounds = parseInt(fullSeasonData.StandingsLists[0].round);
 
-      for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
+      totalRacesFromApi = parseInt(
+        fullSeasonResponse.data.StandingsLists[0].round
+      );
+
+      // Fetching from DB of available
+      if (lastStoredRound !== null) {
+        driverEvolutionResult =
+          await this.driverRepository.getDriverEvolutionFromDb(
+            season,
+            limit,
+            offset
+          );
+
+        // Return DB data
+        if (
+          driverEvolutionResult &&
+          driverEvolutionResult.totalRounds >= totalRacesFromApi
+        ) {
+          console.log(
+            `Driver evolution data for season ${season} is up-to-date in DB.`
+          );
+          return driverEvolutionResult;
+        }
+        // start fetching from the next round
+        startRoundForApi = lastStoredRound + 1;
+        console.log(
+          `DB data for season ${season} is partial. Fetching new rounds from API starting from round ${startRoundForApi}.`
+        );
+      } else {
+        // fetch all rounds from API
+        console.log(
+          `No driver evolution data in DB for season ${season}. Fetching all rounds from API.`
+        );
+      }
+
+      const driverMapping: any = driverEvolutionResult
+        ? driverEvolutionResult.driversEvolution.reduce(
+            (acc: any, driver: any) => {
+              acc[driver.driverId] = driver;
+              return acc;
+            },
+            {}
+          )
+        : {};
+
+      for (
+        let roundNum = startRoundForApi;
+        roundNum <= totalRacesFromApi;
+        roundNum++
+      ) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
           `/${season}/${roundNum}/driverStandings`,
           "Standings",
@@ -113,20 +174,20 @@ export class DriverService {
         );
         const roundData = roundResponse.data;
         const standingsList = roundData.StandingsLists[0];
-        const currentRound = standingsList.round;
+        const currentRound = parseInt(standingsList.round);
 
         let nextAvailablePosition = 1;
-
+        const occupiedPositions = new Set(
+          standingsList.DriverStandings.filter(
+            (s: any) => s.positionText !== "-"
+          ).map((s: any) => parseInt(s.position))
+        );
         for (const standing of standingsList.DriverStandings) {
           const driver = standing.Driver;
           const driverId = driver.driverId;
-
-          // Track occupied positions in this round
-          const occupiedPositions = new Set(
-            standingsList.DriverStandings.filter(
-              (s: any) => s.positionText !== "-"
-            ).map((s: any) => parseInt(s.position))
-          );
+          const currentConstructorId =
+            standing.Constructors[standing.Constructors.length - 1]
+              ?.constructorId;
 
           // Find the first unoccupied position
           let positionValue;
@@ -141,57 +202,91 @@ export class DriverService {
             positionValue = standing.position;
           }
 
-          // Add driver to mapping if new
+          // Prepare driver static data to save/update
+          const driverStatic: IDriverStaticData = {
+            driverId: driverId,
+            driverCode: driver.code,
+            driverName: driver.familyName,
+            nationality: driver.nationality,
+          };
+          await this.driverRepository.saveDriver(driverStatic);
+
+          // Prepare driver standing data for this round to save/update
+          const driverStanding: IDriverStandingRoundData = {
+            season: season,
+            round: currentRound,
+            driverId: driverId,
+            position: parseInt(positionValue),
+            points: parseFloat(standing.points),
+            constructorId: currentConstructorId,
+          };
+          await this.driverRepository.saveDriverStandingRound(driverStanding);
+
+          // Update the driverMapping for the final output
           if (!driverMapping[driverId]) {
             driverMapping[driverId] = {
               driverId: driverId,
               code: driver.code,
               // name: `${driver.givenName} ${driver.familyName}`,
-              name: `${driver.familyName}`,
+              name: driver.familyName,
               nationality: driver.nationality,
-              constructorId: standing.Constructors[0]?.constructorId,
-              constructors: [
-                {
-                  round: parseInt(currentRound),
-                  constructorId: standing.Constructors[0]?.constructorId,
-                },
-              ],
+              constructorId: currentConstructorId,
+              constructors: [],
               rounds: [],
             };
-          } else {
-            const currentConstructor =
-              standing.Constructors[standing.Constructors.length - 1]
-                ?.constructorId;
-            const lastConstructor =
-              driverMapping[driverId].constructors[
-                driverMapping[driverId].constructors.length - 1
-              ];
+          }
 
-            if (currentConstructor !== lastConstructor.constructorId) {
-              driverMapping[driverId].constructors.push({
-                round: parseInt(currentRound),
-                constructorId: currentConstructor,
-              });
-              driverMapping[driverId].constructorId = currentConstructor;
-            }
+          const existingConstructors = driverMapping[driverId].constructors;
+          const lastConstructorEntry =
+            existingConstructors[existingConstructors.length - 1];
+
+          if (
+            !lastConstructorEntry ||
+            lastConstructorEntry.constructorId !== currentConstructorId
+          ) {
+            existingConstructors.push({
+              round: currentRound,
+              constructorId: currentConstructorId,
+            });
+            // Update the main constructorId for the driver to the latest
+            driverMapping[driverId].constructorId = currentConstructorId;
           }
 
           // Add this round's data
           driverMapping[driverId].rounds.push({
-            round: parseInt(currentRound),
+            round: currentRound,
             position: parseInt(positionValue),
             points: parseFloat(standing.points),
           });
         }
       }
 
-      // Convert mapping to array
-      const driverEvolution = Object.values(driverMapping);
+      for (const driverId in driverMapping) {
+        const driver = driverMapping[driverId];
+        if (driver.rounds.length > 0) {
+          const lastRoundData = driver.rounds[driver.rounds.length - 1];
+          const latestConstructorEntry = driver.constructors.findLast(
+            (c: any) => c.round <= lastRoundData.round
+          );
+          if (latestConstructorEntry) {
+            driver.constructorId = latestConstructorEntry.constructorId;
+          }
+        }
+      }
+
+      // Convert mapping to array and sort by position
+      const driversEvolution = Object.values(driverMapping).sort(
+        (a: any, b: any) => {
+          const lastA = a.rounds[a.rounds.length - 1]?.position || Infinity;
+          const lastB = b.rounds[b.rounds.length - 1]?.position || Infinity;
+          return lastA - lastB;
+        }
+      );
 
       return {
-        season: fullSeasonData.season,
-        totalRounds: totalRounds,
-        driversEvolution: driverEvolution,
+        season: season,
+        totalRounds: totalRacesFromApi,
+        driversEvolution: driversEvolution,
       };
     } catch (error) {
       console.error("Error fetching driver evolution:", error);
@@ -199,7 +294,10 @@ export class DriverService {
     }
   }
 
-  async getDriversByConstructor(season: string = "current", constructorId: string) {
+  async getDriversByConstructor(
+    season: string = "current",
+    constructorId: string
+  ) {
     try {
       const response = await this.apiClient.fetchFromApi(
         `${season}/constructors/${constructorId}/drivers`,
