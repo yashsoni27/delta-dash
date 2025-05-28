@@ -28,12 +28,11 @@ export class RaceService {
     limit: number = 30,
     offset: number = 0
   ) {
-
     const dbData = await this.raceRepository.getAllRaces(Number(season));
     if ((dbData?.data?.Races?.length ?? 0) > 0) {
       return dbData;
     }
-
+    
     // Fallback to API call
     const apiData: any = await this.apiClient.fetchFromApi(
       `${season}/races`,
@@ -41,10 +40,18 @@ export class RaceService {
       limit,
       offset
     );
+    if (season == "current") {
+      season = apiData?.data?.season;
+    }
+    const meetings: any = await this.getAllMeetingIds(season);
 
     // Save API data to DB for future requests
     if (apiData?.data?.Races) {
       for (const race of apiData.data.Races) {
+        const meeting = meetings?.meetings?.filter(
+          (m: any) => m.round === parseInt(race.round)
+        );
+        race.Circuit.Location.meetingCode = meeting?.[0]?.meetingCode;
         await this.raceRepository.saveRace(race);
       }
     }
@@ -98,6 +105,9 @@ export class RaceService {
 
   // Previous Races
   async getPreviousRaces(season: string = "current") {
+    if (season === "current") {
+      season = new Date().getFullYear().toString();
+    }
     const result = await this.getRaceCalendar(season);
     const races = result.data?.Races;
 

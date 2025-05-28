@@ -20,6 +20,7 @@ export class RaceRepository {
         circuit_id VARCHAR(100) NOT NULL,
         country VARCHAR(100) NOT NULL,
         locality VARCHAR(100) NOT NULL,
+        meeting_code VARCHAR(10),
         date VARCHAR(255) NOT NULL,
         time VARCHAR(255) NOT NULL,
         first_practice JSONB,
@@ -46,6 +47,7 @@ export class RaceRepository {
           circuit_id,
           country,
           locality,
+          meeting_code,
           date,
           time,
           first_practice,
@@ -60,6 +62,7 @@ export class RaceRepository {
           ${race.Circuit.circuitId},
           ${race.Circuit.Location.country},
           ${race.Circuit.Location.locality},
+          ${race.Circuit.Location.meetingCode},
           ${race.date},
           ${race.time},
           ${JSON.stringify(race.FirstPractice)},
@@ -74,6 +77,7 @@ export class RaceRepository {
           circuit_id = EXCLUDED.circuit_id,
           country = EXCLUDED.country,
           locality = EXCLUDED.locality,
+          meeting_code = EXCLUDED.meeting_code,
           date = EXCLUDED.date,
           time = EXCLUDED.time,
           first_practice = EXCLUDED.first_practice,
@@ -94,13 +98,13 @@ export class RaceRepository {
         WHERE season = ${season.toString()}
         ORDER BY round ASC
       `;
-
+      
       // Ensure races is an array before mapping
       const raceArray = Array.isArray(races)
-        ? races
-        : (races && Array.isArray((races as any).rows))
-          ? (races as any).rows
-          : [];
+      ? races
+      : (races && Array.isArray((races as any).rows))
+      ? (races as any).rows
+      : [];
 
       return {
         data: {
@@ -113,6 +117,7 @@ export class RaceRepository {
               Location: {
                 country: race.country,
                 locality: race.locality,
+                meetingCode: race.meeting_code,
               }
             },
             date: race.date,

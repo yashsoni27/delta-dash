@@ -6,10 +6,8 @@ export class OpenF1ApiClient extends BaseApiClient {
       const response: Response = await this.fetch(`${endpoint}`, {
         headers: { "Content-Type": "application/json" },
       });
-  
-      if (!response.ok) throw new Error(`OpenF1 error: ${response.status}`);
-  
-      return await response.json();
+    
+      return response;
     } catch (error) {
       console.error("Failed to fetch from OpenF1");
       return null;
