@@ -332,9 +332,9 @@ export class StatsService {
       const driverPointsByRound: Record<string, any> = {};
       const constructorPointsByRound: Record<string, any> = {};
 
-      const previousRaceResponse = await this.raceService.getPreviousRaces();
+      const previousRaceResponse = await this.raceService.getPreviousRaces(season);
       const gpNames = previousRaceResponse.reduce(
-        (acc: Record<string, string>, race: any) => {
+        (acc: Record<string, any>, race: any) => {
           const gpName = race.raceName.replace("Grand Prix", "").trim();
           const abbreviation = gpName.includes(" ")
             ? gpName
@@ -342,7 +342,10 @@ export class StatsService {
                 .map((word: any) => word[0])
                 .join("")
             : gpName.slice(0, 3).toUpperCase();
-          acc[race.round] = abbreviation;
+          acc[race.round] = {
+            name: race.Circuit.Location.meetingCode || abbreviation,
+            locality: race.Circuit.Location.locality,
+          }
           return acc;
         },
         {}
@@ -572,7 +575,8 @@ export class StatsService {
         (_, index) => {
           const roundNumber = index + 1;
           const roundPoints: any = {
-            name: gpNames[roundNumber] || `R${roundNumber}`, // Use GP abbreviation if available
+            name: gpNames[roundNumber]?.name || `R${roundNumber}`,
+            locality: gpNames[roundNumber]?.locality,
           };
 
           driverRoundData.forEach((driver) => {
@@ -593,7 +597,8 @@ export class StatsService {
         (_, index) => {
           const roundNumber = index + 1;
           const roundPoints: any = {
-            name: gpNames[roundNumber] || `R${roundNumber}`,
+            name: gpNames[roundNumber]?.name || `R${roundNumber}`,
+            locality: gpNames[roundNumber]?.locality,
           };
 
           constructorRoundData.forEach((constructor) => {

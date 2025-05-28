@@ -147,6 +147,7 @@ export interface driverEvo {
     round: number | string;
     position: number;
     points: number;
+    locality?: string;
   }[];
 }
 
@@ -158,6 +159,7 @@ export interface constructorEvo {
     round: number | string;
     position: number;
     points: number;
+    locality?: string;
   }[];
 }
 

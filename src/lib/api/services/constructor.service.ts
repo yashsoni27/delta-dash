@@ -1,4 +1,8 @@
-import { ConstructorRepository, IConstructorStandingRoundData, IConstructorStaticData } from "@/lib/db/constructor.repository";
+import {
+  ConstructorRepository,
+  IConstructorStandingRoundData,
+  IConstructorStaticData,
+} from "@/lib/db/constructor.repository";
 import { JolpicaApiClient } from "../clients/jolpica";
 import { DriverService } from "./driver.service";
 import { RaceService } from "./race.service";
@@ -144,8 +148,10 @@ export class ConstructorService {
     offset: number = 0
   ) {
     try {
-
-      const lastStoredRound = await this.constructorRepository.getLastStoredRoundForConstructor(season);
+      const lastStoredRound =
+        await this.constructorRepository.getLastStoredRoundForConstructor(
+          season
+        );
 
       let constructorEvolutionResult: any = null;
       let startRoundForApi: number = 1;
@@ -157,7 +163,9 @@ export class ConstructorService {
         1,
         offset
       );
-      totalRacesFromApi = parseInt(fullSeasonResponse.data.StandingsLists[0].round);
+      totalRacesFromApi = parseInt(
+        fullSeasonResponse.data.StandingsLists[0].round
+      );
 
       // Fetching from DB if available
       if (lastStoredRound !== null) {
@@ -176,7 +184,6 @@ export class ConstructorService {
           console.log(
             `Constructor evolution data for season ${season} is up-to-date in DB.`
           );
-          console.log(constructorEvolutionResult); // For debugging
           return constructorEvolutionResult;
         }
 
@@ -202,7 +209,11 @@ export class ConstructorService {
           )
         : {};
 
-      for (let roundNum = startRoundForApi; roundNum <= totalRacesFromApi; roundNum++) {
+      for (
+        let roundNum = startRoundForApi;
+        roundNum <= totalRacesFromApi;
+        roundNum++
+      ) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
           `/${season}/${roundNum}/constructorStandings`,
           "Standings",
@@ -234,8 +245,9 @@ export class ConstructorService {
             position: parseInt(standing.position),
             points: parseFloat(standing.points),
           };
-          await this.constructorRepository.saveConstructorStandingRound(constructorStanding);
-
+          await this.constructorRepository.saveConstructorStandingRound(
+            constructorStanding
+          );
 
           // Update the constructorMapping for the final output
           if (!constructorMapping[constructorId]) {

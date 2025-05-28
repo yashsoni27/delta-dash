@@ -33,6 +33,7 @@ export interface IDriverEvolutionOutput {
       round: number;
       position: number;
       points: number;
+      locality?: string;
     }>;
   }>;
 }
@@ -178,10 +179,11 @@ export class DriverRepository {
 
         // Fetch all standings for this driver for the season
         const standings: any = await this.db`
-          SELECT round, position, points, constructor_id
-          FROM driver_standings_history
-          WHERE season = ${season} AND driver_id = ${driver_id}
-          ORDER BY round ASC;
+          SELECT dsh.round, dsh.position, dsh.points, dsh.constructor_id, r.locality
+          FROM driver_standings_history AS dsh
+          JOIN races AS r ON dsh.season = r.season AND dsh.round = r.round
+          WHERE dsh.season = ${season} AND dsh.driver_id = ${driver_id}
+          ORDER BY dsh.round ASC;
         `;
 
         if (driverStatic.length > 0 && standings.length > 0) {
@@ -190,6 +192,7 @@ export class DriverRepository {
             round: s.round,
             position: s.position,
             points: parseFloat(s.points),
+            locality: s.locality || undefined,
           }));
 
           const constructorHistory: Array<{
