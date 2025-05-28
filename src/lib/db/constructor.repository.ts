@@ -167,8 +167,8 @@ export class ConstructorRepository {
           SELECT csh.round, csh.position, csh.points, r.locality
           FROM constructor_standings_history AS csh
           JOIN races AS r ON csh.round = r.round AND csh.season = r.season
-          WHERE season = ${season} AND constructor_id = ${constructor_id}
-          ORDER BY round ASC;
+          WHERE csh.season = ${season} AND csh.constructor_id = ${constructor_id}
+          ORDER BY csh.round ASC;
         `;
 
         if (constructorStatic.length > 0 && standings.length > 0) {
