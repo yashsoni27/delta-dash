@@ -18,7 +18,7 @@ const myFont = localFont({
 
 export const metadata: Metadata = {
   title: "Delta Dash",
-  description: "Formula 1 analysis dashboard",
+  description: "Formula 1 live telemetry and statistical dashboard",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
