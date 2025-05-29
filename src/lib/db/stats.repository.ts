@@ -83,15 +83,17 @@ export class StatsRepository {
     try {
       const stats = await this.db`
         SELECT 
-          season,
-          round,
-          gp_abbreviation AS gp,
-          locality AS locality,
-          laps_led AS "lapsLed", 
-          laps_not_led AS "lapsNotLed"
-        FROM driver_laps_led
-        WHERE season = ${season} AND driver_id = ${driverId}
-        ORDER BY round ASC;
+          dll.season,
+          dll.round,
+          -- dll.gp_abbreviation AS gp,
+          r.meeting_code AS gp,
+          dll.locality AS locality,
+          dll.laps_led AS "lapsLed", 
+          dll.laps_not_led AS "lapsNotLed"
+        FROM driver_laps_led AS dll
+        JOIN races AS r ON dll.round = r.round AND dll.season = r.season
+        WHERE dll.season = ${season} AND dll.driver_id = ${driverId}
+        ORDER BY dll.round ASC;
       `;
 
       return stats

@@ -893,7 +893,7 @@ export class StatsService {
         console.log(
           `DB is up to date for ${driverId}, Season ${season}. Returning cached data.`
         );
-        return lapsLedPerRound;
+        return lapsLedPerRound.slice().reverse();
       }
 
       const gpNames = initialResult.reduce(
@@ -924,7 +924,7 @@ export class StatsService {
             abbreviation = abbreviation.toUpperCase();
           }
 
-          acc[race.round] = abbreviation;
+          acc[race.round] = race.Circuit.Location.meetingCode || abbreviation;
           return acc;
         },
         {}
@@ -984,7 +984,7 @@ export class StatsService {
         "Final Laps Led Per Round (DB + new API data): ",
         lapsLedPerRound
       );
-      return lapsLedPerRound;
+      return lapsLedPerRound.slice().reverse();
     } catch (e) {
       console.log("Error in fetching LapsLed: ", e);
     }

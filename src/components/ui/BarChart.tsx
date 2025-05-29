@@ -1,6 +1,6 @@
 import { Bar } from "@nivo/bar";
 import { chartTheme } from "./StandingEvolution";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface BarChartProps {
   heading?: string;
@@ -22,6 +22,7 @@ interface BarChartProps {
   layout?: "vertical" | "horizontal";
   groupMode?: "grouped" | "stacked";
   margin?: { top: number; right: number; bottom: number; left: number };
+  barHeight?: number
 }
 
 export default function BarChart({
@@ -44,6 +45,7 @@ export default function BarChart({
   layout = "vertical",
   groupMode = "stacked",
   margin = { top: 20, right: 60, bottom: 30, left: 60 },
+  barHeight,
 }: BarChartProps) {
   if (data == undefined) {
     return null;
@@ -54,6 +56,16 @@ export default function BarChart({
     width: 0,
     height: 0,
   });
+
+  // Calculate dynamic height based on number of bars
+  const chartHeight = useMemo(() => {
+    const numberOfBars = data.length;
+    const totalBarHeight = numberOfBars * barHeight;
+    const totalMargin = margin.top + margin.bottom;
+    const additionalPadding = numberOfBars * 10;
+
+    return totalBarHeight + totalMargin + additionalPadding;
+  }, [data.length, barHeight, margin]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -140,7 +152,7 @@ export default function BarChart({
       >
         <Bar
           data={data}
-          height={containerDimensions.height}
+          height={chartHeight || containerDimensions.height}
           width={containerDimensions.width}
           theme={chartTheme}
           colors={(bar) => {

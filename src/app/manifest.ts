@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Formula 1 live telemetry and statistical dashboard',
     start_url: '/',
     display: 'standalone',
-    background_color: '#fff',
-    theme_color: '#fff',
+    background_color: '#000',
+    theme_color: '#000',
     icons: [
       {
         src: '/icon-192.png',

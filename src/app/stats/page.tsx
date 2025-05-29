@@ -244,6 +244,7 @@ export default function Home() {
                     margin={{ top: 10, right: 10, bottom: 10, left: 40 }}
                     isInteractive={true}
                     showAxisLeft={true}
+                    barHeight={15}
                   />
                 </div>
               </>
