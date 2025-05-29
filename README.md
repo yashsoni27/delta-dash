@@ -1,43 +1,29 @@
 # 🏎️ Delta Dash 
 ![Static Badge](https://img.shields.io/badge/beta-yellow) ![GitHub package.json version](https://img.shields.io/github/package-json/v/yashsoni27/f1-dash)
 
-A sleek and modern Formula 1 dashboard application for real-time race statistics and analytics.
+An unofficial Formula 1 dashboard that offers fans an interactive and data-rich experience. Track driver and constructor standings, analyze race stats, and compare head-to-head performances—all in one sleek interface.
+
+> ⚠️ This project is not affiliated with Formula 1 or Formula One Licensing BV. All trademarks are property of their respective owners.
+
+
+## 🌐 Live Demo
+
+[https://deltadash-pink.vercel.app/](https://deltadash-pink.vercel.app/)
+
 
 ## ✨ Features
 
 ### Current Features
-- **Race Analysis**
-  - Historical race data comparison with interactive charts
-  - Detailed lap time analysis and visualization
-  - Track information with circuit maps
-  - Box plot analysis for race performance
-
-- **Standings & Statistics**
-  - Driver and constructor standings with evolution tracking
-  - Point distribution analysis
-  - Ranking evolution charts
-  - Detailed standings tables
-
-- **Driver & Team Analysis**
-  - Comprehensive driver statistics
-  - Team performance metrics
-  - Performance comparison tools
-  - Stacked bar charts for detailed analysis
-
-- **Pit Stop Analysis**
-  - Pit stop timing statistics
-  - DHL Fastest Pit Stop Award integration
-  - Pit stop strategy visualization
-
-- **Live Features**
-  - Race countdown timer
-  - Live timing and tracking (WIP)
-  - Real-time race updates
+- **Drivers & Constructors Standings**: View current championship standings.
+- **Live Telemetry**: View live telemetry data along with Race Control messages and Team Radios.
+- **Driver Stats**: Dive into individual driver performance metrics.
+- **Race Insights**: Explore race-specific data, including pit stops and head-to-head comparisons.
+- **Circuit Information**: Access detailed information about each circuit.
+- **Interactive Visualizations**: Analyze data through intuitive charts and graphs.
 
 ### Planned Features
-- Interactive track maps with real-time car positions
 - Advanced tire strategy insights
-- Enhanced live race timing and tracking
+- Best lap comparisons
 
 ## 📱 Screenshots
 
