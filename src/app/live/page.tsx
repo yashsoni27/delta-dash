@@ -6,6 +6,7 @@ import moment from "moment";
 import Map, { bearingToCardinal } from "@/components/ui/Map";
 import Radio from "@/components/ui/Radio";
 import { CloudRain } from "lucide-react";
+import LatestMessage from "@/components/ui/LatestMessage";
 
 interface LiveState {
   Heartbeat?: any;
@@ -69,6 +70,8 @@ export default function Live() {
   const [state, setState] = useState<LiveState>({});
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [connectionFailed, setConnectionFailed] = useState(false);
+  const [delayMs, setDelayMs] = useState<Number>(0);
+  const [delayTarget, setDelayTarget] = useState<Number>(0);
   const [openTranscriptionId, setOpenTranscriptionId] = useState<string | null>(
     null
   );
@@ -153,6 +156,11 @@ export default function Live() {
         : ExtrapolatedClock?.Remaining
       : undefined;
 
+  const latestMessage = [
+    ...Object.values(RaceControlMessages?.Messages || {}),
+    ...Object.values(SessionData?.StatusSeries || {}),
+  ].sort(sortUtc)[0];
+
   // Don't render if not connected
   if (!isConnected) {
     return (
@@ -198,6 +206,7 @@ export default function Live() {
 
   return (
     <>
+      <LatestMessage message={latestMessage} />
       <div className="flex flex-col md:flex-row m-2 p-2 justify-between items-center overflow-hidden rounded-lg border border-zinc-800 gap-5">
         <div title="Session Data" className="flex items-center gap-2">
           <div className="flex content-center justify-center">
