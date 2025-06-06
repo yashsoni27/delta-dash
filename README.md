@@ -24,6 +24,7 @@ An unofficial Formula 1 dashboard that offers fans an interactive and data-rich 
 ### Planned Features
 - Advanced tire strategy insights
 - Best lap comparisons
+- Advanced caching strategies for better UI loading times
 
 ## 📱 Screenshots
 
