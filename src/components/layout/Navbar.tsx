@@ -9,6 +9,7 @@ import {
   LucideIcon,
   PanelLeftClose,
   PanelLeftOpen,
+  Radio,
   Timer,
   Trophy,
   Users,
@@ -53,6 +54,7 @@ const NavItem = ({ href, icon: Icon, label, isExpanded, onLinkClick }: NavItemPr
 };
 
 const navigationItems = [
+  { href: "/live", icon: Radio, label: "Live" },
   { href: "/drivers", icon: IdCard, label: "Drivers" },
   {
     href: "/standings?title=Drivers",
@@ -85,14 +87,6 @@ export default function Navbar() {
       setSidebarExpanded(false);
     }
   };
-
-  // useEffect(() => {
-  //   const mainContent = document.getElementById("main-content");
-  //   if (mainContent) {
-  //     mainContent.style.marginLeft =
-  //       isLivePage === true ? "0rem" : isSidebarExpanded ? "15rem" : "4rem";
-  //   }
-  // }, [isSidebarExpanded, isLivePage]);
 
   return (
     <>
