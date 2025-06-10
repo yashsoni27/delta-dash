@@ -70,6 +70,9 @@ npm run dev
   - Jolpica API - Race data integration
   - DHL API - Pitstop data integration
   - F1SignalR - Live race data integration
+ 
+## 🏗️ Currently Working On
+  - Implementing Tanstack query
 
 
 ## 🤝 Contributing
