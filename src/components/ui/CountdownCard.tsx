@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import CountdownCardSkeleton from "../loading/CountdownCardSkeleton";
 import Link from "next/link";
+import { useF1Context } from "@/context/F1Context";
 
 const CountdownCard = () => {
   const [season, setSeason] = useState("");
@@ -19,6 +20,7 @@ const CountdownCard = () => {
   const [sessionOngoing, setSessionOngoing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sessionName, setSessionName] = useState<string>("");
+  const {setIsLive} = useF1Context();
 
   const getSessionName = (sessionType: string): string => {
     const displayName: { [key: string]: string } = {
@@ -69,6 +71,7 @@ const CountdownCard = () => {
           if (currentSession) {
             setRaceDate(`${currentSession.date}T${currentSession.time}`);
             setSessionName(getSessionName(currentSession.type));
+            setIsLive(true);
           } else {
             // Otherwise find next session
             const nextSession = sessions.find(
@@ -78,6 +81,7 @@ const CountdownCard = () => {
             if (nextSession) {
               setRaceDate(`${nextSession.date}T${nextSession.time}`);
               setSessionName(getSessionName(nextSession.type));
+              setIsLive(false);
             }
           }
         }

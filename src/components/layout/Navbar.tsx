@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Tooltip from "./Tooltip";
 import { usePathname } from "next/navigation";
+import { useF1Context } from "@/context/F1Context";
 
 type NavItemProps = {
   href: string;
@@ -77,6 +78,7 @@ export default function Navbar() {
   const [isSidebarExpanded, setSidebarExpanded] = useState(false);
   const pathName = usePathname();
   const isLivePage = pathName === "/live";
+  const {isLive} = useF1Context();
 
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);
@@ -87,6 +89,14 @@ export default function Navbar() {
       setSidebarExpanded(false);
     }
   };
+
+  // Filter navigation items based on live status
+  const filteredNavigationItems = navigationItems.filter(item => {
+    if (item.href === '/live') {
+      return isLive;
+    }
+    return true; 
+  });
 
   return (
     <>
@@ -150,7 +160,7 @@ export default function Navbar() {
 
             {/* Navigation Links */}
             <div className="flex flex-col gap-1 p-2 mt-6 text-sm">
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <NavItem
                   key={item.href}
                   {...item}
