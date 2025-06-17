@@ -4,37 +4,18 @@ import CardSkeleton from "@/components/loading/CardSkeleton";
 import CountdownCard from "@/components/ui/CountdownCard";
 import StandingsTable from "@/components/ui/StandingsTable";
 import { Medal, Timer } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { dhlService, f1LiveService, raceService } from "@/lib/api/index";
+
+import {
+  useFastestLapStandingQuery,
+  useLastRaceWinnerQuery,
+  useSingleFastestPitStopQuery,
+} from "@/hooks/queries/homeQueries";
 
 export default function Home() {
-  const [pitStopInfo, setPitStopInfo] = useState<any | null>(null);
-  const [fastestLap, setFastestLap] = useState<any | null>(null);
-  const [lastRace, setLastRace] = useState<any | null>(null);
-  const [lastWinner, setLastWinner] = useState<any | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    const pitstopRes = await dhlService.getSingleFastestPitStop();
-    setPitStopInfo(pitstopRes);
-    const standing = await dhlService.getFastestLapStanding();
-    setFastestLap(standing.standings[0]);
-
-    const response = await raceService.getPreviousRaces();
-    if (response) {
-      setLastRace(response[0]?.raceName);
-      const lastResult = await raceService.getRaceResults(
-        response[0]?.season,
-        response[0].round
-      );
-      if (lastResult) setLastWinner(lastResult[0]?.Driver?.familyName);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fastestPitStopQuery = useSingleFastestPitStopQuery();
+  const fastestLapQuery = useFastestLapStandingQuery();
+  const lastRaceWinnerQuery = useLastRaceWinnerQuery();
 
   return (
     <main className="p-2 md:p-10 gap-4">
@@ -42,8 +23,16 @@ export default function Home() {
         {/* Card Grid */}
         <CountdownCard />
 
-        {pitStopInfo == null ? (
+        {fastestPitStopQuery.isLoading ? (
           <CardSkeleton />
+        ) : fastestPitStopQuery.error ? (
+          <Card
+            title="Fastest Pit Stop"
+            icon={<Timer size={18} />}
+            stat="Error loading data"
+            subtitle="Please try again later"
+            className="h-full text-red-500"
+          />
         ) : (
           <Link
             href={{
@@ -53,36 +42,48 @@ export default function Home() {
             <Card
               title="Fastest Pit Stop"
               icon={<Timer size={18} />}
-              stat={`${pitStopInfo.duration} s`}
-              subtitle={`${pitStopInfo.lastName} at ${pitStopInfo.abbreviation} (${pitStopInfo.shortTitle})`}
+              stat={`${fastestPitStopQuery.data?.duration} s`}
+              subtitle={`${fastestPitStopQuery.data?.lastName} at ${fastestPitStopQuery.data?.abbreviation} (${fastestPitStopQuery.data?.shortTitle})`}
               className="h-full"
             />
           </Link>
         )}
-        {fastestLap == null ? (
+        {fastestLapQuery.isLoading ? (
           <CardSkeleton />
+        ) : fastestLapQuery.error ? (
+          <Card
+            title="Fastest Lap Awards"
+            icon={<Timer size={18} />}
+            stat="Error loading data"
+            subtitle="Please try again later"
+            className="h-full text-red-500"
+          />
         ) : (
           <Card
             title="Fastest Lap Awards"
             icon={<Timer size={18} />}
-            stat={`${fastestLap.flCount} Fastest Laps`}
-            subtitle={`${fastestLap.firstName} ${fastestLap.lastName}`}
+            stat={`${fastestLapQuery.data?.flCount} Fastest Laps`}
+            subtitle={`${fastestLapQuery.data?.firstName} ${fastestLapQuery.data?.lastName}`}
             className="h-full"
           />
         )}
-        {lastWinner == null || lastRace == null ? (
+        {lastRaceWinnerQuery.isLoading ? (
           <CardSkeleton />
+        ) : lastRaceWinnerQuery.error ? (
+          <Card
+            title="Last Race Winner"
+            icon={<Medal size={18} />}
+            stat="Error loading data"
+            subtitle="Please try again later"
+            className="h-full text-red-500"
+          />
         ) : (
-          <Link
-            href={{
-              pathname: "/races",
-            }}
-          >
+          <Link href={{ pathname: "/races" }}>
             <Card
               title="Last Race Winner"
               icon={<Medal size={18} />}
-              stat={lastWinner}
-              subtitle={lastRace}
+              stat={lastRaceWinnerQuery.data?.winner || ""}
+              subtitle={lastRaceWinnerQuery.data?.raceName || ""}
               className="h-full"
             />
           </Link>
