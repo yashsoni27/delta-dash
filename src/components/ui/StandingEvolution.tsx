@@ -1,11 +1,12 @@
 import { getConstructorHex } from "@/lib/utils";
 import { Evolutions, StandingEvolutionProps } from "@/types";
 import { ResponsiveLine } from "@nivo/line";
+import { CircleAlert } from "lucide-react";
 
 function transformData(rankings: Evolutions) {
   const transformedData = [];
 
-  if (rankings.driversEvolution) {
+  if (rankings?.driversEvolution) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
@@ -34,7 +35,7 @@ function transformData(rankings: Evolutions) {
     }
   }
 
-  if (rankings.constructorsEvolution) {
+  if (rankings?.constructorsEvolution) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
@@ -118,9 +119,7 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
           fontWeight: "light",
         }}
       >
-        <div className="mb-2 p-2 border-b border-slate-600">
-          {locality}
-        </div>
+        <div className="mb-2 p-2 border-b border-slate-600">{locality}</div>
         {sortedPoints.map((point) => {
           return (
             <div
@@ -137,27 +136,40 @@ const StandingEvolution = ({ title, standings }: StandingEvolutionProps) => {
     );
   };
 
+  const hasNoData =
+    (standings?.driversEvolution?.length === 0 ||
+      !standings?.driversEvolution) &&
+    (standings?.constructorsEvolution?.length === 0 ||
+      !standings?.constructorsEvolution);
+
   return (
     <>
       <div className="mb-3">{title} Standings Evolution</div>
-      <ResponsiveLine
-        data={data}
-        margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
-        axisTop={null}
-        axisRight={null}
-        theme={chartTheme}
-        enablePoints={true}
-        lineWidth={2}
-        pointSize={4}
-        enableSlices="x"
-        sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
-        colors={getColor}
-        enableGridX={false}
-        enableGridY={true}
-        animate={true}
-        motionConfig={"slow"}
-        useMesh={true}
-      />
+      {hasNoData ? (
+        <div className="h-full flex justify-center items-center text-gray-500">
+          <CircleAlert />
+          &nbsp;&nbsp;Not Available
+        </div>
+      ) : (
+        <ResponsiveLine
+          data={data}
+          margin={{ top: 10, right: 40, bottom: 20, left: 30 }}
+          axisTop={null}
+          axisRight={null}
+          theme={chartTheme}
+          enablePoints={true}
+          lineWidth={2}
+          pointSize={4}
+          enableSlices="x"
+          sliceTooltip={({ slice }) => <CustomTooltip slice={slice} />}
+          colors={getColor}
+          enableGridX={false}
+          enableGridY={true}
+          animate={true}
+          motionConfig={"slow"}
+          useMesh={true}
+        />
+      )}
     </>
   );
 };

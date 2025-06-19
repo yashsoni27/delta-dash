@@ -2,11 +2,12 @@ import { getConstructorHex } from "@/lib/utils";
 import { Evolutions, RankingEvolutionProps } from "@/types";
 import { ResponsiveBump } from "@nivo/bump";
 import { chartTheme } from "./StandingEvolution";
+import { CircleAlert } from "lucide-react";
 
 function transformData(rankings: Evolutions) {
   const transformedData = [];
 
-  if (rankings.driversEvolution) {
+  if (rankings?.driversEvolution) {
     for (const driver of rankings.driversEvolution) {
       const driverSeries: {
         id: string;
@@ -36,7 +37,7 @@ function transformData(rankings: Evolutions) {
     }
   }
 
-  if (rankings.constructorsEvolution) {
+  if (rankings?.constructorsEvolution) {
     for (const constructor of rankings.constructorsEvolution) {
       const constructorSeries: {
         id: string;
@@ -95,33 +96,45 @@ const RankingEvolution = ({ title, rankings }: RankingEvolutionProps) => {
     );
   };
 
+  const hasNoData =
+    (rankings?.driversEvolution?.length === 0 || !rankings?.driversEvolution) &&
+    (rankings?.constructorsEvolution?.length === 0 ||
+      !rankings?.constructorsEvolution);
+
   return (
     <>
       <div className="mb-3">{title} Ranking Evolution</div>
-      <ResponsiveBump
-        data={data}
-        margin={
-          title == "Drivers"
-            ? { top: 0, right: 40, bottom: 20, left: 22 }
-            : { top: 0, right: 90, bottom: 20, left: 22 }
-        }
-        endLabelPadding={10}
-        xPadding={0.6}
-        xOuterPadding={0.3}
-        interpolation="smooth"
-        pointSize={4}
-        inactivePointSize={1}
-        axisTop={null}
-        axisRight={null}
-        theme={chartTheme}
-        colors={getColor}
-        useMesh={true}
-        animate={true}
-        motionConfig={"slow"}
-        enableGridY={false}
-        enableGridX={false}
-        pointTooltip={CustomTooltip}
-      />
+      {hasNoData ? (
+        <div className="h-full flex justify-center items-center text-gray-500">
+          <CircleAlert />
+          &nbsp;&nbsp;Not Available
+        </div>
+      ) : (
+        <ResponsiveBump
+          data={data}
+          margin={
+            title == "Drivers"
+              ? { top: 0, right: 40, bottom: 20, left: 22 }
+              : { top: 0, right: 90, bottom: 20, left: 22 }
+          }
+          endLabelPadding={10}
+          xPadding={0.6}
+          xOuterPadding={0.3}
+          interpolation="smooth"
+          pointSize={4}
+          inactivePointSize={1}
+          axisTop={null}
+          axisRight={null}
+          theme={chartTheme}
+          colors={getColor}
+          useMesh={true}
+          animate={true}
+          motionConfig={"slow"}
+          enableGridY={false}
+          enableGridX={false}
+          pointTooltip={CustomTooltip}
+        />
+      )}
     </>
   );
 };

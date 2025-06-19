@@ -5,7 +5,12 @@ import RankingEvolution from "@/components/ui/RankingEvolution";
 import StackedBarChart from "@/components/ui/StackedBarChart";
 import StandingEvolution from "@/components/ui/StandingEvolution";
 import StandingsTable from "@/components/ui/StandingsTable";
-import { constructorService, driverService, statsService } from "@/lib/api/index";
+import {
+  constructorService,
+  driverService,
+  statsService,
+} from "@/lib/api/index";
+import { Eraser, SquareCheckBig } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -18,18 +23,57 @@ function StandingsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>();
   const [ptDistribution, setPtDistribution] = useState<any>();
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [allOptions, setAllOptions] = useState<any[]>([]);
+  // const [availableOptions, setAvailableOptions] = useState<any[]>([]);
+  const [showOptionDropdown, setShowOptionDropdown] = useState(false);
+
+  const handleOptionSelection = (optionId: string) => {
+    setFilteredData((prev) => {
+      if (prev.includes(optionId)) {
+        return prev.filter((id) => id !== optionId);
+      } else {
+        return [...prev, optionId];
+      }
+    });
+  };
+
+  const selectAllOptions = () => {
+    setFilteredData(allOptions.map((option) => option.id));
+  };
+
+  const clearAllOptions = () => {
+    setFilteredData([]);
+  };
+
+  const getDisplayText = () => {
+    if (filteredData.length === 0) return title || "Select";
+    if (filteredData.length === 1) return `${title}: 1`;
+    return `${title}: ${filteredData.length}`;
+  };
 
   useEffect(() => {
     const fetchEvolution = async () => {
       setIsLoading(true);
       try {
-        const finishingStat = await statsService.getFinishingStats(selectedYear.toString());
+        const finishingStat = await statsService.getFinishingStats(
+          selectedYear.toString()
+        );
         if (title === "Drivers") {
-          const evolution = await driverService.getDriverEvolution(selectedYear.toString());
+          const evolution = await driverService.getDriverEvolution(
+            selectedYear.toString()
+          );
           setDriverEvolution(evolution);
           setConstructorEvolution(undefined);
           setStats(finishingStat?.drivers);
           setPtDistribution(finishingStat?.driversRound?.slice().reverse());
+          const driverOptions =
+            finishingStat?.drivers?.map((driver: any) => ({
+              id: driver.id,
+              name: driver.name,
+            })) || [];
+          setAllOptions(driverOptions);
+          setFilteredData(driverOptions.map((driver: any) => driver.id));
         } else if (title === "Constructors") {
           const evolution = await constructorService.getConstructorEvolution(
             selectedYear.toString()
@@ -38,6 +82,13 @@ function StandingsContent() {
           setDriverEvolution(undefined);
           setStats(finishingStat?.constructors);
           setPtDistribution(finishingStat?.constructorRound?.slice().reverse());
+          const constructorOptions =
+            finishingStat?.constructors?.map((constructor: any) => ({
+              id: constructor.id,
+              name: constructor.name,
+            })) || [];
+          setAllOptions(constructorOptions);
+          setFilteredData(constructorOptions.map((constructor: any) => constructor.id));
         }
       } catch (e) {
         console.log(`Error fetching ${title} evolution`);
@@ -68,6 +119,67 @@ function StandingsContent() {
               ))}
             </select>
           </div>
+          <div className="filter-panel relative">
+            <button
+              className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800 hover:bg-slate-700"
+              onClick={() => setShowOptionDropdown(!showOptionDropdown)}
+            >
+              {getDisplayText()}
+            </button>
+
+            {showOptionDropdown && (
+              <div className="absolute right-0 mt-1 w-48 bg-slate-900 border border-gray-800 rounded-md shadow-lg z-50">
+                <div className="p-2 border-b border-gray-700">
+                  <div className="text-sm font-light  mb-2 text-start">
+                    Select {title}
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <button
+                      className="flex items-center gap-1 text-xs text-slate-200 hover:text-slate-50 "
+                      onClick={selectAllOptions}
+                    >
+                      <div className="bg-slate-700 p-1 flex gap-1 rounded-md">
+                        <SquareCheckBig size={16} />
+                        Select All
+                      </div>
+                    </button>
+                    <button
+                      className="flex items-center gap-1 text-xs text-red-400 hover:text-red-500"
+                      onClick={clearAllOptions}
+                    >
+                      <div className="bg-slate-700 p-1 flex gap-1 rounded-md">
+                        <Eraser size={16} />
+                        Clear
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="py-1">
+                  {allOptions.map((option) => (
+                    <label
+                      key={option.id}
+                      className="flex items-center px-3 py-2 hover:bg-slate-700 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        className="mr-2 rounded border-gray-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-2"
+                        checked={filteredData.includes(option.id)}
+                        onChange={() => handleOptionSelection(option.id)}
+                      />
+                      <span className="text-xs text-white">{option.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            {showOptionDropdown && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowOptionDropdown(false)}
+              />
+            )}
+          </div>
         </div>
 
         {title && (
@@ -89,19 +201,43 @@ function StandingsContent() {
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <StandingEvolution
                             title={title}
-                            standings={driverEvolution}
+                            standings={
+                              driverEvolution
+                                ? {
+                                    ...driverEvolution,
+                                    driversEvolution:
+                                      driverEvolution.driversEvolution.filter(
+                                        (item: any) =>
+                                          filteredData.includes(item.driverId)
+                                      ),
+                                  }
+                                : undefined
+                            }
                           />
                         </div>
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <RankingEvolution
                             title={title}
-                            rankings={driverEvolution}
+                            rankings={
+                              driverEvolution
+                                ? {
+                                    ...driverEvolution,
+                                    driversEvolution:
+                                      driverEvolution.driversEvolution.filter(
+                                        (item: any) =>
+                                          filteredData.includes(item.driverId)
+                                      ),
+                                  }
+                                : undefined
+                            }
                           />
                         </div>
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <StackedBarChart
                             heading="Stats"
-                            data={stats}
+                            data={stats?.filter((item: any) =>
+                              filteredData.includes(item.id)
+                            )}
                             indexBy="code"
                             keys={[
                               "Wins",
@@ -121,8 +257,24 @@ function StandingsContent() {
                         </div>
                         <div className="lg:col-span-2 sm:rounded-lg p-4 bg-slate-900">
                           <PtDistributionChart
-                            heading="Points Distribution"                        
-                            data={ptDistribution}
+                            heading="Points Distribution"
+                            // data={ptDistribution}
+                            data={
+                              ptDistribution?.map((round: any) => {
+                                const filteredRound: any = {
+                                  name: round.name,
+                                  locality: round.locality,
+                                };
+                                Object.keys(round).forEach((key) => {
+                                  if (["name", "locality"].includes(key))
+                                    return;
+                                  if (filteredData.includes(key)) {
+                                    filteredRound[key] = round[key];
+                                  }
+                                });
+                                return filteredRound;
+                              }) || []
+                            }
                             indexBy="name"
                             groupMode="stacked"
                             layout="horizontal"
@@ -142,19 +294,47 @@ function StandingsContent() {
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <StandingEvolution
                             title={title}
-                            standings={constructorEvolution}
+                            standings={
+                              constructorEvolution
+                                ? {
+                                    ...constructorEvolution,
+                                    constructorsEvolution:
+                                      constructorEvolution.constructorsEvolution.filter(
+                                        (item: any) =>
+                                          filteredData.includes(
+                                            item.constructorId
+                                          )
+                                      ),
+                                  }
+                                : undefined
+                            }
                           />
                         </div>
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <RankingEvolution
                             title={title}
-                            rankings={constructorEvolution}
+                            rankings={
+                              constructorEvolution
+                                ? {
+                                    ...constructorEvolution,
+                                    constructorsEvolution:
+                                      constructorEvolution.constructorsEvolution.filter(
+                                        (item: any) =>
+                                          filteredData.includes(
+                                            item.constructorId
+                                          )
+                                      ),
+                                  }
+                                : undefined
+                            }
                           />
                         </div>
                         <div className="lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 bg-slate-900">
                           <StackedBarChart
                             heading="Stats"
-                            data={stats}
+                            data={stats?.filter((item: any) =>
+                              filteredData.includes(item.id)
+                            )}
                             indexBy="name"
                             keys={[
                               "Wins",
@@ -174,8 +354,23 @@ function StandingsContent() {
                         </div>
                         <div className="lg:col-span-2 sm:rounded-lg p-4 bg-slate-900">
                           <PtDistributionChart
-                            heading="Points Distribution"                        
-                            data={ptDistribution}
+                            heading="Points Distribution"
+                            data={
+                              ptDistribution?.map((round: any) => {
+                                const filteredRound: any = {
+                                  name: round.name,
+                                  locality: round.locality,
+                                };
+                                Object.keys(round).forEach((key) => {
+                                  if (["name", "locality"].includes(key))
+                                    return;
+                                  if (filteredData.includes(key)) {
+                                    filteredRound[key] = round[key];
+                                  }
+                                });
+                                return filteredRound;
+                              }) || []
+                            }
                             indexBy="name"
                             groupMode="stacked"
                             layout="horizontal"

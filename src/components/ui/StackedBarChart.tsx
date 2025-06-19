@@ -1,6 +1,7 @@
 import { BarTooltipProps, ResponsiveBar } from "@nivo/bar";
 import { chartTheme } from "./StandingEvolution";
 import ChartSkeleton from "../loading/ChartSkeleton";
+import { CircleAlert } from "lucide-react";
 
 interface StackedBarChartProps {
   heading?: string;
@@ -50,47 +51,54 @@ export default function StackedBarChart({
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
-      <ResponsiveBar
-        data={data}
-        theme={chartTheme}
-        colors={colors}
-        keys={keys}
-        tooltip={CustomTooltip}
-        indexBy={indexBy}
-        margin={margin}
-        padding={0.1}
-        {...(minValue && maxValue
-          ? {
-              valueScale: {
-                type: "linear",
-                min: minValue,
-                max: maxValue,
-                clamp: true,
-              },
-            }
-          : {})}
-        layout={layout}
-        groupMode={groupMode}
-        enableLabel={false}
-        isInteractive={true}
-        axisBottom={{
-          tickRotation: -45,
-        }}
-        legends={[
-          {
-            dataFrom: "keys",
-            anchor: "top-right",
-            direction: "column",
-            itemWidth: 80,
-            itemHeight: 20,
-            symbolSize: 12,
-            toggleSerie: true,
-          },
-        ]}
-        enableGridX={false}
-        enableGridY={true}
-        animate={true}
-      />
+      {data.length === 0 ? (
+        <div className="h-full flex justify-center items-center text-gray-500">
+          <CircleAlert />
+          &nbsp;&nbsp;Not Available
+        </div>
+      ) : (
+        <ResponsiveBar
+          data={data}
+          theme={chartTheme}
+          colors={colors}
+          keys={keys}
+          tooltip={CustomTooltip}
+          indexBy={indexBy}
+          margin={margin}
+          padding={0.1}
+          {...(minValue && maxValue
+            ? {
+                valueScale: {
+                  type: "linear",
+                  min: minValue,
+                  max: maxValue,
+                  clamp: true,
+                },
+              }
+            : {})}
+          layout={layout}
+          groupMode={groupMode}
+          enableLabel={false}
+          isInteractive={true}
+          axisBottom={{
+            tickRotation: -45,
+          }}
+          legends={[
+            {
+              dataFrom: "keys",
+              anchor: "top-right",
+              direction: "column",
+              itemWidth: 80,
+              itemHeight: 20,
+              symbolSize: 12,
+              toggleSerie: true,
+            },
+          ]}
+          enableGridX={false}
+          enableGridY={true}
+          animate={true}
+        />
+      )}
     </>
   );
 }

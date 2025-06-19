@@ -2,6 +2,7 @@ import { BarItemProps, BarTooltipProps, ResponsiveBar } from "@nivo/bar";
 import { chartTheme } from "./StandingEvolution";
 import { getConstructorHex } from "@/lib/utils";
 import { useMemo } from "react";
+import { CircleAlert } from "lucide-react";
 
 interface PtDistributionChartProps {
   heading?: string;
@@ -22,6 +23,7 @@ export default function PtDistributionChart({
   margin = { top: 20, right: 20, bottom: 40, left: 30 },
   barHeight = 15,
 }: PtDistributionChartProps) {
+
   // Get all keys (excluding 'name' and 'locality')
   const keys = Object.keys(data[0]).filter(
     (key) =>
@@ -31,6 +33,18 @@ export default function PtDistributionChart({
       data[0][key] !== null &&
       "points" in data[0][key]
   );
+
+  if (keys.length === 0) {
+    return (
+      <>
+        <div className="scroll-m-20 mb-3">{heading}</div>
+        <div className="h-full flex justify-center items-center text-gray-500">
+          <CircleAlert />
+          &nbsp;&nbsp;Not Available
+        </div>
+      </>
+    );
+  }
 
   // Calculate dynamic height based on number of bars
   const chartHeight = useMemo(() => {
