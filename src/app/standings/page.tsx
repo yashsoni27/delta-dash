@@ -10,7 +10,7 @@ import {
   driverService,
   statsService,
 } from "@/lib/api/index";
-import { Eraser, SquareCheckBig } from "lucide-react";
+import { Check, Eraser, SquareCheckBig } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -48,8 +48,11 @@ function StandingsContent() {
 
   const getDisplayText = () => {
     if (filteredData.length === 0) return title || "Select";
-    if (filteredData.length === 1) return `${title}: 1`;
-    return `${title}: ${filteredData.length}`;
+    return (
+      <>
+        {title}: <span className="bg-slate-900 px-2 py-1 rounded-xl">{filteredData.length}</span>
+      </>
+    );
   };
 
   useEffect(() => {
@@ -88,7 +91,9 @@ function StandingsContent() {
               name: constructor.name,
             })) || [];
           setAllOptions(constructorOptions);
-          setFilteredData(constructorOptions.map((constructor: any) => constructor.id));
+          setFilteredData(
+            constructorOptions.map((constructor: any) => constructor.id)
+          );
         }
       } catch (e) {
         console.log(`Error fetching ${title} evolution`);
@@ -128,26 +133,26 @@ function StandingsContent() {
             </button>
 
             {showOptionDropdown && (
-              <div className="absolute right-0 mt-1 w-48 bg-slate-900 border border-gray-800 rounded-md shadow-lg z-50">
+              <div className="absolute right-0 mt-1 w-52 bg-slate-900 border border-gray-800 rounded-md shadow-lg z-50">
                 <div className="p-2 border-b border-gray-700">
                   <div className="text-sm font-light  mb-2 text-start">
                     Select {title}
                   </div>
                   <div className="flex justify-between gap-2">
                     <button
-                      className="flex items-center gap-1 text-xs text-slate-200 hover:text-slate-50 "
+                      className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 "
                       onClick={selectAllOptions}
                     >
-                      <div className="bg-slate-700 p-1 flex gap-1 rounded-md">
+                      <div className="bg-slate-800 p-2 flex gap-1 rounded-md">
                         <SquareCheckBig size={16} />
                         Select All
                       </div>
                     </button>
                     <button
-                      className="flex items-center gap-1 text-xs text-red-400 hover:text-red-500"
+                      className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600"
                       onClick={clearAllOptions}
                     >
-                      <div className="bg-slate-700 p-1 flex gap-1 rounded-md">
+                      <div className="bg-slate-800 p-2 flex gap-1 rounded-md">
                         <Eraser size={16} />
                         Clear
                       </div>
@@ -156,20 +161,27 @@ function StandingsContent() {
                 </div>
 
                 <div className="py-1">
-                  {allOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className="flex items-center px-3 py-2 hover:bg-slate-700 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        className="mr-2 rounded border-gray-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-2"
-                        checked={filteredData.includes(option.id)}
-                        onChange={() => handleOptionSelection(option.id)}
-                      />
-                      <span className="text-xs text-white">{option.name}</span>
-                    </label>
-                  ))}
+                  {allOptions.map((option) => {
+                    const selected = filteredData.includes(option.id);
+                    return (
+                      <label
+                        key={option.id}
+                        onClick={() => handleOptionSelection(option.id)}
+                        className={`
+                          flex items-center py-1 px-2 m-1 cursor-pointer rounded-md hover:bg-slate-800
+                          
+                        `}
+                        style={{ userSelect: "none" }}
+                      >
+                        <div className="w-5 h-5 mr-3 flex items-center justify-center">
+                          {selected && <Check size={16} />}
+                        </div>
+                        <span className="text-xs text-white">
+                          {option.name}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}
