@@ -93,7 +93,8 @@ export default function Navbar() {
   // Filter navigation items based on live status
   const filteredNavigationItems = navigationItems.filter(item => {
     if (item.href === '/live') {
-      return isLive;
+      // return isLive;
+      return true;
     }
     return true; 
   });
