@@ -129,6 +129,7 @@ export class StatsService {
     driverId2: string
   ) {
 
+    // TODO: Check the Race and Qualification if that is alright and if that can be improved
     const [driver1Race, driver2Race, driver1Sprint, driver2Sprint] =
       await Promise.all([
         this.apiClient.fetchFromApi(

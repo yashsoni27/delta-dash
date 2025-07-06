@@ -1,10 +1,6 @@
 "use client";
 import ComparisonChart from "@/components/ui/ComparisonChart";
-import {
-  driverService,
-  f1MediaService,
-  statsService,
-} from "@/lib/api/index";
+import { driverService, f1MediaService, statsService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
@@ -18,13 +14,6 @@ interface Constructor {
   name: string;
   nationality?: string;
   url?: string;
-}
-
-interface ConstructorStanding {
-  Constructor: Constructor;
-  position: string;
-  points: string;
-  wins: string;
 }
 
 export default function Home() {
@@ -354,16 +343,21 @@ export default function Home() {
                   borderColor: "transparent",
                 }}
               >
-                <div className="flex justify-around">
+                <div className="flex justify-between items-center">
                   <img
                     src={`teams/${stats?.driver1?.constructorId}.svg`}
                     alt={stats?.driver1?.constructorId}
-                    className="w-28 h-28 sm:w-40 sm:h-40"
+                    className="w-28 h-28 sm:w-36 sm:h-36"
+                  />
+                  <img
+                    src={`versus.svg`}
+                    alt="versus img"
+                    className="w-16 h-20"
                   />
                   <img
                     src={`teams/${stats?.driver2?.constructorId}.svg`}
                     alt={stats?.driver2?.constructorId}
-                    className="w-28 h-28 sm:w-40 sm:h-40"
+                    className="w-28 h-28 sm:w-36 sm:h-36"
                   />
                 </div>
                 <ComparisonChart
@@ -452,6 +446,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            {/* <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-1 sm:gap-4 mt-5">
+              <div className="sm:rounded-lg bg-slate-900 py-4 relative p-4"></div>
+              <div className="sm:rounded-lg bg-slate-900 py-4 relative p-4"></div>
+              <div className="sm:rounded-lg bg-slate-900 py-4 relative p-4"></div>
+              <div className="sm:rounded-lg bg-slate-900 py-4 relative p-4"></div>
+            </div> */}
           </>
         )}
       </div>
