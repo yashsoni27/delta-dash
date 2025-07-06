@@ -4,12 +4,12 @@ import {
   Crown,
   Flag,
   Flame,
-  GitCompare,
   IdCard,
   LucideIcon,
   PanelLeftClose,
   PanelLeftOpen,
   Radio,
+  Swords,
   Timer,
   Trophy,
   Users,
@@ -71,7 +71,7 @@ const navigationItems = [
   { href: "/stats", icon: ChartColumn, label: "Driver Stats" },
   { href: "/races", icon: Flag, label: "Races" },
   { href: "/pitstop", icon: Timer, label: "Pit Stops" },
-  { href: "/comparison", icon: GitCompare, label: "Head to Head" },
+  { href: "/comparison", icon: Swords, label: "Head to Head" },
 ];
 
 export default function Navbar() {
