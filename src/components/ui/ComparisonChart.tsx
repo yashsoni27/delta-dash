@@ -1,5 +1,5 @@
 import ChartSkeleton from "../loading/ChartSkeleton";
-import { lightenColor } from "@/lib/utils";
+import { getConstructorHex, lightenColor } from "@/lib/utils";
 import { chartTheme } from "./StandingEvolution";
 import { ResponsiveRadar } from "@nivo/radar";
 
@@ -71,8 +71,20 @@ export default function ComparisonChart({
           keys={driverNames}
           indexBy={"label"}
           margin={margin}
-          // colors={[data.color, lightenColor(data.color, 0.6)]}
-          colors={[lightenColor(data.color, 0.6), data.color]}
+          colors={
+            data?.driver1?.constructorId === data?.driver2?.constructorId
+              ? [
+                  lightenColor(
+                    getConstructorHex(data.driver1.constructorId),
+                    0.6
+                  ),
+                  getConstructorHex(data.driver2.constructorId),
+                ]
+              : [
+                  getConstructorHex(data.driver1.constructorId),
+                  getConstructorHex(data.driver2.constructorId),
+                ]
+          }
           fillOpacity={0.5}
           gridLevels={6}
           gridShape="linear"

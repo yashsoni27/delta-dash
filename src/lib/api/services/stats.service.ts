@@ -123,204 +123,122 @@ export class StatsService {
   }
 
   // Get Head to Head data
-  async getComparisonData(season: string = "current", constructorId: string) {
-    const raceResults = await this.apiClient.fetchFromApi(
-      `${season}/constructors/${constructorId}/results`,
-      "Race",
-      100,
-      0
-    );
-    const sprintResults = await this.apiClient.fetchFromApi(
-      `${season}/constructors/${constructorId}/sprint`,
-      "Race",
-      100,
-      0
-    );
+  async getComparisonData(
+    season: string = "current",
+    driverId1: string,
+    driverId2: string
+  ) {
 
-    // Track all drivers and their last appearance
-    const driversMap = new Map<
-      string,
-      {
-        driverId: string;
-        givenName: string;
-        familyName: string;
-        driverNo: string;
-        lastRound: number;
-        races: number;
-        raceWins: number;
-        sprintWins: number;
-        wins: number;
-        qualifying: number;
-        qualifyingWins: number;
-        poles: number;
-        points: number;
-        podiums: number;
-        bestFinish: number;
-        bestGrid: number;
-        dnf: number;
-      }
-    >();
+    const [driver1Race, driver2Race, driver1Sprint, driver2Sprint] =
+      await Promise.all([
+        this.apiClient.fetchFromApi(
+          `${season}/drivers/${driverId1}/results`,
+          "Race",
+          100,
+          0
+        ),
+        this.apiClient.fetchFromApi(
+          `${season}/drivers/${driverId2}/results`,
+          "Race",
+          100,
+          0
+        ),
+        this.apiClient.fetchFromApi(
+          `${season}/drivers/${driverId1}/sprint`,
+          "Race",
+          100,
+          0
+        ),
+        this.apiClient.fetchFromApi(
+          `${season}/drivers/${driverId2}/sprint`,
+          "Race",
+          100,
+          0
+        ),
+      ]);
 
-    // Process race results first to set driver identities
-    if ((raceResults?.data as any)?.Races) {
-      const races = (raceResults?.data as any)?.Races;
+    const processDriver = (raceResults: any, sprintResults: any) => {
+      const races = (raceResults?.data as { Races: any[] })?.Races || [];
+      const sprints = (sprintResults?.data as { Races: any[] })?.Races || [];
+      let stats = {
+        driverId: "",
+        givenName: "",
+        familyName: "",
+        driverNo: "",
+        constructorId: "",
+        lastRound: 0,
+        races: 0,
+        raceWins: 0,
+        sprintWins: 0,
+        wins: 0,
+        qualifying: 0,
+        qualifyingWins: 0,
+        poles: 0,
+        points: 0,
+        podiums: 0,
+        bestFinish: Infinity,
+        bestGrid: Infinity,
+        dnf: 0,
+      };
 
-      [...races].reverse().forEach((race: any) => {
-        const round = parseInt(race.round);
+      // Process race results
+      races.forEach((race: any) => {
+        const result = race.Results[0];
+        if (!stats.driverId) {
+          stats.driverId = result.Driver.driverId;
+          stats.givenName = result.Driver.givenName;
+          stats.familyName = result.Driver.familyName;
+          stats.driverNo = result.Driver.permanentNumber;
+          stats.constructorId = result.Constructor.constructorId;
+        }
+        stats.lastRound = Math.max(stats.lastRound, parseInt(race.round));
+        stats.races++;
+        stats.points += parseFloat(result.points);
 
-        race.Results.forEach((result: any) => {
-          const driverId = result.Driver.driverId;
+        const position = parseInt(result.position);
+        const gridPosition = parseInt(result.grid);
 
-          // Add or update driver info
-          if (!driversMap.has(driverId)) {
-            driversMap.set(driverId, {
-              driverId: result.Driver.driverId,
-              givenName: result.Driver.givenName,
-              familyName: result.Driver.familyName,
-              driverNo: result.Driver.permanentNumber,
-              lastRound: round,
-              races: 0,
-              raceWins: 0,
-              sprintWins: 0,
-              wins: 0,
-              qualifying: 0,
-              qualifyingWins: 0,
-              poles: 0,
-              points: 0,
-              podiums: 0,
-              bestFinish: Infinity,
-              bestGrid: Infinity,
-              dnf: 0,
-            });
-          }
-
-          const driver = driversMap.get(driverId)!;
-
-          // Update statistics
-          driver.races++;
-          driver.points += parseFloat(result.points);
-
-          const position = parseInt(result.position);
-          const gridPosition = parseInt(result.grid);
-
-          // Update best finish
-          if (position < driver.bestFinish) {
-            driver.bestFinish = position;
-          }
-
-          // Update best grid
-          if (gridPosition < driver.bestGrid) {
-            driver.bestGrid = gridPosition;
-          }
-
-          // Count poles
-          if (gridPosition === 1) {
-            driver.poles++;
-          }
-
-          // Count podiums
-          if (position <= 3) {
-            driver.podiums++;
-          }
-
-          // Count wins
-          if (position === 1) {
-            driver.wins++;
-          }
-
-          // Count DNFs
-          if (result.status !== "Finished" && !result.status.includes("Lap")) {
-            driver.dnf++;
-          }
-        });
-
-        // Process qualifying and race battles if we have two drivers
-        if (race.Results.length === 2) {
-          const [result1, result2] = race.Results;
-          const driver1 = driversMap.get(result1.Driver.driverId)!;
-          const driver2 = driversMap.get(result2.Driver.driverId)!;
-
-          // Qualifying battle
-          const grid1 = parseInt(result1.grid);
-          const grid2 = parseInt(result2.grid);
-
-          driver1.qualifying++;
-          driver2.qualifying++;
-
-          if (grid1 < grid2) {
-            driver1.qualifyingWins++;
-          } else if (grid2 < grid1) {
-            driver2.qualifyingWins++;
-          }
-
-          // Race battle
-          const pos1 = parseInt(result1.position);
-          const pos2 = parseInt(result2.position);
-
-          if (pos1 < pos2) {
-            driver1.raceWins++;
-          } else if (pos2 < pos1) {
-            driver2.raceWins++;
-          }
+        if (position < stats.bestFinish) stats.bestFinish = position;
+        if (gridPosition < stats.bestGrid) stats.bestGrid = gridPosition;
+        if (gridPosition === 1) stats.poles++;
+        if (position <= 3) stats.podiums++;
+        if (position === 1) {
+          stats.wins++;
+          stats.raceWins++;
+        }
+        if (result.status !== "Finished" && !result.status.includes("Lap")) {
+          stats.dnf++;
         }
       });
-    }
 
-    // Process sprint results
-    if ((sprintResults?.data as any)?.Races) {
-      const sprints = (sprintResults?.data as any)?.Races;
-
+      // Process sprint results
       sprints.forEach((sprint: any) => {
         if (!sprint.SprintResults) return;
+        const result = sprint.SprintResults.find(
+          (r: any) => r.Driver.driverId === stats.driverId
+        );
+        if (!result) return;
 
-        // Process sprint battles if we have two drivers
-        if (sprint.SprintResults.length === 2) {
-          const [result1, result2] = sprint.SprintResults;
-          const driver1 = driversMap.get(result1.Driver.driverId)!;
-          const driver2 = driversMap.get(result2.Driver.driverId)!;
+        stats.points += parseFloat(result.points);
 
-          // Update points from sprint
-          driver1.points += parseFloat(result1.points);
-          driver2.points += parseFloat(result2.points);
-
-          // Compare sprint results between teammates
-          const pos1 = parseInt(result1.position);
-          const pos2 = parseInt(result2.position);
-
-          // Add sprint win to whoever finished ahead
-          if (pos1 < pos2) {
-            driver1.sprintWins++;
-          } else if (pos2 < pos1) {
-            driver2.sprintWins++;
-          }
-        } else {
-          // Handle case with just one driver or more than two
-          sprint.SprintResults.forEach((result: any) => {
-            const driverId = result.Driver.driverId;
-
-            // Make sure driver exists in our map
-            if (driversMap.has(driverId)) {
-              const driver = driversMap.get(driverId)!;
-
-              // Update points from sprint
-              driver.points += parseFloat(result.points);
-            }
-          });
+        const pos = parseInt(result.position);
+        if (pos === 1) {
+          stats.sprintWins++;
+          stats.wins++;
         }
+        if (pos <= 3) stats.podiums++;
       });
-    }
 
-    // Get the two most recent drivers
-    const sortedDrivers = Array.from(driversMap.values())
-      .sort((a, b) => b.lastRound - a.lastRound)
-      .slice(0, 2);
+      return stats;
+    };
+
+    const driver1 = processDriver(driver1Race, driver1Sprint);
+    const driver2 = processDriver(driver2Race, driver2Sprint);
 
     return {
       season,
-      constructorId,
-      color: getConstructorHex(constructorId),
-      driver1: sortedDrivers[0],
-      driver2: sortedDrivers[1],
+      driver1,
+      driver2,
     };
   }
 
@@ -332,7 +250,9 @@ export class StatsService {
       const driverPointsByRound: Record<string, any> = {};
       const constructorPointsByRound: Record<string, any> = {};
 
-      const previousRaceResponse = await this.raceService.getPreviousRaces(season);
+      const previousRaceResponse = await this.raceService.getPreviousRaces(
+        season
+      );
       const gpNames = previousRaceResponse.reduce(
         (acc: Record<string, any>, race: any) => {
           const gpName = race.raceName.replace("Grand Prix", "").trim();
@@ -345,7 +265,7 @@ export class StatsService {
           acc[race.round] = {
             name: race.Circuit.Location.meetingCode || abbreviation,
             locality: race.Circuit.Location.locality,
-          }
+          };
           return acc;
         },
         {}

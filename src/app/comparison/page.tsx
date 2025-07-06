@@ -1,8 +1,7 @@
 "use client";
 import ComparisonChart from "@/components/ui/ComparisonChart";
-import LoadingSpinner from "@/components/loading/LoadingSpinner";
 import {
-  constructorService,
+  driverService,
   f1MediaService,
   statsService,
 } from "@/lib/api/index";
@@ -10,9 +9,8 @@ import {
   getConstructorColor,
   getConstructorGradient,
   getConstructorHex,
-  lightenColor,
 } from "@/lib/utils";
-import { Calendar, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
 interface Constructor {
@@ -32,55 +30,60 @@ interface ConstructorStanding {
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [isLoading, setIsLoading] = useState(true);
-  const [constructors, setConstructors] = useState<ConstructorStanding[]>([]);
-  const [selectedConst, setSelectedConst] = useState<Constructor | null>(null);
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [selectedDriver1, setSelectedDriver1] = useState<any>(null);
+  const [selectedDriver2, setSelectedDriver2] = useState<any>(null);
   const [stats, setStats] = useState<any>();
   const [driver1Img, setDriver1Img] = useState<any>();
   const [driver2Img, setDriver2Img] = useState<any>();
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedYear(Number(e.target.value));
-  };
+  // const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSelectedYear(Number(e.target.value));
+  // };
 
-  const handleConstructorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedConstructor = constructors.find(
-      (c: ConstructorStanding) =>
-        c?.Constructor?.constructorId === e.target.value
-    );
-    setSelectedConst(selectedConstructor?.Constructor || null);
-  };
+  // const handleConstructorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const selectedConstructor = constructors.find(
+  //     (c: ConstructorStanding) =>
+  //       c?.Constructor?.constructorId === e.target.value
+  //   );
+  //   setSelectedConst(selectedConstructor?.Constructor || null);
+  // };
 
-  const fetchConstructors = useCallback(async (year: string) => {
+  const fetchDrivers = useCallback(async (year: string) => {
     try {
       setIsLoading(true);
-      const response = await constructorService.getConstructorStandings(year);
-      const constructorsList = response?.standings || [];
-      setConstructors(constructorsList);
-      setSelectedConst(
-        constructorsList.length > 0 ? constructorsList[0].Constructor : null
-      );
+      const response = await driverService.getDriverStandings(year);
+      const driverList = response?.standings || [];
+      setDrivers(driverList);
+      setSelectedDriver1(driverList[0]?.Driver || null);
+      setSelectedDriver2(driverList[1]?.Driver || null);
     } catch (e) {
-      setConstructors([]);
-      setSelectedConst(null);
+      setDrivers([]);
+      setSelectedDriver1(null);
+      setSelectedDriver2(null);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const fetchData = useCallback(async (year: string, constructorId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await statsService.getComparisonData(
-        year,
-        constructorId
-      );
-      setStats(response);
-    } catch (e) {
-      console.log("Failed in fetching data: ", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fetchData = useCallback(
+    async (year: string, driverId1: string, driverId2: string) => {
+      try {
+        setIsLoading(true);
+        const response = await statsService.getComparisonData(
+          year,
+          driverId1,
+          driverId2
+        );
+        setStats(response);
+      } catch (e) {
+        console.log("Failed in fetching data: ", e);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   const fetchDriverImage = useCallback(
     async (givenName: string, familyName: string) => {
@@ -103,19 +106,23 @@ export default function Home() {
     []
   );
 
-  // Effect to fetch constructors when year changes
+  // Effect to fetch drivers when year changes
   useEffect(() => {
     setDriver1Img(null);
     setDriver2Img(null);
-    fetchConstructors(selectedYear.toString());
-  }, [selectedYear, fetchConstructors]);
+    fetchDrivers(selectedYear.toString());
+  }, [selectedYear, fetchDrivers]);
 
-  // Effect to fetch driverData when constructors changes
+  // Effect to fetch driverData when drivers changes
   useEffect(() => {
-    if (selectedConst !== null) {
-      fetchData(selectedYear.toString(), selectedConst.constructorId);
+    if (selectedDriver1 && selectedDriver2) {
+      fetchData(
+        selectedYear.toString(),
+        selectedDriver1.driverId,
+        selectedDriver2.driverId
+      );
     }
-  }, [selectedConst, fetchData]);
+  }, [selectedDriver1, selectedDriver2, fetchData]);
 
   useEffect(() => {
     const loadDriverLogos = async () => {
@@ -141,7 +148,7 @@ export default function Home() {
   return (
     <>
       <div className="p-2 md:p-10 md:pt-0 gap-4">
-        <div className="flex flex-col justify-end sm:flex-row gap-5 p-4">
+        <div className="flex flex-col justify-between sm:flex-row gap-5 p-4">
           {/* Season selector */}
           {/* <div className="flex items-center gap-2">
             <span className="text-xs font-thin flex items-center">
@@ -161,30 +168,78 @@ export default function Home() {
             </select>
           </div> */}
 
-          {/* Constructor Selector */}
+          {/* Driver 1 Selector */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs font-thin flex items-center">
               <Users size={16} />
-              &nbsp;Constructor
+              &nbsp;Driver 1
             </span>
             <select
               className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 sm:w-40 px-4 py-2 bg-transparent bg-slate-800"
-              value={selectedConst?.constructorId || ""}
-              onChange={handleConstructorChange}
-              disabled={constructors?.length === 0}
+              value={selectedDriver1?.driverId || ""}
+              onChange={(e) => {
+                const driver = drivers.find(
+                  (d: any) => d.Driver.driverId === e.target.value
+                );
+                setSelectedDriver1(driver?.Driver || null);
+              }}
+              disabled={drivers.length === 0}
             >
-              {constructors.length === 0 ? (
-                <option className="bg-slate-800">No races available</option>
+              {drivers.length === 0 ? (
+                <option className="bg-slate-800">No drivers available</option>
               ) : (
-                constructors.map((option: ConstructorStanding) => (
-                  <option
-                    key={option.Constructor.constructorId}
-                    value={option.Constructor.constructorId}
-                    className="bg-slate-800"
-                  >
-                    {option.Constructor.name}
-                  </option>
-                ))
+                drivers
+                  .filter(
+                    (option: any) =>
+                      option.Driver.driverId !== selectedDriver2?.driverId
+                  )
+                  .map((option: any) => (
+                    <option
+                      key={option.Driver.driverId}
+                      value={option.Driver.driverId}
+                      className="bg-slate-800"
+                    >
+                      {option.Driver.familyName}
+                    </option>
+                  ))
+              )}
+            </select>
+          </div>
+
+          {/* Driver 2 Selector */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <span className="text-xs font-thin flex items-center">
+              <Users size={16} />
+              &nbsp;Driver 2
+            </span>
+            <select
+              className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 sm:w-40 px-4 py-2 bg-transparent bg-slate-800"
+              value={selectedDriver2?.driverId || ""}
+              onChange={(e) => {
+                const driver = drivers.find(
+                  (d: any) => d.Driver.driverId === e.target.value
+                );
+                setSelectedDriver2(driver?.Driver || null);
+              }}
+              disabled={drivers.length === 0}
+            >
+              {drivers.length === 0 ? (
+                <option className="bg-slate-800">No drivers available</option>
+              ) : (
+                drivers
+                  .filter(
+                    (option: any) =>
+                      option.Driver.driverId !== selectedDriver1?.driverId
+                  )
+                  .map((option: any) => (
+                    <option
+                      key={option.Driver.driverId}
+                      value={option.Driver.driverId}
+                      className="bg-slate-800"
+                    >
+                      {option.Driver.familyName}
+                    </option>
+                  ))
               )}
             </select>
           </div>
@@ -207,9 +262,11 @@ export default function Home() {
               <div
                 className="2xl:col-start-1 lg:col-span-2 sm:rounded-lg p-4 bg-slate-900 flex flex-col border justify-between"
                 style={{
-                  borderColor: getConstructorColor(stats?.constructorId),
+                  borderColor: getConstructorColor(
+                    stats?.driver1?.constructorId
+                  ),
                   boxShadow: `inset 0 0 5px 5px ${getConstructorColor(
-                    stats?.constructorId
+                    stats?.driver1?.constructorId
                   )}`,
                 }}
               >
@@ -219,10 +276,10 @@ export default function Home() {
                       className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
                         boxShadow: `0 0 20px 20px ${getConstructorColor(
-                          stats?.constructorId
+                          stats?.driver1?.constructorId
                         )}`,
                         backgroundColor: `${getConstructorColor(
-                          stats?.constructorId
+                          stats?.driver1?.constructorId
                         )}`,
                       }}
                     >
@@ -235,7 +292,11 @@ export default function Home() {
                   ) : (
                     <div
                       className="text-6xl sm:text-8xl"
-                      style={{ color: stats?.color }}
+                      style={{
+                        color: getConstructorColor(
+                          stats?.driver1?.constructorId
+                        ),
+                      }}
                     >
                       {stats?.driver1?.driverNo}
                     </div>
@@ -246,7 +307,9 @@ export default function Home() {
                     </div>
                     <div
                       className="text-4xl sm:text-6xl font-bold"
-                      style={{ color: stats?.color }}
+                      style={{
+                        color: getConstructorHex(stats?.driver1?.constructorId),
+                      }}
                     >
                       {stats?.driver1?.familyName}
                     </div>
@@ -264,8 +327,10 @@ export default function Home() {
                   <div
                     className="text-2xl sm:text-4xl font-semibold px-4 py-2 rounded-full"
                     style={{
-                      color: stats?.color,
-                      background: `${stats?.color}15`,
+                      color: getConstructorHex(stats?.driver1?.constructorId),
+                      background: `${getConstructorHex(
+                        stats?.driver1?.constructorId
+                      )}15`,
                     }}
                   >
                     {stats?.driver1?.points} pts
@@ -277,15 +342,28 @@ export default function Home() {
               <div
                 className="2xl:col-start-3 lg:col-span-2 aspect-[1/1] sm:aspect-[16/10] sm:rounded-lg p-4 border"
                 style={{
-                  background: getConstructorGradient(stats?.constructorId),
-                  borderColor: getConstructorColor(stats?.constructorId),
+                  background:
+                    stats?.driver1?.constructorId ===
+                    stats?.driver2?.constructorId
+                      ? getConstructorGradient(stats?.driver1?.constructorId)
+                      : `linear-gradient(to right, ${getConstructorColor(
+                          stats?.driver1?.constructorId
+                        )}, ${getConstructorColor(
+                          stats?.driver2?.constructorId
+                        )})`,
+                  borderColor: "transparent",
                 }}
               >
-                <div className="flex justify-center">
+                <div className="flex justify-around">
                   <img
-                    src={`teams/${stats?.constructorId}.svg`}
-                    alt={stats?.constructorId}
-                    className="w-32 h-32 sm:w-40 sm:h-40"
+                    src={`teams/${stats?.driver1?.constructorId}.svg`}
+                    alt={stats?.driver1?.constructorId}
+                    className="w-28 h-28 sm:w-40 sm:h-40"
+                  />
+                  <img
+                    src={`teams/${stats?.driver2?.constructorId}.svg`}
+                    alt={stats?.driver2?.constructorId}
+                    className="w-28 h-28 sm:w-40 sm:h-40"
                   />
                 </div>
                 <ComparisonChart
@@ -298,9 +376,11 @@ export default function Home() {
               <div
                 className="2xl:col-start-5 lg:col-span-2 sm:rounded-lg p-4 bg-slate-900 flex flex-col border justify-between"
                 style={{
-                  borderColor: getConstructorColor(stats?.constructorId),
+                  borderColor: getConstructorColor(
+                    stats?.driver2?.constructorId
+                  ),
                   boxShadow: `inset 0 0 5px 5px ${getConstructorColor(
-                    stats?.constructorId
+                    stats?.driver2?.constructorId
                   )}`,
                 }}
               >
@@ -310,10 +390,10 @@ export default function Home() {
                       className="rounded-lg p-2 mb-4 sm:mb-0"
                       style={{
                         boxShadow: `0 0 20px 20px ${getConstructorColor(
-                          stats?.constructorId
+                          stats?.driver2?.constructorId
                         )}`,
                         backgroundColor: `${getConstructorColor(
-                          stats?.constructorId
+                          stats?.driver2?.constructorId
                         )}`,
                       }}
                     >
@@ -326,7 +406,11 @@ export default function Home() {
                   ) : (
                     <div
                       className="text-6xl sm:text-8xl"
-                      style={{ color: stats?.color }}
+                      style={{
+                        color: getConstructorColor(
+                          stats?.driver2?.constructorId
+                        ),
+                      }}
                     >
                       {stats?.driver2?.driverNo}
                     </div>
@@ -337,7 +421,9 @@ export default function Home() {
                     </div>
                     <div
                       className="text-4xl sm:text-6xl font-bold"
-                      style={{ color: stats?.color }}
+                      style={{
+                        color: getConstructorHex(stats?.driver2?.constructorId),
+                      }}
                     >
                       {stats?.driver2?.familyName}
                     </div>
@@ -355,8 +441,10 @@ export default function Home() {
                   <div
                     className="text-2xl sm:text-4xl font-semibold px-4 py-2 rounded-full"
                     style={{
-                      color: stats?.color,
-                      background: `${stats?.color}15`,
+                      color: getConstructorHex(stats?.driver2?.constructorId),
+                      background: `${getConstructorHex(
+                        stats?.driver2?.constructorId
+                      )}15`,
                     }}
                   >
                     {stats?.driver2?.points} pts

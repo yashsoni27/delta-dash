@@ -124,6 +124,8 @@ function StandingsContent() {
               ))}
             </select>
           </div>
+          
+          {/* Driver filter */}
           <div className="filter-panel relative">
             <button
               className="inline-flex appearance-none focus:outline-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-thin border border-gray-700 shadow-sm h-9 px-4 py-2 bg-transparent bg-slate-800 hover:bg-slate-700"
