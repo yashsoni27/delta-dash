@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import Map, { bearingToCardinal } from "@/components/ui/Map";
 import Radio from "@/components/ui/Radio";
-import { CloudRain } from "lucide-react";
+import { AlertCircle, CloudRain } from "lucide-react";
 import LatestMessage from "@/components/ui/LatestMessage";
 
 interface LiveState {
@@ -70,8 +70,7 @@ export default function Live() {
   const [state, setState] = useState<LiveState>({});
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [connectionFailed, setConnectionFailed] = useState(false);
-  const [delayMs, setDelayMs] = useState<Number>(0);
-  const [delayTarget, setDelayTarget] = useState<Number>(0);
+
   const [openTranscriptionId, setOpenTranscriptionId] = useState<string | null>(
     null
   );
@@ -228,12 +227,48 @@ export default function Live() {
               {extrapolatedTimeRemaining}
             </p>
           </div>
+          {/* <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
+              <AlertCircle size={18} color="grey" />
+            </div>
+          </div> */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = new FormData(e.target as HTMLFormElement);
+              const delaySecValue = Number(form.get("delaySec"));
+              const delayMsValue = delaySecValue * 1000; 
+
+              f1LiveService.setDelay(delayMsValue);
+            }}
+            className="flex items-center gap-2"
+          >
+            <p className="text-sm">Delay</p>
+            <input
+              type="number"
+              name="delaySec"
+              min="0"
+              step="1"
+              defaultValue={0}
+              className="w-14 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm"
+            />
+            <p className="text-sm">s</p>
+            <button
+              type="submit"
+              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+            >
+              Apply
+            </button>
+          </form>
         </div>
         <div
           title="Weather Data"
           className="flex justify-between gap-4 w-full md:w-auto  "
         >
-          <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
+          <div
+            className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full"
+            title="Track temperature"
+          >
             <div className="mt-2 flex flex-col items-center gap-0.5">
               <p className="flex h-[22px] shrink-0 text-xl leading-[normal] font-medium text-white">
                 {String(Number(WeatherData?.TrackTemp))}
