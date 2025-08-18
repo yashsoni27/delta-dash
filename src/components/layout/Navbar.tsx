@@ -72,6 +72,7 @@ const navigationItems = [
   { href: "/races", icon: Flag, label: "Races" },
   { href: "/pitstop", icon: Timer, label: "Pit Stops" },
   { href: "/comparison", icon: Swords, label: "Head to Head" },
+  { href: "/tracks", icon: Swords, label: "Circuits"},
 ];
 
 export default function Navbar() {
