@@ -4,7 +4,7 @@ import Image from "next/image";
 type TrackCardProps = {
   name: string;
   location: string;
-  image: string;       // local image filename
+  image: string;       
   onClick: () => void;
 };
 

@@ -32,7 +32,7 @@ export default function TracksPage() {
     ))}
   </div>
 
-      {/* Modal for detailed image */}
+      {/* Detailed Image */}
       {selected && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
     <div
@@ -67,7 +67,7 @@ export default function TracksPage() {
           style={{ width: "100%", height: "auto" }}
         />
       </div>
-      {/* Future: Add any detailed info/component here */}
+     
     </div>
   </div>
 )}

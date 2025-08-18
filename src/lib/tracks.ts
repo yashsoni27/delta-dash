@@ -3,8 +3,8 @@ export type Track = {
   location: string;
   slug: string;
   country: string;
-  image: string;                // local preview image filename (e.g., albert_park.avif)
-  remoteDetailFilename: string; // remote detailed image filename from F1 CDN
+  image: string;                
+  remoteDetailFilename: string; 
 };
 
 export const tracks: Track[] = [
