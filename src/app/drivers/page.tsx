@@ -1,5 +1,5 @@
 "use client";
-import { driverService, f1MediaService } from "@/lib/api/index";
+import { driverService, f1MediaService, raceService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,

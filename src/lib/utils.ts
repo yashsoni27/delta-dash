@@ -232,6 +232,38 @@ export function circuitIdToF1Adapter(circuitId: string): string | null {
   return circuit[circuitId] || null;
 }
 
+export function BlackCircuitIdToF1Adapter(circuitId: string): string | null{
+  const circuit: Record<string, string> = {
+    albert_park: "melbourne",
+    shanghai: "shanghai",
+    suzuka: "suzuka",
+    bahrain: "sakhir",
+    jeddah: "jeddah",
+    miami: "miami",
+    imola: "imola",
+    monaco: "montecarlo",
+    catalunya: "catalunya",
+    villeneuve: "montreal",
+    red_bull_ring: "spielberg",
+    silverstone: "silverstone",
+    spa: "Spafrancorchamps",
+    hungaroring: "hungaroring",
+    zandvoort: "zandvoort",
+    monza: "monza",
+    baku: "baku",
+    marina_bay: "singapore",
+    americas: "austin",
+    rodriguez: "mexicocity",
+    interlagos: "interlagos",
+    vegas: "lasvegas",
+    losail: "lusail",
+    yas_marina: "yasmarina",
+  };
+  return circuit[circuitId] || null;
+}
+
+
+
 /* -------------------------------------------------------------------------- */
 /*                     convert DHL table response to JSON                     */
 /* -------------------------------------------------------------------------- */
