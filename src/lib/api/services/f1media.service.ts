@@ -1,4 +1,4 @@
-import { circuitIdToF1Adapter, jolpicaToF1MediaConstructor } from "@/lib/utils";
+import { BlackCircuitIdToF1Adapter, circuitIdToF1Adapter, jolpicaToF1MediaConstructor } from "@/lib/utils";
 import { F1MediaApiClient } from "../clients/f1media";
 
 export class F1MediaService {
@@ -16,6 +16,19 @@ export class F1MediaService {
       return URL.createObjectURL(imageBlob);
     } catch (e) {
       console.error("Error in fetching track image:", e);
+      return null;
+    }
+  }
+
+  async getblackTrackImg(circuitId : string): Promise<string | null >{
+    try {
+      const circuit = BlackCircuitIdToF1Adapter(circuitId);
+      console.log(circuitId,circuit);
+      const response = await this.f1MediaClient.fetchFromF1(`image/upload/c_lfill,w_3392/v1740000000/common/f1/2025/track/2025track${circuit}whiteoutline.svg`);
+      const imageBlob = await response.blob();
+      return URL.createObjectURL(imageBlob);
+    }catch(e){
+      console.error("Error in fetching black track image:", e);
       return null;
     }
   }
@@ -71,6 +84,7 @@ export class F1MediaService {
       return null;
     }
   }
+
 
   // async getConstructorLogo(
   //   season: string,
