@@ -189,7 +189,7 @@ export class F1LiveService extends EventEmitter {
   private setupEventListeners() {
     this.client.on("data", (data) => {
       const parsedData = JSON.parse(data?.data);
-
+      // console.log("parsed: ", parsedData);
       if (Array.isArray(parsedData?.M)) {
         for (const message of parsedData?.M) {
           if (message.M === "feed") {

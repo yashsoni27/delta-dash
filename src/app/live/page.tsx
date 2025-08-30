@@ -237,7 +237,7 @@ export default function Live() {
               e.preventDefault();
               const form = new FormData(e.target as HTMLFormElement);
               const delaySecValue = Number(form.get("delaySec"));
-              const delayMsValue = delaySecValue * 1000; 
+              const delayMsValue = delaySecValue * 1000;
 
               f1LiveService.setDelay(delayMsValue);
             }}
@@ -365,7 +365,7 @@ export default function Live() {
                   <p>Speed</p>
                 </div>
               </div>
-              {TimingData && CarData ? (
+              {TimingData ? (
                 <>
                   <div>
                     {Object.entries(TimingData?.Lines)

@@ -39,7 +39,7 @@ export default function Driver({
 }: any) {
   const driver = DriverList[racingNumber];
   const carData =
-    CarData.Entries[CarData.Entries.length - 1].Cars[racingNumber].Channels;
+    CarData?.Entries[CarData?.Entries.length - 1]?.Cars[racingNumber]?.Channels ?? {};
   // Channels
   // 0 : rpm
   // 2 : speed (km/h)
@@ -48,9 +48,9 @@ export default function Driver({
   // 5 : brake (0 or 100)
   // 45 : drs status
 
-  const rpmPercent = (carData["0"] / 15000) * 100;
-  const throttlePercent = Math.min(100, carData["4"]);
-  const brakeApplied = carData["5"] > 0;
+  const rpmPercent = ((carData["0"] ?? 0 ) / 15000) * 100;
+  const throttlePercent = Math.min(100, carData["4"] ?? 0);
+  const brakeApplied = (carData["5"] ?? 0) > 0;
 
   const appData = TimingAppData?.Lines[racingNumber];
   let currentStint: any;
@@ -137,13 +137,13 @@ export default function Driver({
                   <div
                     className={`${carData["45"] === 8 ? "text-gray-400" : ""}
                       ${
-                        drsEnabledValues.includes(carData["45"])
+                        drsEnabledValues.includes(carData["45"] ?? -1)
                           ? "text-green-500"
                           : ""
                       }
                       ${
                         carData["45"] !== 8 &&
-                        !drsEnabledValues.includes(carData["45"])
+                        !drsEnabledValues.includes(carData["45"] ?? -1)
                           ? "text-gray-700"
                           : ""
                       }`}
@@ -347,10 +347,10 @@ export default function Driver({
             <div title="Gear/RPM" className="mr-2">
               <div className="flex justify-between">
                 <p className="flex h-8 w-8 items-center justify-start text-sm">
-                  {carData["3"]}
+                  {carData["3"] ?? "-"}
                 </p>
                 <p className="flex h-8 w-8 items-center justify-end text-sm">
-                  {carData["0"]}
+                  {carData["0"] ?? "-"}
                 </p>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-xl bg-zinc-700">
@@ -367,7 +367,7 @@ export default function Driver({
             <div title="Speed">
               <div className="flex justify-start gap-2 mb-2">
                 <div className="text-left text-sm leading-none font-medium">
-                  {carData["2"]}
+                  {carData["2"] ?? "-"}
                 </div>
                 <div className="text-xs leading-none text-zinc-600">km/h</div>
               </div>
