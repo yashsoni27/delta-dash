@@ -1,5 +1,5 @@
 "use client";
-import { driverService, f1MediaService, raceService } from "@/lib/api/index";
+import { driverService, f1MediaService } from "@/lib/api/index";
 import {
   getConstructorColor,
   getConstructorGradient,
@@ -61,13 +61,16 @@ export default function Home() {
         try {
           const imageUrl = await f1MediaService.getDriverImage(
             driver.Driver.givenName,
-            driver.Driver.familyName
+            driver.Driver.familyName,
+            driver.Constructors[0].constructorId
           );
           const driverCode =
             driver.Driver.givenName.substring(0, 3) +
             driver.Driver.familyName.substring(0, 3);
           const numberLogo = await f1MediaService.getDriverNumberLogo(
-            driverCode
+            driver.Driver.givenName,
+            driver.Driver.familyName,
+            driver.Constructors[0].constructorId
           );
           // const constructorLogo = await f1MediaService.getConstructorLogo(
           //   season || "",
@@ -182,8 +185,11 @@ export default function Home() {
                     alt={`${driver.Driver.givenName} number`}
                     width={50}
                     height={50}
-                    className="rounded-es-2xl rounded-se-2xl"
+                    // className="rounded-es-2xl rounded-se-2xl"
+                    // className="h-em-24 w-em-96"
                     style={{
+                      // height: "3.2rem",
+                      // width: "3.2rem",
                       background: getConstructorColor(
                         driver.Constructors[driver.Constructors.length - 1]
                           .constructorId
@@ -212,14 +218,14 @@ export default function Home() {
               </div>
 
               {/* Driver image - larger and right-aligned */}
-              <div className="absolute right-0 bottom-0 h-full w-3/6">
+              <div className="absolute right-0 top-0 h-full w-3/6">
                 {driverImages[driver.Driver.driverId] ? (
                   <Image
                     src={driverImages[driver.Driver.driverId].imageUrl}
                     alt={`${driver.Driver.givenName} ${driver.Driver.familyName}`}
                     fill
                     className="object-cover object-center"
-                    style={{ objectPosition: "bottom right" }}
+                    style={{ objectPosition: "top right" }}
                   />
                 ) : (
                   <>
