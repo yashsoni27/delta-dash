@@ -339,14 +339,14 @@ export function liveToJolpicaConstructor(constructorName: string): string {
 export function jolpicaToF1MediaConstructor(constructorId: string): string {
   const constructors: Record<string, string> = {
     "mercedes": "mercedes",
-    "red_bull": "red-bull-racing",
+    "red_bull": "redbullracing",
     "ferrari": "ferrari",
     "mclaren": "mclaren",
     "alpine": "alpine",
-    "rb": "racing-bulls",
-    "aston_martin": "aston-martin",
+    "rb": "racingbulls",
+    "aston_martin": "astonmartin",
     "williams": "williams",
-    "sauber": "kick-sauber",
+    "sauber": "kicksauber",
     "haas": "haas",
   };
 
