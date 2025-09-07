@@ -214,54 +214,10 @@ export default function Home() {
               const teamInfo = teamsInfo.find(
                 (team) => team.code === standing.Constructor.constructorId
               );
-
-              // const driversResponse =
-              //   await driverService.getDriversByConstructor(
-              //     "current",
-              //     standing.Constructor.constructorId
-              //   );
-
-              // const drivers = driversResponse?.data?.Drivers || [];
-              // const driverImagePromises =
-              //   drivers.map(async (driver: any) => {
-              //     try {
-              //       const imageUrl = await f1MediaService.getDriverImage(
-              //         driver.givenName,
-              //         driver.familyName
-              //       );
-              //       return { driverId: driver.driverId, imageUrl };
-              //     } catch (error) {
-              //       console.error(
-              //         `Error fetching driver image for ${driver.driverId}:`,
-              //         error
-              //       );
-              //       return null;
-              //     }
-              //   }) || [];
-
-              // const driverImages = await Promise.all(driverImagePromises);
-              // const driverImageMap = driverImages.reduce(
-              //   (acc: { [key: string]: string }, result: any) => {
-              //     if (result) {
-              //       acc[result.driverId] = result.imageUrl;
-              //     }
-              //     return acc;
-              //   },
-              //   {}
-              // );
-
-              // setDriverImages((prev) => ({ ...prev, ...driverImageMap }));
-
+              
               return {
                 ...standing,
                 ...teamInfo,
-                // drivers:
-                //   drivers.map((driver: any) => ({
-                //     driverId: driver.driverId,
-                //     imageUrl:
-                //       driverImageMap[driver.driverId] ||
-                //       `/drivers/${driver.driverId}.avif`,
-                //   })) || [],
               };
             })
           );

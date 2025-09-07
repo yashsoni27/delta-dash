@@ -18,6 +18,7 @@ export class RaceRepository {
         round INTEGER NOT NULL,
         race_name VARCHAR(255) NOT NULL,
         circuit_id VARCHAR(100) NOT NULL,
+        circuit_name VARCHAR(255),
         country VARCHAR(100) NOT NULL,
         locality VARCHAR(100) NOT NULL,
         meeting_code VARCHAR(10),
@@ -45,6 +46,7 @@ export class RaceRepository {
           round, 
           race_name,
           circuit_id,
+          circuit_name,
           country,
           locality,
           meeting_code,
@@ -60,6 +62,7 @@ export class RaceRepository {
           ${parseInt(race.round)},
           ${race.raceName},
           ${race.Circuit.circuitId},
+          ${race.Circuit.circuitName},
           ${race.Circuit.Location.country},
           ${race.Circuit.Location.locality},
           ${race.Circuit.Location.meetingCode},
@@ -114,6 +117,7 @@ export class RaceRepository {
             raceName: race.race_name,
             Circuit: {
               circuitId: race.circuit_id,
+              circuitName: race.circuit_name,
               Location: {
                 country: race.country,
                 locality: race.locality,
