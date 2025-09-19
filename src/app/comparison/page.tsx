@@ -75,15 +75,20 @@ export default function Home() {
   );
 
   const fetchDriverImage = useCallback(
-    async (givenName: string, familyName: string) => {
+    async (givenName: string, familyName: string, constructorId: string) => {
       try {
         setIsLoading(true);
         const driverCode =
           givenName.substring(0, 3) + familyName.substring(0, 3);
-        const logoUrl = await f1MediaService.getDriverNumberLogo(driverCode);
+        const logoUrl = await f1MediaService.getDriverNumberLogo(
+          givenName,
+          familyName,
+          constructorId
+        );
         const headShotUrl = await f1MediaService.getDriverImage(
           givenName,
-          familyName
+          familyName,
+          constructorId
         );
         return { headShot: headShotUrl, logo: logoUrl };
       } catch (e) {
@@ -116,13 +121,21 @@ export default function Home() {
   useEffect(() => {
     const loadDriverLogos = async () => {
       if (stats?.driver1?.driverId && stats?.driver2?.driverId) {
-        const [logo1, logo2] = await Promise.all([
-          fetchDriverImage(stats.driver1.givenName, stats.driver1.familyName),
-          fetchDriverImage(stats.driver2.givenName, stats.driver2.familyName),
+        const [img1, img2] = await Promise.all([
+          fetchDriverImage(
+            stats.driver1.givenName,
+            stats.driver1.familyName,
+            stats.driver1.constructorId
+          ),
+          fetchDriverImage(
+            stats.driver2.givenName,
+            stats.driver2.familyName,
+            stats.driver2.constructorId
+          ),
         ]);
 
-        setDriver1Img(logo1);
-        setDriver2Img(logo2);
+        setDriver1Img(img1);
+        setDriver2Img(img2);
       }
     };
 
@@ -170,6 +183,7 @@ export default function Home() {
                 const driver = drivers.find(
                   (d: any) => d.Driver.driverId === e.target.value
                 );
+                setDriver1Img(null);
                 setSelectedDriver1(driver?.Driver || null);
               }}
               disabled={drivers.length === 0}
@@ -208,6 +222,7 @@ export default function Home() {
                 const driver = drivers.find(
                   (d: any) => d.Driver.driverId === e.target.value
                 );
+                setDriver2Img(null);
                 setSelectedDriver2(driver?.Driver || null);
               }}
               disabled={drivers.length === 0}
@@ -305,12 +320,17 @@ export default function Home() {
                   </div>
                 </div>
 
-                <img
-                  // src={`drivers/${stats?.driver1?.driverId}.avif`}
-                  src={driver1Img?.headShot}
-                  className="scale-x-[-1] rounded-lg w-full h-auto object-contain"
-                  alt={`${stats?.driver1?.givenName} ${stats?.driver1?.familyName}`}
-                />
+                <div
+                  className="relative overflow-hidden"
+                  style={{ height: "34rem" }}
+                >
+                  <img
+                    // src={`drivers/${stats?.driver1?.driverId}.avif`}
+                    src={driver1Img?.headShot}
+                    className="scale-x-[-1] rounded-lg w-full h-auto object-contain object-top"
+                    alt={`${stats?.driver1?.givenName} ${stats?.driver1?.familyName}`}
+                  />
+                </div>
 
                 <div className="flex justify-center items-center gap-2 mt-4">
                   <div
@@ -424,12 +444,17 @@ export default function Home() {
                   </div>
                 </div>
 
-                <img
-                  // src={`drivers/${stats?.driver2?.driverId}.avif`}
-                  src={driver2Img?.headShot}
-                  className="scale-x-[1] rounded-lg w-full h-auto object-contain"
-                  alt={`${stats?.driver2?.givenName} ${stats?.driver2?.familyName}`}
-                />
+                <div
+                  className="relative overflow-hidden"
+                  style={{ height: "34rem" }}
+                >
+                  <img
+                    // src={`drivers/${stats?.driver2?.driverId}.avif`}
+                    src={driver2Img?.headShot}
+                    className="scale-x-[1] rounded-lg w-full h-auto object-contain object-top"
+                    alt={`${stats?.driver2?.givenName} ${stats?.driver2?.familyName}`}
+                  />
+                </div>
 
                 <div className="flex justify-center items-center gap-2 mt-4">
                   <div
