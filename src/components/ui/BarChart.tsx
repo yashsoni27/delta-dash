@@ -22,7 +22,7 @@ interface BarChartProps {
   layout?: "vertical" | "horizontal";
   groupMode?: "grouped" | "stacked";
   margin?: { top: number; right: number; bottom: number; left: number };
-  barHeight?: number
+  barHeight?: number;
 }
 
 export default function BarChart({
@@ -141,6 +141,10 @@ export default function BarChart({
       </div>
     );
   };
+  const chartDataWithId = data.map((d: any, i: any) => ({
+    ...d,
+    id: `${indexBy ? d[indexBy as string] ?? "" : ""}-${i}`, // unique internal ID with guard for undefined indexBy
+  }));
 
   return (
     <>
@@ -151,7 +155,7 @@ export default function BarChart({
         // style={{ maxHeight: height }}
       >
         <Bar
-          data={data}
+          data={chartDataWithId}
           height={chartHeight || containerDimensions.height}
           width={containerDimensions.width}
           theme={chartTheme}
@@ -163,7 +167,7 @@ export default function BarChart({
           }}
           tooltip={pitStopTooltip == true ? PitStopToolTip : CustomTooltip}
           keys={keys}
-          indexBy={indexBy}
+          indexBy="id"
           valueFormat={(value) => {
             const num = Number(value);
             return Number.isInteger(num) ? num.toString() : num.toFixed(2);
@@ -188,7 +192,12 @@ export default function BarChart({
           axisTop={null}
           axisRight={null}
           axisBottom={showAxisBottom ? {} : null}
-          axisLeft={showAxisLeft ? {} : null}
+          axisLeft={{
+            ...(showAxisLeft ? {} : null),
+            format: (id: string) =>
+              chartDataWithId.find((d:any) => d.id === id)?.[indexBy as string] ??
+              id,
+          }}
           indexScale={{ type: "band", round: true }}
           enableGridX={enableGridX}
           enableGridY={enableGridY}
