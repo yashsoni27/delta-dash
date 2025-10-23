@@ -1,7 +1,6 @@
 "use client";
 import { multViewerService } from "@/lib/api";
-import { CircleArrowUp, Compass, Maximize, Minimize, Wind } from "lucide-react";
-import Image from "next/image";
+import { CircleArrowUp, Maximize, Minimize } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const space = 1000;
@@ -186,8 +185,7 @@ export default function Map({
                 display: "inline-block",
               }}
             />{" "} */}
-            Wind{" "}
-            {bearingToCardinal(Number(WindDirection))}
+            Wind {bearingToCardinal(Number(WindDirection))}
             <span
               style={{
                 display: "inline-block",
@@ -237,54 +235,59 @@ export default function Map({
               data.transformedPoints[0][1] + stroke / 2
             })`}
           />
-          {Object.entries(Position.Entries ?? {})
-            .sort(sortDriverPosition(TimingData.Lines))
-            .map(([racingNumber, pos]: [string, any]) => {
-              const driver = DriverList[racingNumber];
-              const timingData = TimingData.Lines[racingNumber];
-              const onTrack =
-                pos.Status === "OnTrack" &&
-                (timingData ? !timingData.InPit : true);
-              const out =
-                timingData?.KnockedOut ||
-                timingData?.Retired ||
-                timingData?.Stopped;
-              const [rx, ry] = rotate(
-                pos.X,
-                pos.Y,
-                data.rotation,
-                (Math.max(...data.x) - Math.min(...data.x)) / 2,
-                (Math.max(...data.y) - Math.min(...data.y)) / 2
-              );
-              const fontSize = stroke * 2.5;
-              return driver && !out ? (
-                <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.25}>
-                  <circle
-                    cx={rx}
-                    cy={ry}
-                    r={stroke * (onTrack ? 1.25 : 0.6)}
-                    fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
-                    stroke="black"
-                    strokeWidth={fontSize / 20}
-                    style={{ transition: "all 1s linear" }}
-                  />
-                  <text
-                    x={0}
-                    y={0}
-                    fill={driver?.TeamColour ? `#${driver.TeamColour}` : "grey"}
-                    fontSize={onTrack ? fontSize : fontSize * 0.75}
-                    style={{
-                      transform: `translate(${rx + stroke * 2}px, ${
-                        ry + stroke
-                      }px)`,
-                      transition: "all 1s linear",
-                    }}
-                  >
-                    {driver.Tla}
-                  </text>
-                </g>
-              ) : null;
-            })}
+          {Position?.Entries &&
+            Object.entries(Position.Entries ?? {})
+              .sort(sortDriverPosition(TimingData.Lines))
+              .map(([racingNumber, pos]: [string, any]) => {
+                const driver = DriverList[racingNumber];
+                const timingData = TimingData.Lines[racingNumber];
+                const onTrack =
+                  pos.Status === "OnTrack" &&
+                  (timingData ? !timingData.InPit : true);
+                const out =
+                  timingData?.KnockedOut ||
+                  timingData?.Retired ||
+                  timingData?.Stopped;
+                const [rx, ry] = rotate(
+                  pos.X,
+                  pos.Y,
+                  data.rotation,
+                  (Math.max(...data.x) - Math.min(...data.x)) / 2,
+                  (Math.max(...data.y) - Math.min(...data.y)) / 2
+                );
+                const fontSize = stroke * 2.5;
+                return driver && !out ? (
+                  <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.25}>
+                    <circle
+                      cx={rx}
+                      cy={ry}
+                      r={stroke * (onTrack ? 1.25 : 0.6)}
+                      fill={
+                        driver?.TeamColour ? `#${driver.TeamColour}` : "grey"
+                      }
+                      stroke="black"
+                      strokeWidth={fontSize / 20}
+                      style={{ transition: "all 1s linear" }}
+                    />
+                    <text
+                      x={0}
+                      y={0}
+                      fill={
+                        driver?.TeamColour ? `#${driver.TeamColour}` : "grey"
+                      }
+                      fontSize={onTrack ? fontSize : fontSize * 0.75}
+                      style={{
+                        transform: `translate(${rx + stroke * 2}px, ${
+                          ry + stroke
+                        }px)`,
+                        transition: "all 1s linear",
+                      }}
+                    >
+                      {driver.Tla}
+                    </text>
+                  </g>
+                ) : null;
+              })}
           {data.corners.map((corner: any) => {
             let string = `${corner.number}`;
             if (corner.letter) string = string + corner.letter;

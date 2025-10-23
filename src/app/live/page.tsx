@@ -402,16 +402,16 @@ export default function Live() {
             >
               {/* For Track map  */}
               <div>
-                {!!Position ? (
+                {/* {!!Position ? ( */}
                   <Map
                     circuit={SessionInfo.Meeting.Circuit.Key}
-                    Position={Position.Position[Position.Position.length - 1]}
+                    Position={Position?.Position[Position.Position.length - 1]}
                     DriverList={DriverList}
                     TimingData={TimingData}
                     TrackStatus={TrackStatus}
                     WindDirection={WeatherData.WindDirection}
                   />
-                ) : (
+                {/* ) : (
                   <div
                     style={{
                       display: "flex",
@@ -422,7 +422,7 @@ export default function Live() {
                   >
                     <p>NO DATA YET</p>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
