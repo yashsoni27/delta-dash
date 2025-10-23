@@ -23,15 +23,20 @@ export default function PtDistributionChart({
   margin = { top: 20, right: 20, bottom: 40, left: 30 },
   barHeight = 15,
 }: PtDistributionChartProps) {
-
   // Get all keys (excluding 'name' and 'locality')
-  const keys = Object.keys(data[0]).filter(
-    (key) =>
-      key !== "name" &&
-      key !== "locality" && 
-      typeof data[0][key] === "object" &&
-      data[0][key] !== null &&
-      "points" in data[0][key]
+  const keys = Array.from(
+    new Set(
+      data.flatMap((d) =>
+        Object.keys(d).filter(
+          (key) =>
+            key !== "name" &&
+            key !== "locality" &&
+            typeof d[key] === "object" &&
+            d[key] !== null &&
+            "points" in d[key]
+        )
+      )
+    )
   );
 
   if (keys.length === 0) {
@@ -52,7 +57,7 @@ export default function PtDistributionChart({
     const totalBarHeight = numberOfBars * barHeight;
     const totalMargin = margin.top + margin.bottom;
     const additionalPadding = numberOfBars * 10;
-    
+
     return totalBarHeight + totalMargin + additionalPadding;
   }, [data.length, barHeight, margin]);
 
@@ -76,9 +81,7 @@ export default function PtDistributionChart({
   const CustomTooltip = ({ id, value, color, data }: BarTooltipProps<any>) => {
     return (
       <div className="bg-slate-800 text-xs rounded-md w-36 flex flex-col opacity-95">
-        <div className="p-2 border-b border-slate-600">
-          {data.locality}
-        </div>
+        <div className="p-2 border-b border-slate-600">{data.locality}</div>
         <div className="text-xs p-2 flex justify-between w-full">
           <div>{driverNames[id as string] || String(id)}</div>
           <div style={{ color: color }}>{value} pts</div>
@@ -88,8 +91,9 @@ export default function PtDistributionChart({
   };
 
   // Transform data for Nivo
-  const chartData = data.map((round) => {
+  const chartData = data.map((round, index) => {
     const formattedRound: { name: string; [key: string]: number | string } = {
+      id: `${round.name}-${index}`,
       name: round.name,
       locality: round.locality || "",
     };
@@ -123,32 +127,36 @@ export default function PtDistributionChart({
   return (
     <>
       <div className="scroll-m-20 mb-3">{heading}</div>
-      <div style={{height: chartHeight}}>
-      <ResponsiveBar
-        data={chartData}
-        theme={chartTheme}
-        keys={keys}
-        indexBy={indexBy}
-        colors={({ id }) => getColor(String(id))}
-        tooltip={CustomTooltip}
-        margin={margin}
-        innerPadding={1}
-        padding={0.075}
-        layout={layout}
-        groupMode={groupMode}
-        enableLabel={false}
-        // enableTotals={true}
-        isInteractive={true}
-        axisLeft={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-        }}
-        enableGridX={true}
-        enableGridY={false}
-        animate={true}
-        ariaLabel="Points Distribution"
-      />
+      <div style={{ height: chartHeight }}>
+        <ResponsiveBar
+          data={chartData}
+          theme={chartTheme}
+          keys={keys}
+          indexBy="id"
+          colors={({ id }) => getColor(String(id))}
+          tooltip={CustomTooltip}
+          margin={margin}
+          innerPadding={1}
+          padding={0.075}
+          layout={layout}
+          groupMode={groupMode}
+          enableLabel={false}
+          // enableTotals={true}
+          isInteractive={true}
+          axisLeft={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            format: (id: string) => {
+              const d = chartData.find(c => c.id === id);
+              return d?.name ?? id;
+            },
+          }}
+          enableGridX={true}
+          enableGridY={false}
+          animate={true}
+          ariaLabel="Points Distribution"
+        />
       </div>
     </>
   );
