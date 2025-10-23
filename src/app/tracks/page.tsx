@@ -13,7 +13,7 @@ export default function TracksPage() {
     async function fetchTracks() {
       try {
         const raceCalendar = await raceService.getRaceCalendar();
-        console.log("Checking :", raceCalendar);
+        // console.log("Checking :", raceCalendar);
         const uniqueCircuits: { [id: string]: any } = {};
         for (const race of raceCalendar.data.Races) {
           const c = race.Circuit;
