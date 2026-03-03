@@ -102,7 +102,7 @@ export default function Home() {
       name: "Audi",
       code: "audi",
       chassis: "R26",
-      logoImage: "/teams/audi.png",
+      logoImage: "/teams/audi.svg",
       drivers: ["/drivers/hulkenberg.avif", "/drivers/bortoleto.avif"],
       details: {
         fullName: "Audi Revolut F1 Team",
@@ -182,7 +182,7 @@ export default function Home() {
       name: "Cadillac",
       code: "cadillac",
       chassis: "TBC",
-      logoImage: "/teams/cadillac.png",
+      logoImage: "/teams/cadillac.svg",
       drivers: ["/drivers/bottas.avif", "/drivers/perez.avif"],
       details: {
         fullName: "Cadillac Formula 1 Team",
