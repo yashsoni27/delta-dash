@@ -66,18 +66,15 @@ export class F1MediaService {
   async getDriverImage(
     firstName: string,
     lastName: string,
-    constructorId: string
+    constructorId: string,
+    season: string = "2025"
   ): Promise<string | null> {
     try {
-      const firstLetter = firstName.substring(0, 1);
       const arg2 = firstName.substring(0, 3) + lastName.substring(0, 3) + "01";
-      const arg1 = arg2 + `_${firstName}_${lastName}`;
-      // console.log('check', arg1);
       const response = await this.f1MediaClient.fetchFromF1(
-        // `d_driver_fallback_image.png/content/dam/fom-website/drivers/${firstLetter}/${arg1}/${arg2}.png`
-        `image/upload/c_lfill,w_440/q_auto/d_common:f1:2025:fallback:driver:2025fallbackdriverright.webp/v1740000000/common/f1/2025/${jolpicaToF1MediaConstructor(
+        `image/upload/c_lfill,w_440/q_auto/d_common:f1:${season}:fallback:driver:${season}fallbackdriverright.webp/v1740000000/common/f1/${season}/${jolpicaToF1MediaConstructor(
           constructorId
-        )}/${arg2}/2025${jolpicaToF1MediaConstructor(
+        )}/${arg2}/${season}${jolpicaToF1MediaConstructor(
           constructorId
         )}${arg2}right.webp`
       );
@@ -95,12 +92,9 @@ export class F1MediaService {
   ): Promise<string | null> {
     try {
       const response = await this.f1MediaClient.fetchFromF1(
-        // `d_team_car_fallback_image.png/content/dam/fom-website/teams/${season}/${jolpicaToF1MediaConstructor(
-        //   constructor
-        // )}.png`
-        `image/upload/c_lfill,w_512/q_auto/d_common:f1:2025:fallback:car:2025fallbackcarright.webp/v1740000000/common/f1/2025/${jolpicaToF1MediaConstructor(
+        `image/upload/c_lfill,w_512/q_auto/d_common:f1:${season}:fallback:car:${season}fallbackcarright.webp/v1740000000/common/f1/${season}/${jolpicaToF1MediaConstructor(
           constructor
-        )}/2025${jolpicaToF1MediaConstructor(constructor)}carright.webp`
+        )}/${season}${jolpicaToF1MediaConstructor(constructor)}carright.webp`
       );
 
       const imageBlob = await response.blob();
@@ -117,9 +111,11 @@ export class F1MediaService {
   // ): Promise<string | null> {
   //   try {
   //     const response = await this.f1MediaClient.fetchFromF1(
-  //       `content/dam/fom-website/teams/${season}/${jolpicaToF1MediaConstructor(
-  //         constructorId
-  //       )}-logo.png`
+  //       // https://media.formula1.com/image/upload/c_lfill,w_48/q_auto/v1740000000/common/f1/2026/cadillac/2026cadillaclogowhite.webp
+  //       `image/upload/c_lfill,w_48/q_auto/v1740000000/common/f1/${season}/${constructorId}/${season}${constructorId}logo.webp`
+  //       // `content/dam/fom-website/teams/${season}/${jolpicaToF1MediaConstructor(
+  //       //   constructorId
+  //       // )}-logo.png`
   //     );
 
   //     const imageBlob = await response.blob();

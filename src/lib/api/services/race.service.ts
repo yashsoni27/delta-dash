@@ -28,7 +28,10 @@ export class RaceService {
     limit: number = 30,
     offset: number = 0
   ) {
-    const dbData = await this.raceRepository.getAllRaces(Number(season));
+    const numericSeason = Number(season);
+    const dbData = !isNaN(numericSeason)
+      ? await this.raceRepository.getAllRaces(numericSeason)
+      : null;
     if ((dbData?.data?.Races?.length ?? 0) > 0) {
       return dbData;
     }
@@ -109,7 +112,17 @@ export class RaceService {
       season = new Date().getFullYear().toString();
     }
     const result = await this.getRaceCalendar(season);
-    const races = result.data?.Races;
+    let races = result?.data?.Races;
+
+    // Off-season fallback: no races yet for current year, show previous season
+    if (
+      (!races || races.length === 0) &&
+      season === new Date().getFullYear().toString()
+    ) {
+      const prevSeason = (parseInt(season) - 1).toString();
+      const prevResult = await this.getRaceCalendar(prevSeason);
+      races = prevResult?.data?.Races;
+    }
 
     if (!races || races.length === 0) return [];
 

@@ -35,9 +35,90 @@ export class DriverService {
     limit: number = 30,
     offset: number = 0
   ) {
-    const nextRace = await this.raceService.getNextRace();
+    const nextRace = await this.raceService.getNextRace(season);
+
+    // Off-season or early in season: no next race or not enough rounds for evo comparison
+    if (!nextRace || nextRace.round < 3) {
+      const result = await this.apiClient.fetchFromApi<any>(
+        `${season}/driverStandings`,
+        "Standings",
+        limit,
+        offset
+      );
+      let standings =
+        result.data?.StandingsLists[0]?.DriverStandings || [];
+
+      // No standings yet (pre-season): fall back to driver entry list with constructor pairings
+      if (standings.length === 0) {
+        // Fetch drivers and constructors in parallel
+        const [driversResult, constructorsResult] = await Promise.all([
+          this.apiClient.fetchFromApi<any>(`${season}/drivers`, "Driver", limit, offset),
+          this.apiClient.fetchFromApi<any>(`${season}/constructors`, "Constructor", 30, 0),
+        ]);
+        const drivers = driversResult.data?.Drivers || [];
+        const constructors = constructorsResult.data?.Constructors || [];
+
+        // Build driverId → constructor map via parallel per-constructor lookups
+        const driverConstructorMap: Record<string, any> = {};
+        await Promise.all(
+          constructors.map(async (constructor: any) => {
+            try {
+              const driversForConstructor = await this.apiClient.fetchFromApi<any>(
+                `${season}/constructors/${constructor.constructorId}/drivers`,
+                "Driver",
+                30,
+                0
+              );
+              const driverList = driversForConstructor.data?.Drivers || [];
+              for (const d of driverList) {
+                driverConstructorMap[d.driverId] = constructor;
+              }
+            } catch {
+              // Skip if lookup fails for a constructor
+            }
+          })
+        );
+
+        standings = drivers.map((d: any, index: number) => ({
+          position: String(index + 1),
+          positionText: "-",
+          points: "0",
+          wins: "0",
+          Driver: d,
+          Constructors: driverConstructorMap[d.driverId]
+            ? [driverConstructorMap[d.driverId]]
+            : [],
+          pointsDifference: 0,
+          positionDifference: 0,
+        }));
+        return {
+          standings,
+          season: driversResult.data?.season || season,
+          pagination: {
+            total: driversResult.total,
+            limit: driversResult.limit,
+            offset: driversResult.offset,
+          },
+        };
+      }
+
+      return {
+        standings: standings.map((d: any) => ({
+          ...d,
+          pointsDifference: 0,
+          positionDifference: 0,
+        })),
+        season: result.data?.StandingsLists[0]?.season || "",
+        pagination: {
+          total: result.total,
+          limit: result.limit,
+          offset: result.offset,
+        },
+      };
+    }
+
     const evoResults = await this.apiClient.fetchFromApi<any>(
-      `${season}/${nextRace?.round - 2}/driverStandings`,
+      `${season}/${nextRace.round - 2}/driverStandings`,
       "Standings",
       limit,
       offset

@@ -13,8 +13,16 @@ import { Calendar, CircleAlert, Flag } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
+function getDefaultF1Year(): number {
+  const now = new Date();
+  const year = now.getFullYear();
+  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
+    return year - 1;
+  return year;
+}
+
 export default function Home() {
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(getDefaultF1Year);
   const [round, setRound] = useState<number | null>(null);
   const [raceName, setRaceName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -254,7 +262,7 @@ export default function Home() {
                 value={selectedYear}
                 onChange={handleYearChange}
               >
-                {Array.from({ length: 3 }, (_, i) => 2025 - i).map((year) => (
+                {Array.from({ length: 3 }, (_, i) => getDefaultF1Year() - i).map((year) => (
                   <option key={year} value={year} className="bg-slate-800">
                     {year}
                   </option>

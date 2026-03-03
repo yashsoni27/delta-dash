@@ -66,8 +66,7 @@ export class ConstructorService {
     limit: number = 30,
     offset: number = 0
   ) {
-    const nextRace = await this.raceService.getNextRace();
-    const year = new Date().getFullYear();
+    const nextRace = await this.raceService.getNextRace(season);
 
     const result = await this.apiClient.fetchFromApi<any>(
       `${season}/constructorStandings`,
@@ -75,9 +74,47 @@ export class ConstructorService {
       limit,
       offset
     );
-    if (year !== Number(nextRace.season)) {
+
+    // Off-season or early in season: no next race or not enough rounds for evo comparison
+    if (!nextRace || nextRace.round < 3) {
+      let standings =
+        result.data?.StandingsLists[0]?.ConstructorStandings || [];
+
+      // No standings yet (pre-season): fall back to constructor entry list
+      if (standings.length === 0) {
+        const constructorsResult = await this.apiClient.fetchFromApi<any>(
+          `${season}/constructors`,
+          "Constructor",
+          limit,
+          offset
+        );
+        const constructors = constructorsResult.data?.Constructors || [];
+        standings = constructors.map((c: any, index: number) => ({
+          position: String(index + 1),
+          positionText: "-",
+          points: "0",
+          wins: "0",
+          Constructor: c,
+          pointsDifference: 0,
+          positionDifference: 0,
+        }));
+        return {
+          standings,
+          season: constructorsResult.data?.season || season,
+          pagination: {
+            total: constructorsResult.total,
+            limit: constructorsResult.limit,
+            offset: constructorsResult.offset,
+          },
+        };
+      }
+
       return {
-        standings: result.data?.StandingsLists[0]?.ConstructorStandings,
+        standings: standings.map((c: any) => ({
+          ...c,
+          pointsDifference: 0,
+          positionDifference: 0,
+        })),
         season: result.data?.StandingsLists[0]?.season || "",
         pagination: {
           total: result.total,
@@ -88,7 +125,7 @@ export class ConstructorService {
     }
 
     const evoResults = await this.apiClient.fetchFromApi<any>(
-      `${season}/${nextRace?.round - 2}/constructorStandings`,
+      `${season}/${nextRace.round - 2}/constructorStandings`,
       "Standings",
       limit,
       offset

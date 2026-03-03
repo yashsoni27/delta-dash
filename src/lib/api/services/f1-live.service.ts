@@ -165,7 +165,11 @@ export class F1LiveService extends EventEmitter {
       );
 
       const removedCount = oldLength - this.updateBuffer.length;
-      this,this.playbackPosition = Math.max(0, this.playbackPosition - removedCount);
+      this,
+        (this.playbackPosition = Math.max(
+          0,
+          this.playbackPosition - removedCount
+        ));
     }
   }
 
@@ -189,7 +193,7 @@ export class F1LiveService extends EventEmitter {
   private setupEventListeners() {
     this.client.on("data", (data) => {
       const parsedData = JSON.parse(data?.data);
-      // console.log("parsed: ", parsedData);
+      console.log("parsed: ", parsedData);
       if (Array.isArray(parsedData?.M)) {
         for (const message of parsedData?.M) {
           if (message.M === "feed") {
@@ -198,22 +202,14 @@ export class F1LiveService extends EventEmitter {
 
             if (field === "CarData.z" || field === "Position.z") {
               const [parsedField] = field.split(".");
-              field = parsedField;
               value = this.parseCompressed(value);
+              console.log("value: ", value);
+              field = parsedField;
             }
 
             const newState = this.objectMerge(this.state, { [field]: value });
             this.state = newState;
             this.addToBuffer(this.state);
-
-            // setInterval(() => {
-            //   if (this.state) {
-            //     this.emit("stateUpdate", {
-            //       ...this.state,
-            //       _timestamp: Date.now(),
-            //     });
-            //   }
-            // }, this.emitInterval);
           }
         }
       } else if (
@@ -222,33 +218,26 @@ export class F1LiveService extends EventEmitter {
         parsedData?.I === "1"
       ) {
         this.messageCount++;
-
+        console.log("PR: ", parsedData.R);
         if (parsedData.R["CarData.z"]) {
-          parsedData.R.CarData = this.parseCompressed(
+          const decompressed = this.parseCompressed(
             parsedData.R["CarData.z"]
           );
+          parsedData.R.CarData = decompressed.Entries?.at(-1)?.Cars ?? null;
           delete parsedData.R["CarData.z"];
         }
 
         if (parsedData.R["Position.z"]) {
-          parsedData.R.Position = this.parseCompressed(
+          const decompressed = this.parseCompressed(
             parsedData.R["Position.z"]
           );
+          parsedData.R.Position = decompressed.Position?.at(-1)?.Entries ?? null;
           delete parsedData.R["Position.z"];
         }
 
         const newState = this.objectMerge(this.state, parsedData.R);
         this.state = newState;
         this.addToBuffer(this.state);
-
-        // setInterval(() => {
-        //   if (this.state) {
-        //     this.emit("stateUpdate", {
-        //       ...this.state,
-        //       _timestamp: Date.now(),
-        //     });
-        //   }
-        // }, this.emitInterval);
       }
     });
 
@@ -292,7 +281,7 @@ export class F1LiveService extends EventEmitter {
         "CarData.z", // Compressed Car Data
         "Position.z", // Compressed Position data
         "TeamRadio", // Team Radio
-        // "RcmSeries", // Unknown
+        "ChampionshipPrediction",
       ]);
       this.emit("connect");
     } catch (error) {

@@ -36,6 +36,7 @@ export default function Home() {
     [key: string]: {
       imageUrl: string;
       numberLogo: string;
+      // constructorLogo: string;
     };
   }>({});
 
@@ -58,19 +59,19 @@ export default function Home() {
   useEffect(() => {
     const fetchDriverImages = async () => {
       const driverImagePromises = drivers.map(async (driver) => {
+        const constructorId = driver.Constructors[0]?.constructorId;
+        if (!constructorId) return null;
         try {
           const imageUrl = await f1MediaService.getDriverImage(
             driver.Driver.givenName,
             driver.Driver.familyName,
-            driver.Constructors[0].constructorId
+            constructorId,
+            season || "2025",
           );
-          const driverCode =
-            driver.Driver.givenName.substring(0, 3) +
-            driver.Driver.familyName.substring(0, 3);
           const numberLogo = await f1MediaService.getDriverNumberLogo(
             driver.Driver.givenName,
             driver.Driver.familyName,
-            driver.Constructors[0].constructorId
+            constructorId,
           );
           // const constructorLogo = await f1MediaService.getConstructorLogo(
           //   season || "",
@@ -82,12 +83,13 @@ export default function Home() {
               driverId: driver.Driver.driverId,
               imageUrl,
               numberLogo,
+              // constructorLogo
             };
           }
         } catch (e) {
           console.log(
             `Error fetching driver image for ${driver.Driver.driverId}:`,
-            e
+            e,
           );
         }
         return null;
@@ -100,19 +102,21 @@ export default function Home() {
             [key: string]: {
               imageUrl: string;
               numberLogo: string;
+              // constructorLogo: string;
             };
           },
-          result
+          result,
         ) => {
           if (result) {
             acc[result.driverId] = {
               imageUrl: result.imageUrl,
               numberLogo: result.numberLogo,
+              // constructorLogo: result.constructorLogo,
             };
           }
           return acc;
         },
-        {}
+        {},
       );
 
       setDriverImages(newDriverImages);
@@ -134,11 +138,11 @@ export default function Home() {
               style={{
                 background: getConstructorGradient(
                   driver.Constructors[driver.Constructors.length - 1]
-                    .constructorId
+                    ?.constructorId,
                 ),
                 borderColor: getConstructorColor(
                   driver.Constructors[driver.Constructors.length - 1]
-                    .constructorId
+                    ?.constructorId,
                 ),
               }}
             >
@@ -148,10 +152,10 @@ export default function Home() {
                   <Image
                     src={`/teams/${
                       driver.Constructors[driver.Constructors.length - 1]
-                        .constructorId
+                        ?.constructorId
                     }.svg`}
                     alt={`${
-                      driver.Constructors[driver.Constructors.length - 1].name
+                      driver.Constructors[driver.Constructors.length - 1]?.name
                     } logo`}
                     layout="fill"
                     objectFit="contain"
@@ -166,40 +170,42 @@ export default function Home() {
                   style={{
                     color: getConstructorHex(
                       driver.Constructors[driver.Constructors.length - 1]
-                        .constructorId
+                        ?.constructorId,
                     ),
                   }}
                 >
                   {driver.Driver.familyName}
                 </p>
                 <p className="text-xs opacity-50">
-                  {driver.Constructors[driver.Constructors.length - 1].name}
+                  {driver.Constructors[driver.Constructors.length - 1]?.name}
                 </p>
               </div>
 
               {/* Number */}
               <div className="absolute bottom-5 left-5 z-10">
-                {driverImages[driver.Driver.driverId] ? (
-                  <Image
-                    src={driverImages[driver.Driver.driverId].numberLogo}
-                    alt={`${driver.Driver.givenName} number`}
-                    width={50}
-                    height={50}
-                    // className="rounded-es-2xl rounded-se-2xl"
-                    // className="h-em-24 w-em-96"
-                    style={{
-                      // height: "3.2rem",
-                      // width: "3.2rem",
-                      background: getConstructorColor(
-                        driver.Constructors[driver.Constructors.length - 1]
-                          .constructorId
-                      ),
-                      boxShadow: `0 0 15px 10px ${getConstructorColor(
-                        driver.Constructors[driver.Constructors.length - 1]
-                          .constructorId
-                      )}`,
-                    }}
-                  />
+                {!driverImages[driver.Driver.driverId] ? (
+                  <>
+                    {/* <Image
+                      src={driverImages[driver.Driver.driverId].numberLogo}
+                      alt={`${driver.Driver.givenName} number`}
+                      width={50}
+                      height={50}
+                      // className="rounded-es-2xl rounded-se-2xl"
+                      // className="h-em-24 w-em-96"
+                      style={{
+                        // height: "3.2rem",
+                        // width: "3.2rem",
+                        background: getConstructorColor(
+                          driver.Constructors[driver.Constructors.length - 1]
+                            ?.constructorId,
+                        ),
+                        boxShadow: `0 0 15px 10px ${getConstructorColor(
+                          driver.Constructors[driver.Constructors.length - 1]
+                            ?.constructorId,
+                        )}`,
+                      }}
+                    /> */}
+                  </>
                 ) : (
                   <>
                     <p
@@ -207,7 +213,7 @@ export default function Home() {
                       style={{
                         color: getConstructorHex(
                           driver.Constructors[driver.Constructors.length - 1]
-                            .constructorId
+                            ?.constructorId,
                         ),
                       }}
                     >

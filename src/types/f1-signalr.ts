@@ -15,7 +15,8 @@ export type F1DataStream =
   | "CarData.z"
   | "Position.z"
   | "RcmSeries"
-  | "TeamRadio";
+  | "TeamRadio"
+  | "ChampionshipPrediction";
 
 export interface SignalRNegotiateResponse {
   Url: string;

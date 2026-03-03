@@ -14,12 +14,21 @@ import { Check, Eraser, SquareCheckBig } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+function getDefaultF1Year(): number {
+  const now = new Date();
+  const year = now.getFullYear();
+  // F1 season typically starts mid-March; use previous year if before March 15
+  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
+    return year - 1;
+  return year;
+}
+
 function StandingsContent() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
   const [driverEvolution, setDriverEvolution] = useState<any>();
   const [constructorEvolution, setConstructorEvolution] = useState<any>();
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(getDefaultF1Year);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>();
   const [ptDistribution, setPtDistribution] = useState<any>();
@@ -117,7 +126,7 @@ function StandingsContent() {
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
-              {Array.from({ length: 3 }, (_, i) => 2025 - i).map((year) => (
+              {Array.from({ length: 3 }, (_, i) => getDefaultF1Year() - i).map((year) => (
                 <option key={year} value={year} className="bg-slate-800">
                   {year}
                 </option>

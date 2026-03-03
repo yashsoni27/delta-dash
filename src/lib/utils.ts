@@ -98,8 +98,18 @@ export function getConstructorHex(constructorName: string): string {
     rb: "#6692FF",
     aston_martin: "#229971",
     williams: "#1868DB",
-    sauber: "#52E252",
     haas: "#B6BABD",
+    audi: "#751500",
+    cadillac: "#58585b",
+    // Historical constructors
+    sauber: "#52E252",
+    alphatauri: "#2B4562",
+    toro_rosso: "#469BFF",
+    alfa: "#B12039",
+    renault: "#FFF500",
+    racing_point: "#F596C8",
+    force_india: "#F596C8",
+    lotus_f1: "#FFB800",
   };
 
   return colors[constructorName] || "#333333";
@@ -142,8 +152,18 @@ export function getConstructorColor(constructorName: string): string {
     rb: "rgb(102,146,255,.25)",
     aston_martin: "rgb(34,153,113,.25)",
     williams: "rgb(24,104,219,.25)",
-    sauber: "rgb(82,226,82,.25)",
     haas: "rgb(182,186,189,.25)",
+    audi: "rgb(232,0,32,.25)",
+    cadillac: "rgb(182,186,189,.25)",
+    // Historical constructors
+    sauber: "rgb(82,226,82,.25)",
+    alphatauri: "rgb(43,69,98,.25)",
+    toro_rosso: "rgb(70,155,255,.25)",
+    alfa: "rgb(177,32,57,.25)",
+    renault: "rgb(255,245,0,.25)",
+    racing_point: "rgb(245,150,200,.25)",
+    force_india: "rgb(245,150,200,.25)",
+    lotus_f1: "rgb(255,184,0,.25)",
   };
 
   return colors[constructorName] || "#333333";
@@ -330,6 +350,8 @@ export function liveToJolpicaConstructor(constructorName: string): string {
     Williams: "williams",
     "Kick Sauber": "sauber",
     "Haas F1 Team": "haas",
+    Audi: "audi",
+    Cadillac: "cadillac",
   };
 
   return constructors[constructorName] || "Unknown";
@@ -348,6 +370,8 @@ export function jolpicaToF1MediaConstructor(constructorId: string): string {
     "williams": "williams",
     "sauber": "kicksauber",
     "haas": "haas",
+    "audi": "audi",
+    "cadillac": "cadillac",
   };
 
   return constructors[constructorId] || "Unknown";

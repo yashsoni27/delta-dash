@@ -16,8 +16,16 @@ interface Constructor {
   url?: string;
 }
 
+function getDefaultF1Year(): number {
+  const now = new Date();
+  const year = now.getFullYear();
+  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
+    return year - 1;
+  return year;
+}
+
 export default function Home() {
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(getDefaultF1Year);
   const [isLoading, setIsLoading] = useState(true);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [selectedDriver1, setSelectedDriver1] = useState<any>(null);
@@ -88,7 +96,8 @@ export default function Home() {
         const headShotUrl = await f1MediaService.getDriverImage(
           givenName,
           familyName,
-          constructorId
+          constructorId,
+          selectedYear.toString()
         );
         return { headShot: headShotUrl, logo: logoUrl };
       } catch (e) {
@@ -97,7 +106,7 @@ export default function Home() {
         setIsLoading(false);
       }
     },
-    []
+    [selectedYear]
   );
 
   // Effect to fetch drivers when year changes
@@ -162,7 +171,7 @@ export default function Home() {
               value={selectedYear}
               onChange={handleYearChange}
             >
-              {Array.from({ length: 3 }, (_, i) => 2025 - i).map((year) => (
+              {Array.from({ length: 3 }, (_, i) => getDefaultF1Year() - i).map((year) => (
                 <option key={year} value={year} className="bg-slate-800">
                   {year}
                 </option>

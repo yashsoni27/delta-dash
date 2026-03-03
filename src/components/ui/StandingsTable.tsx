@@ -48,7 +48,7 @@ function StandingsTableContent({
 
           setStandings(formattedDrivers);
         } else if (name === "Constructors") {
-          const response = await constructorService.getConstructorStandings();
+          const response = await constructorService.getConstructorStandings(season);
 
           const formattedConstructors = response.standings.map((item: any) => ({
             position: Number(item.position),
