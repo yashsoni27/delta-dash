@@ -27,9 +27,10 @@ type NavItemProps = {
   label: string;
   isExpanded: boolean;
   onLinkClick: () => void;
+  badge?: string;
 };
 
-const NavItem = ({ href, icon: Icon, label, isExpanded, onLinkClick }: NavItemProps) => {
+const NavItem = ({ href, icon: Icon, label, isExpanded, onLinkClick, badge }: NavItemProps) => {
   if (!isExpanded) {
     return (
       <Tooltip text={label}>
@@ -51,12 +52,18 @@ const NavItem = ({ href, icon: Icon, label, isExpanded, onLinkClick }: NavItemPr
     >
       <Icon strokeWidth={1} size={22} />
       <span>{label}</span>
+
+      {badge && (
+        <sub className="text-[10px] text-f1-red border-red-600 border rounded-lg p-2 ">
+          {badge}
+        </sub>
+      )}
     </Link>
   );
 };
 
 const navigationItems = [
-  { href: "/live", icon: Radio, label: "Live" },
+  { href: "/live", icon: Radio, label: "Live", badge: "BETA" },
   { href: "/drivers", icon: IdCard, label: "Drivers" },
   {
     href: "/standings?title=Drivers",
