@@ -18,8 +18,15 @@ const myFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Delta Dash",
-  description: "Formula 1 live telemetry and statistical dashboard",
+  title: "Delta Dash - F1 Data Dashboard",
+  description: "Explore Formula 1 data with Delta Dash: pit stops, fastest laps, and more from Jolpica, DHL, and OpenF1 APIs.",
+  keywords: 'delta dash, deltadash, F1 dashboard, Formula 1 data, pit stops, fastest laps, live F1',
+  openGraph: {
+    title: 'Delta Dash - F1 Data Dashboard',
+    description: 'Real-time F1 insights with Delta Dash.',
+    url: 'https://deltadash.space',
+    siteName: 'Delta Dash',
+  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
