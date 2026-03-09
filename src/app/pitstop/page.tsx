@@ -178,7 +178,6 @@ export default function Home() {
 
       // Convert Set to Array
       const driverKeys = Array.from(allDrivers);
-      console.log("1111", pitAvg);
       setChartKeys(driverKeys);
     }
   }, [pitAvg]);

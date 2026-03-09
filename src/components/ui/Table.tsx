@@ -81,37 +81,3 @@ export default function Table({
     </div>
   );
 }
-
-// // Example usage in another component
-// const columns: Column[] = [
-//   { key: 'position', header: 'Pos.', width: 'w-1/6', align: 'center' },
-//   {
-//     key: 'driver',
-//     header: 'Driver',
-//     width: 'w-3/6',
-//     align: 'left',
-//     render: (value, item) => (
-//       <div className="flex items-center gap-2">
-//         {item.team && (
-//           <img
-//             src={`/teams/${item.team}.svg`}
-//             alt={item.team}
-//             className="w-5 h-5"
-//             onError={(e) => (e.currentTarget.src = "/vercel.svg")}
-//           />
-//         )}
-//         {value || item.constructor}
-//       </div>
-//     ),
-//   },
-//   { key: 'points', header: 'Points', width: 'w-1/6', align: 'right' },
-//   { key: 'status', header: 'Status', width: 'w-1/6', align: 'center' },
-// ];
-
-// // Using the table
-// <Table
-//   heading="Race Results"
-//   columns={columns}
-//   data={items}
-//   onRowClick={(item) => console.log(item)}
-// />

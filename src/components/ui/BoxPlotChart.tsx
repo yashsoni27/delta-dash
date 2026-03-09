@@ -8,28 +8,42 @@ const chartTheme = {
 };
 
 function transformData(data: any) {
-  const allValues = data.map((item: any) => item.time);
+  // const allValues = data.map((item: any) => item.time);
+  const times = data.map((d: any) => d.time).sort((a: number, b: number) => a - b);
 
   // Calculate quartiles
-  const sorted = [...allValues].sort((a, b) => a - b);
-  const q1 = sorted[Math.floor(sorted.length * 0.25)];
-  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const q1 = times[Math.floor(times.length * 0.25)];
+  const q3 = times[Math.floor(times.length * 0.75)];
   const iqr = q3 - q1;
 
   // Define outlier thresholds (typically 1.5 * IQR)
-  const lowerThreshold = q1 - 1.5 * iqr;
-  const upperThreshold = q3 + 1.5 * iqr;
+  const min = q1 - 1.5 * iqr;
+  const max = q3 + 1.5 * iqr;
 
-  return data
-    .filter((item: any) => {
-      const value = item.time;
-      return value >= lowerThreshold && value <= upperThreshold;
+  const filtered = data.filter((d: any) => d.time >= min && d.time <= max);
+
+  // group laps by driver
+  const groups = Object.groupBy(filtered, (d: any) => d.driverCode);
+
+  // sort drivers by median lap time
+  const orderedDrivers = Object.entries(groups)
+    .map(([driver, laps]: any) => {
+      const sorted = laps.map((l: any) => l.time).sort((a: number, b: number) => a - b);
+      const median = sorted[Math.floor(sorted.length / 2)];
+      return { driver, median };
     })
-    .map((item: any) => ({
-      group: item.driverCode,
-      value: item.time,
-      color: getConstructorHex(item.constructorId),
-    }));
+    .sort((a, b) => a.median - b.median)
+    .map((d) => d.driver);
+
+
+  return orderedDrivers.flatMap((driver) =>
+    (groups[driver] ?? []).map((lap: any) => ({
+      group: lap.driverCode,
+      value: lap.time,
+      color: getConstructorHex(lap.constructorId),
+    }))
+  );
+
 }
 
 export default function BoxPlotChart({ data, heading }: any) {
@@ -64,7 +78,7 @@ export default function BoxPlotChart({ data, heading }: any) {
           fontWeight: "light",
         }}
       >
-        <div className="flex items-center justify-between mb-2 border-b border-slate-600 p-2">
+        <div className="flex items-center justify-between mb-2 border-b border-slate-700 p-2">
           <div className="flex items-center">
             <div
               className="w-3 h-3 mr-2 rounded-sm"
@@ -77,15 +91,15 @@ export default function BoxPlotChart({ data, heading }: any) {
 
         <div className="flex py-2 px-3">
           <div className="mr-4 mb-1">
-            <div className="flex justify-between gap-2">
+            <div className="flex justify-between gap-2 text-green-600">
               <span>Best:</span>{" "}
               <span className="ml-2">{extrema?.[0].toFixed(2) ?? "N/A"}</span>
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex justify-between gap-2 text-orange-600">
               <span>Average: </span>
               <span className="">{mean?.toFixed(2) ?? "N/A"}</span>
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex justify-between gap-2 text-red-600">
               <span>Worst: </span>
               <span className="">{extrema?.[1].toFixed(2) ?? "N/A"}</span>
             </div>

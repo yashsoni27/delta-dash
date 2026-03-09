@@ -119,8 +119,6 @@ export function getConstructorHex(constructorName: string): string {
     alfa: "#B12039",
     renault: "#FFF500",
     racing_point: "#F596C8",
-    force_india: "#F596C8",
-    lotus_f1: "#FFB800",
   };
 
   return colors[constructorName] || "#333333";
@@ -164,8 +162,8 @@ export function getConstructorColor(constructorName: string): string {
     aston_martin: "rgb(34,153,113,.25)",
     williams: "rgb(24,104,219,.25)",
     haas: "rgb(182,186,189,.25)",
-    audi: "rgb(232,0,32,.25)",
-    cadillac: "rgb(182,186,189,.25)",
+    audi: "rgb(117,27,0,.25)",
+    cadillac: "rgb(88,88,91,.25)",
     // Historical constructors
     sauber: "rgb(82,226,82,.25)",
     alphatauri: "rgb(43,69,98,.25)",
@@ -173,8 +171,6 @@ export function getConstructorColor(constructorName: string): string {
     alfa: "rgb(177,32,57,.25)",
     renault: "rgb(255,245,0,.25)",
     racing_point: "rgb(245,150,200,.25)",
-    force_india: "rgb(245,150,200,.25)",
-    lotus_f1: "rgb(255,184,0,.25)",
   };
 
   return colors[constructorName] || "#333333";
