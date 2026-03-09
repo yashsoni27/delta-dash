@@ -10,18 +10,10 @@ import {
   driverService,
   statsService,
 } from "@/lib/api/index";
+import { getDefaultF1Year } from "@/lib/utils";
 import { Check, Eraser, SquareCheckBig } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-
-function getDefaultF1Year(): number {
-  const now = new Date();
-  const year = now.getFullYear();
-  // F1 season typically starts mid-March; use previous year if before March 15
-  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
-    return year - 1;
-  return year;
-}
 
 function StandingsContent() {
   const searchParams = useSearchParams();

@@ -35,7 +35,7 @@ function StandingsTableContent({
           const response = await driverService.getDriverStandings(season);
 
           const formattedDrivers = response.standings
-            .slice(0, title === null ? 10 : response.standings.length + 1)
+            .slice(0, title === null ? 11 : response.standings.length + 1)
             .map((item: any) => ({
               position: Number(item.position),
               driver: item.Driver.familyName,

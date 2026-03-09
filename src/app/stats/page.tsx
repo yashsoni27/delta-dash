@@ -8,16 +8,10 @@ import PieChart from "@/components/ui/PieChart";
 import RadialBarChart from "@/components/ui/RadialBarChart";
 import SankeyChart from "@/components/ui/SankeyChart";
 import { driverService, statsService } from "@/lib/api/index";
+import { getDefaultF1Year } from "@/lib/utils";
 import { Calendar, CircleSlash2, Flag, Medal, Sigma, User } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
-function getDefaultF1Year(): number {
-  const now = new Date();
-  const year = now.getFullYear();
-  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
-    return year - 1;
-  return year;
-}
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);

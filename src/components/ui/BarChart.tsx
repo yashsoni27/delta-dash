@@ -143,7 +143,8 @@ export default function BarChart({
   };
   const chartDataWithId = data.map((d: any, i: any) => ({
     ...d,
-    id: `${indexBy ? d[indexBy as string] ?? "" : ""}-${i}`, // unique internal ID with guard for undefined indexBy
+    // id: `${indexBy ? d[indexBy as string] ?? "" : ""}-${i}`, // unique internal ID with guard for undefined indexBy
+    id: `${indexBy ? d[indexBy as string] ?? "" : ""}`, // unique internal ID with guard for undefined indexBy
   }));
 
   return (

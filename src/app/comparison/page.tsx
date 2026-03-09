@@ -5,6 +5,7 @@ import {
   getConstructorColor,
   getConstructorGradient,
   getConstructorHex,
+  getDefaultF1Year,
 } from "@/lib/utils";
 import { Users } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -14,14 +15,6 @@ interface Constructor {
   name: string;
   nationality?: string;
   url?: string;
-}
-
-function getDefaultF1Year(): number {
-  const now = new Date();
-  const year = now.getFullYear();
-  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
-    return year - 1;
-  return year;
 }
 
 export default function Home() {

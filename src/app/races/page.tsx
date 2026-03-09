@@ -7,19 +7,12 @@ import StackedBarChart from "@/components/ui/StackedBarChart";
 import Table from "@/components/ui/Table";
 import TrackImg from "@/components/ui/TrackImg";
 import { dhlService, raceService, statsService } from "@/lib/api/index";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getDefaultF1Year } from "@/lib/utils";
 import { Column } from "@/types";
 import { Calendar, CircleAlert, Flag } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
-function getDefaultF1Year(): number {
-  const now = new Date();
-  const year = now.getFullYear();
-  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 15))
-    return year - 1;
-  return year;
-}
 
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState(getDefaultF1Year);

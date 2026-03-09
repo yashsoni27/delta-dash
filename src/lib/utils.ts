@@ -15,6 +15,17 @@ export function transformResponse<T>(
   };
 }
 
+
+/* ---------------------------- Get Default year ---------------------------- */
+export function getDefaultF1Year(): number {
+  const now = new Date();
+  const year = now.getFullYear();
+  // F1 season typically starts mid-March; use previous year if before March 5
+  if (now.getMonth() < 2 || (now.getMonth() === 2 && now.getDate() < 5))
+    return year - 1;  
+  return year;
+}
+
 /* -------------------------------------------------------------------------- */
 /*                    Formats seconds into a minute format                    */
 /* -------------------------------------------------------------------------- */
@@ -205,6 +216,8 @@ export function DHLtoJolpicaConstructor(constructorName: string): string {
     Williams: "williams",
     Sauber: "sauber",
     Haas: "haas",
+    Audi: "audi",
+    Cadillac: "cadillac"
   };
 
   return constructors[constructorName] || "Unknown";
