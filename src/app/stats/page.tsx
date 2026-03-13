@@ -221,6 +221,8 @@ export default function Home() {
                     heading="Finish Positions Distribution"
                     data={driverStat?.finishPositions?.distribution}
                     driver={driverStat?.familyName}
+                    keys={["value"]}
+                    indexBy="id"
                     layout="vertical"
                     groupMode="grouped"
                     enableGridY={true}
