@@ -1,5 +1,5 @@
 # 🏎️ Delta Dash 
-![Static Badge](https://img.shields.io/badge/beta-yellow) ![GitHub package.json version](https://img.shields.io/github/package-json/v/yashsoni27/f1-dash)
+![Static Badge](https://img.shields.io/badge/beta-yellow) ![GitHub package.json version](https://img.shields.io/github/package-json/v/yashsoni27/delta-dash)
 
 An unofficial Formula 1 dashboard that offers fans an interactive and data-rich experience. Track driver and constructor standings, analyze race stats, and compare head-to-head performances—all in one sleek interface.
 
@@ -8,7 +8,7 @@ An unofficial Formula 1 dashboard that offers fans an interactive and data-rich 
 
 ## 🌐 Live Demo
 
-[https://deltadash-pink.vercel.app/](https://deltadash-pink.vercel.app/)
+[https://deltadash.space/](https://deltadash.space/)
 
 
 ## ✨ Features
