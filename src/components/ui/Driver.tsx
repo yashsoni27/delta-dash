@@ -3,9 +3,29 @@
 import { liveToJolpicaConstructor } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { driverColumns, driverGridTemplate } from "./DriverColumn";
+import {
+  driverColumns,
+  driverGridTemplate,
+  stintsColumns,
+  stintsGridTemplate,
+} from "./DriverColumn";
 
-const drsEnabledValues = [10, 12, 14];
+const getCompoundColor = (compound: string) => {
+  switch (compound?.toUpperCase()) {
+    case "SOFT":
+      return "#e8002d";
+    case "MEDIUM":
+      return "#ffd000";
+    case "HARD":
+      return "#f0f0f0";
+    case "INTERMEDIATE":
+      return "#39b54a";
+    case "WET":
+      return "#0067ff";
+    default:
+      return "#555";
+  }
+};
 
 const getPosChangeColor = (pos: any, gridPos: any) => {
   if (pos < gridPos) return "limegreen";
@@ -36,6 +56,8 @@ export default function Driver({
   TimingAppData,
   TimingStats,
   SessionName,
+  view = "timing",
+  maxTotalLaps,
 }: any) {
   const driver = DriverList[racingNumber];
   const carData =
@@ -74,6 +96,191 @@ export default function Driver({
 
     setPrevPos(pos);
   }, [line.Position]);
+
+  const stints: any[] = appData?.Stints
+    ? Array.isArray(appData.Stints)
+      ? appData.Stints
+      : Object.values(appData.Stints)
+    : [];
+
+  const totalStintLaps = stints.reduce((sum, s) => sum + (s.TotalLaps ?? 0), 0);
+
+  const normalizationLaps =
+    maxTotalLaps != null && maxTotalLaps > 0 ? maxTotalLaps : totalStintLaps;
+
+  if (view === "stints") {
+    return (
+      <div
+        style={{
+          opacity: line.KnockedOut || line.Retired || line.Stopped ? 0.5 : 1,
+        }}
+      >
+        <div className="flex flex-col gap-1 rounded-lg p-2 select-none">
+          <div
+            className="grid items-center gap-2 mx-2"
+            style={{ gridTemplateColumns: stintsGridTemplate }}
+          >
+            {stintsColumns.find((c) => c.key === "pos") && (
+              <div title="Position">
+                <p
+                  className={`px-1 text-sm leading-none ${
+                    TimingStats?.Lines[racingNumber]?.PersonalBestLapTime
+                      ?.Position === 1
+                      ? "text-purple-500"
+                      : "text-white"
+                  }`}
+                >
+                  {line.Position}
+                </p>
+              </div>
+            )}
+
+            {stintsColumns.find((c) => c.key === "driver") && (
+              <div
+                title="Driver"
+                className="flex w-fit items-center justify-start gap-0.5 rounded-lg font-medium min-w-full"
+              >
+                <img
+                  src={`/teams/${liveToJolpicaConstructor(driver?.TeamName)}.svg`}
+                  alt={driver?.TeamName}
+                  className="w-6 h-6"
+                  onError={(e) => (e.currentTarget.src = "/vercel.svg")}
+                />
+                <div className="flex h-min w-min items-center justify-center px-1">
+                  <p className="text-slate-300">{driver?.Tla}</p>
+                </div>
+              </div>
+            )}
+
+            {stintsColumns.find((c) => c.key === "pit") && (
+              <div title="PIT">
+                <div className="text-sm inline-flex h-8 w-full items-center justify-start font-bold gap-2">
+                  {line.InPit ? (
+                    <div className="text-cyan-500">PIT</div>
+                  ) : line?.PitOut ? (
+                    <div className="text-white">OUT</div>
+                  ) : (
+                    <div className="text-gray-700">—</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {stintsColumns.find((c) => c.key === "tyre") && (
+              <div title="Tyre">
+                <div className="flex flex-row items-center gap-1">
+                  {currentStint?.Compound &&
+                  currentStint?.Compound !== "UNKNOWN" ? (
+                    <img
+                      alt={`${currentStint?.Compound}`}
+                      loading="lazy"
+                      width="24"
+                      height="24"
+                      decoding="async"
+                      src={`/tyres/${currentStint?.Compound}.svg`}
+                      style={{ color: "transparent" }}
+                    />
+                  ) : (
+                    <div className="w-6 h-6 bg-slate-700 animate-pulse rounded-full" />
+                  )}
+                  <p className="text-xs text-zinc-400">
+                    {line?.NumberOfPitStops ?? 0}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {stintsColumns.find((c) => c.key === "stintHistory") && (
+              <div className="flex items-center gap-0.5 w-full overflow-visible">
+                {stints.length === 0 ? (
+                  <p className="text-zinc-600 text-xs">—</p>
+                ) : (
+                  stints.map((stint: any, i: number) => {
+                    const laps = stint.TotalLaps - stint.StartLaps;
+                    const color = getCompoundColor(stint.Compound);
+                    const isUsed =
+                      stint.New === "false";
+                    const isActive = i === stints.length - 1;
+                    const widthPct =
+                      normalizationLaps > 0
+                        ? (laps / normalizationLaps) * 100
+                        : 0;
+                    const compoundName =
+                      stint.Compound
+                        ? stint.Compound.charAt(0) +
+                          stint.Compound.slice(1).toLowerCase()
+                        : "Unknown";
+                    return (
+                      <div
+                        key={i}
+                        className="relative group/stint"
+                        style={{ width: `${widthPct}%`, minWidth: "5px" }}
+                      >
+                        <div
+                          style={{
+                            backgroundColor: color,
+                            backgroundImage: isUsed
+                              ? "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.25) 4px, rgba(0,0,0,0.25) 8px)"
+                              : "none",
+                            opacity: isActive ? 1 : 0.75,
+                            border: isActive
+                              ? "1px solid rgba(255,255,255,0.4)"
+                              : "1px solid transparent",
+                          }}
+                          className="h-6 w-full rounded flex items-center justify-center"
+                        >
+                          <span
+                            className="text-[10px] font-bold leading-none select-none"
+                            style={{
+                              color:
+                                stint.Compound === "HARD" ? "#333" : "#000",
+                            }}
+                          >
+                            {laps > 0 ? (
+                              <>
+                                {stint.Compound?.[0]}
+                                {laps}
+                              </>
+                            ) : null}
+                          </span>
+                        </div>
+
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-50 pointer-events-none opacity-0 group-hover/stint:opacity-100 transition-opacity duration-100 whitespace-nowrap">
+                          <div className="bg-slate-800 text-xs rounded-md min-w-36 flex flex-col opacity-95 shadow-lg">
+                            <div className="p-2 border-b border-slate-600 font-medium text-slate-200">
+                              {isUsed ? "Used" : "New"} {compoundName}
+                            </div>
+                            <div className="p-2 flex flex-col gap-1 text-slate-400">
+                              <div className="flex justify-between gap-3">
+                                <span>Stint</span>
+                                <span className="font-bold text-slate-200">
+                                  {laps} {laps === 1 ? "lap" : "laps"}
+                                </span>
+                              </div>
+                              {isUsed && (
+                                <div className="flex justify-between gap-3">
+                                  <span>Tyre Life</span>
+                                  <span className="font-bold text-slate-200">
+                                    {stint.TotalLaps}{" "}
+                                    {stint.TotalLaps === 1 ? "lap" : "laps"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -116,43 +323,18 @@ export default function Driver({
                 <div className="flex h-min w-min items-center justify-center px-1">
                   <p className=" text-slate-300">{driver?.Tla}</p>
                 </div>
-                {/* <p
-                className="px-1 text-sm"
-                style={{
-                  color: driver?.TeamColour
-                    ? `#${driver?.TeamColour}`
-                    : undefined,
-                }}
-              >
-                {racingNumber}
-              </p> */}
               </div>
             )}
 
-            {driverColumns.find((c) => c.key === "drs")?.visible && (
-              <div title="DRS and PIT">
+            {driverColumns.find((c) => c.key === "pit")?.visible && (
+              <div title="PIT status">
                 <div className="text-sm inline-flex h-8 w-full items-center justify-start font-bold gap-2">
                   {line.InPit ? (
                     <div className="text-cyan-500">PIT</div>
                   ) : line?.PitOut ? (
                     <div className="text-white">OUT</div>
                   ) : (
-                    <div
-                      className={`${carData["45"] === 8 ? "text-gray-400" : ""}
-                      ${
-                        drsEnabledValues.includes(carData["45"] ?? -1)
-                          ? "text-green-500"
-                          : ""
-                      }
-                      ${
-                        carData["45"] !== 8 &&
-                        !drsEnabledValues.includes(carData["45"] ?? -1)
-                          ? "text-gray-700"
-                          : ""
-                      }`}
-                    >
-                      DRS
-                    </div>
+                    <div className="text-gray-700">—</div>
                   )}
                 </div>
               </div>
@@ -200,17 +382,7 @@ export default function Driver({
               <div title="Info">
                 <div className="">
                   <div className="text-gray-500">
-                    {/* {Number(appData?.GridPos) - appData?.Line !== 0 ? (
-                    Number(appData?.GridPos) - appData?.Line > 0 ? (
-                      <div className="text-green-500">
-                        +{Number(appData?.GridPos) - appData?.Line}
-                      </div>
-                    ) : (
-                      <div className="text-red-500">
-                        {Number(appData?.GridPos) - appData?.Line}
-                      </div>
-                    )
-                  ) : null} */}
+                    
                     {(() => {
                       const gridPos = Number(appData?.GridPos ?? 0);
                       const line = Number(appData?.Line ?? 0);
@@ -292,7 +464,7 @@ export default function Driver({
 
             {driverColumns.find((c) => c.key === "sectors")?.visible && (
               <div title="Sectors">
-                <div className="flex gap-2 justify-around">
+                <div className="flex gap-2 justify-between">
                   {(Array.isArray(line?.Sectors)
                     ? line?.Sectors
                     : Object.values(line?.Sectors ?? {})

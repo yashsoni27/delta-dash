@@ -188,9 +188,12 @@ export default function Home() {
                 ? "DNF"
                 : item.status === "Disqualified"
                 ? "DSQ"
+                : item.status === "Did not start"
+                ? "DNS"
                 : item.Time?.time || "",
             pos: index + 1,
           }));
+          console.log(resultsResponse);
           setTableData(raceResults);
         }
 

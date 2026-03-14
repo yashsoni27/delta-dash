@@ -8,9 +8,10 @@ import Radio from "@/components/ui/Radio";
 import { AlertCircle, CloudRain } from "lucide-react";
 import LatestMessage from "@/components/ui/LatestMessage";
 import {
-  driverColumns,
   driverGridTemplate,
   visibleDriverColumns,
+  stintsColumns,
+  stintsGridTemplate,
 } from "@/components/ui/DriverColumn";
 
 interface LiveState {
@@ -75,6 +76,7 @@ export default function Live() {
   const [state, setState] = useState<LiveState>({});
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [connectionFailed, setConnectionFailed] = useState(false);
+  const [view, setView] = useState<"timing" | "stints">("timing");
 
   const [openTranscriptionId, setOpenTranscriptionId] = useState<string | null>(
     null,
@@ -165,6 +167,15 @@ export default function Live() {
     ...Object.values(SessionData?.StatusSeries || {}),
   ].sort(sortUtc)[0];
 
+  const maxTotalLaps = Math.max(
+    ...Object.keys(TimingAppData?.Lines?? {}).map((num) => {
+      const stints = TimingAppData?.Lines[num]?.Stints;
+      if (!stints) return 0;
+      const stintArr: any[] = Array.isArray(stints) ? stints : Object.values(stints);
+      return stintArr.reduce((sum, s) => sum + (s.TotalLaps - s.StartLaps), 0);
+    })
+  );
+
   // Don't render if not connected
   if (!isConnected) {
     return (
@@ -235,11 +246,6 @@ export default function Live() {
               {extrapolatedTimeRemaining}
             </p>
           </div>
-          {/* <div className="relative flex h-[55px] w-[55px] items-center justify-center rounded-full">
-            <div className="mt-2 flex flex-col items-center gap-0.5">
-              <AlertCircle size={18} color="grey" />
-            </div>
-          </div> */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -353,18 +359,45 @@ export default function Live() {
           <div className="flex w-full flex-col gap-2 2xl:flex-row">
             <div title="Telemetry" className="overflow-x-auto">
               <div className="flex w-fit flex-col gap-0.5">
+                <div className="flex items-center gap-2 mx-2 mb-1">
+                  <button
+                    onClick={() => setView("timing")}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      view === "timing"
+                        ? "bg-slate-800 text-zinc-300"
+                        : "text-zinc-600 hover:text-zinc-300"
+                    }`}
+                  >
+                    Timing
+                  </button>
+                  <button
+                    onClick={() => setView("stints")}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      view === "stints"
+                        ? "bg-slate-800 text-zinc-300"
+                        : "text-zinc-600 hover:text-zinc-300"
+                    }`}
+                  >
+                    Stints
+                  </button>
+                </div>
                 <div
                   className="grid items-center gap-2 p-1 px-2 mx-2 text-sm font-medium text-zinc-500"
-                  style={{ gridTemplateColumns: driverGridTemplate }}
+                  style={{
+                    gridTemplateColumns:
+                      view === "stints" ? stintsGridTemplate : driverGridTemplate,
+                  }}
                 >
-                  {visibleDriverColumns.map((col) => (
-                    <div
-                      key={col.key}
-                      className="text-zinc-500 text-sm font-medium"
-                    >
-                      {col.label}
-                    </div>
-                  ))}
+                  {(view === "stints" ? stintsColumns : visibleDriverColumns).map(
+                    (col) => (
+                      <div
+                        key={col.key}
+                        className="text-zinc-500 text-sm font-medium"
+                      >
+                        {col.label}
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
               {TimingData ? (
@@ -382,6 +415,8 @@ export default function Live() {
                           TimingAppData={TimingAppData}
                           TimingStats={TimingStats}
                           SessionName={SessionInfo?.Name}
+                          view={view}
+                          maxTotalLaps={maxTotalLaps}
                         />
                       ))}
                   </div>
