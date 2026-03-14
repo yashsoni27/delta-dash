@@ -7,6 +7,11 @@ import Map, { bearingToCardinal } from "@/components/ui/Map";
 import Radio from "@/components/ui/Radio";
 import { AlertCircle, CloudRain } from "lucide-react";
 import LatestMessage from "@/components/ui/LatestMessage";
+import {
+  driverColumns,
+  driverGridTemplate,
+  visibleDriverColumns,
+} from "@/components/ui/DriverColumn";
 
 interface LiveState {
   Heartbeat?: any;
@@ -72,7 +77,7 @@ export default function Live() {
   const [connectionFailed, setConnectionFailed] = useState(false);
 
   const [openTranscriptionId, setOpenTranscriptionId] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -145,11 +150,11 @@ export default function Live() {
                 moment
                   .duration(ExtrapolatedClock?.Remaining)
                   .subtract(
-                    moment.utc().diff(moment.utc(ExtrapolatedClock?.Utc))
+                    moment.utc().diff(moment.utc(ExtrapolatedClock?.Utc)),
                   )
                   .asMilliseconds(),
-                0
-              )
+                0,
+              ),
             )
             .format("HH:mm:ss")
         : ExtrapolatedClock?.Remaining
@@ -220,10 +225,13 @@ export default function Live() {
             />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="truncate text-sm leading-none font-medium text-white">
-              {SessionInfo?.Meeting?.Name}: {SessionInfo?.Name}
+            <h1 className="truncate text-lg leading-none font-medium text-white">
+              {SessionInfo?.Meeting?.Name}
             </h1>
-            <p className="text-2xl leading-none font-bold">
+            <p className="truncate text-xs leading-none font-medium text-white">
+              {SessionInfo?.Name}
+            </p>
+            <p className="text leading-none font-bold">
               {extrapolatedTimeRemaining}
             </p>
           </div>
@@ -236,28 +244,27 @@ export default function Live() {
             onSubmit={(e) => {
               e.preventDefault();
               const form = new FormData(e.target as HTMLFormElement);
-              const delaySecValue = Number(form.get("delaySec"));
-              const delayMsValue = delaySecValue * 1000;
-
-              f1LiveService.setDelay(delayMsValue);
+              const delaySecValue = Number(form.get("delaySec")) * 1000;
+              
+              f1LiveService.setDelay(delaySecValue);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 bg-zinc-800/60 border border-zinc-700 rounded-md px-2 py-1 flex-shrink-0"
           >
-            <p className="text-sm">Delay</p>
+            <p className="text-xs text-zinc-400 font-medium">Delay</p>
             <input
               type="number"
               name="delaySec"
               min="0"
               step="1"
               defaultValue={0}
-              className="w-14 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm"
+              className="w-10 px-1 py-0.5 bg-zinc-900 border border-zinc-600 rounded text-xs text-center text-white"
             />
-            <p className="text-sm">s</p>
+            <p className="text-sm text-zinc-400">s</p>
             <button
               type="submit"
-              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+              className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs font-medium"
             >
-              Apply
+              Set
             </button>
           </form>
         </div>
@@ -348,21 +355,16 @@ export default function Live() {
               <div className="flex w-fit flex-col gap-0.5">
                 <div
                   className="grid items-center gap-2 p-1 px-2 mx-2 text-sm font-medium text-zinc-500"
-                  style={{
-                    gridTemplateColumns:
-                      "2.5rem 6.5rem 3.5rem 5.5rem 4.5rem 5rem 6.5rem 25rem 6rem 6rem",
-                  }}
+                  style={{ gridTemplateColumns: driverGridTemplate }}
                 >
-                  <p>Pos</p>
-                  <p>Driver</p>
-                  <p>DRS</p>
-                  <p>Tyre</p>
-                  <p>Info</p>
-                  <p>Gap</p>
-                  <p>LapTime</p>
-                  <p>Sectors</p>
-                  <p>Gear/RPM</p>
-                  <p>Speed</p>
+                  {visibleDriverColumns.map((col) => (
+                    <div
+                      key={col.key}
+                      className="text-zinc-500 text-sm font-medium"
+                    >
+                      {col.label}
+                    </div>
+                  ))}
                 </div>
               </div>
               {TimingData ? (
@@ -398,19 +400,19 @@ export default function Live() {
             </div>
             <div
               title="Track Map"
-              className="flex-1 2xl:max-h-[50rem] flex items-center"
+              className="flex-1 2xl:max-h-[50rem] flex items-center justify-center"
             >
               {/* For Track map  */}
               <div>
                 {/* {!!Position ? ( */}
-                  <Map
-                    circuit={SessionInfo.Meeting.Circuit.Key}
-                    Position={Position?.Position[Position.Position.length - 1]}
-                    DriverList={DriverList}
-                    TimingData={TimingData}
-                    TrackStatus={TrackStatus}
-                    WindDirection={WeatherData.WindDirection}
-                  />
+                <Map
+                  circuit={SessionInfo.Meeting.Circuit.Key}
+                  Position={Position?.Position[Position.Position.length - 1]}
+                  DriverList={DriverList}
+                  TimingData={TimingData}
+                  TrackStatus={TrackStatus}
+                  WindDirection={WeatherData.WindDirection}
+                />
                 {/* ) : (
                   <div
                     style={{
@@ -534,7 +536,7 @@ export default function Live() {
                             }
                           />
                         );
-                      }
+                      },
                     )}
                   </ul>
                 ) : (
