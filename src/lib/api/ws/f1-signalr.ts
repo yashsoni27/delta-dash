@@ -57,6 +57,7 @@ export class F1SignalRClient extends EventEmitter {
         this.socket.onmessage = (event) => {
           try {
             this.emit("data", event);
+            console.log("check", event.data);
           } catch (error) {
             console.error("Error parsing message:", error);
           }
