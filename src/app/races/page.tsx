@@ -349,6 +349,7 @@ export default function Home() {
                       circuitId={selectedRace.circuitId}
                       circuitName={selectedRace.circuitName}
                       className="object-cover"
+                      year={selectedYear}
                     />
                   )}
                 </div>

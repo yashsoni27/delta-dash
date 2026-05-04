@@ -8,6 +8,7 @@ interface TrackImgProps {
   className?: string;
   width?: number;
   height?: number;
+  year?: number;
 }
 
 export default function TrackImg({
@@ -16,6 +17,7 @@ export default function TrackImg({
   className = "",
   width = 700,
   height = 450,
+  year = 2026
 }: TrackImgProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function TrackImg({
     const loadImage = async () => {
       try {
         setIsLoading(true);
-        const url = await f1MediaService.getTrackImg(circuitId);
+        const url = await f1MediaService.getTrackImg(circuitId, year);
         if (url) {
           setImageUrl(url);
           setError(null);

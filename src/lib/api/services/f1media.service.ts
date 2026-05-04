@@ -8,12 +8,12 @@ import { F1MediaApiClient } from "../clients/f1media";
 export class F1MediaService {
   constructor(private f1MediaClient: F1MediaApiClient) {}
 
-  async getTrackImg(circuitId: string): Promise<string | null> {
+  async getTrackImg(circuitId: string, year?: number): Promise<string | null> {
     try {
       const circuit = circuitIdToF1Adapter(circuitId);
-
-      const response = await this.f1MediaClient.fetchFromF1(
-        `image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/${circuit}_Circuit`
+      
+      const response = await this.f1MediaClient.fetchFromF1(        
+        `image/upload/c_fit,h_704/q_auto/v1740000001/common/f1/${year}/track/${year}track${circuit}detailed`
       );
 
       const imageBlob = await response.blob();
