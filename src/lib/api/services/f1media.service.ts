@@ -10,10 +10,10 @@ export class F1MediaService {
 
   async getTrackImg(circuitId: string, year?: number): Promise<string | null> {
     try {
-      const circuit = circuitIdToF1Adapter(circuitId);
+      // const circuit = circuitIdToF1Adapter(circuitId);
       
       const response = await this.f1MediaClient.fetchFromF1(        
-        `image/upload/c_fit,h_704/q_auto/v1740000001/common/f1/${year}/track/${year}track${circuit}detailed`
+        `image/upload/c_fit,h_704/q_auto/v1740000001/common/f1/${year}/track/${year}track${circuitId}detailed`
       );
 
       const imageBlob = await response.blob();
