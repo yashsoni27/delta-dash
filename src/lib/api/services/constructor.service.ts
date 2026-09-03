@@ -252,7 +252,7 @@ export class ConstructorService {
         roundNum++
       ) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
-          `/${season}/${roundNum}/constructorStandings`,
+          `${season}/${roundNum}/constructorStandings`,
           "Standings",
           150,
           limit,

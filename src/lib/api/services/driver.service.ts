@@ -247,7 +247,7 @@ export class DriverService {
         roundNum++
       ) {
         const roundResponse = await this.apiClient.fetchWithDelay<any>(
-          `/${season}/${roundNum}/driverStandings`,
+          `${season}/${roundNum}/driverStandings`,
           "Standings",
           100,
           limit,
